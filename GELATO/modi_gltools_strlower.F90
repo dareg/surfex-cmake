@@ -76,15 +76,17 @@
 ! 
 FUNCTION gltools_strlower( hstring ) RESULT(hresult)
 !
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   IMPLICIT NONE
 !
   CHARACTER(LEN=*), INTENT(in) ::  &
-    hstring
+    & hstring 
   CHARACTER(LEN=LEN(hstring)) ::  &
-    hresult
+    & hresult 
 !
   INTEGER ::  &
-    ic,ji
+    & ic,ji 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !* Note that characters from A to Z have a code between 65 and 90, and 
@@ -92,6 +94,7 @@ FUNCTION gltools_strlower( hstring ) RESULT(hresult)
 ! (so a conversion from uppercase to lowercase amounts to adding 32 to
 ! the character code)
 !
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_STRLOWER',0,ZHOOK_HANDLE)
   DO ji = 1,LEN(hstring)
     ic = ICHAR( hstring(ji:ji) )
     IF ( ic>=65 .AND. ic<=90 ) THEN
@@ -100,6 +103,7 @@ FUNCTION gltools_strlower( hstring ) RESULT(hresult)
         hresult(ji:ji) = CHAR(ic)
     ENDIF
   END DO
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_STRLOWER',1,ZHOOK_HANDLE)
 !
 END FUNCTION gltools_strlower
 !

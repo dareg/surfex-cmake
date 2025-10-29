@@ -95,9 +95,10 @@
 ! not the thickness variation.
 !
 SUBROUTINE glt_frzvtp_r( tpmxl,tpsit,pqfac,phsi,pssi,tpsil,&
-       nilay,nl,noutlu,np,nt,dtt,lp3,height,sf3tinv )
+       & nilay,nl,noutlu,np,nt,dtt,lp3,height,sf3tinv ) 
 !
   USE modd_glt_const_thm
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_types_glt, only: t_mxl, t_sit, t_vtp
   USE mode_gltools_enthalpy
   USE mode_gltools_interp
@@ -110,38 +111,40 @@ SUBROUTINE glt_frzvtp_r( tpmxl,tpsit,pqfac,phsi,pssi,tpsil,&
   REAL,DIMENSION(:),INTENT(IN) :: sf3tinv,height
   LOGICAL,INTENT(IN) :: lp3
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
-        tpmxl
+        & tpmxl 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
-        tpsit
+        & tpsit 
   REAL, DIMENSION(nt,np), INTENT(in) ::  &
-        pqfac
+        & pqfac 
   REAL, DIMENSION(nt,np), INTENT(inout) ::  &
-        phsi
+        & phsi 
   REAL, DIMENSION(nt,np), INTENT(out) ::  &
-        pssi
+        & pssi 
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(inout) ::   &
-        tpsil
+        & tpsil 
 !
   INTEGER ::  &
-        jp,jk,jl
+        & jp,jk,jl 
   LOGICAL, DIMENSION(np) ::  &
-        yfreeze
+        & yfreeze 
   REAL ::  &
-        zavei,zavef,zdave,zhsinew
+        & zavei,zavef,zdave,zhsinew 
   REAL, DIMENSION(nilay) ::  &
-        zentn
+        & zentn 
   REAL, DIMENSION(nilay+1) ::  &
-        zsf3tinvo,zento
+        & zsf3tinvo,zento 
   REAL, DIMENSION(nilay+2) ::  &
-        zlevo
+        & zlevo 
   REAL, DIMENSION(np) ::  &
-        zssib,zentb,zdhsib,ztem
+        & zssib,zentb,zdhsib,ztem 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
 ! 1. Update vertical temperature profile and mixed layer water flux
 ! ==================================================================
 !
+IF (LHOOK) CALL DR_HOOK('GLT_FRZVTP_R',0,ZHOOK_HANDLE)
   DO jk=1,nt
 !
 ! Define where the salt trapping process should be applied
@@ -192,15 +195,15 @@ SUBROUTINE glt_frzvtp_r( tpmxl,tpsit,pqfac,phsi,pssi,tpsil,&
               IF ( zdave>1.e-5 ) THEN
                   WRITE(noutlu,*) 'jp= ',jp,' jk= ',jk
                   WRITE(noutlu,*)  &
-                    '    Difference in av. vert. temp. =',  &
-                    ( zavef-zavei )
+                    & '    Difference in av. vert. temp. =',  &
+                    & ( zavef-zavei ) 
               ENDIF
           ENDIF
 !
 ! Update salinity and thickness
           zhsinew = phsi(jk,jp)+zdhsib(jp)          
           tpsit(jk,jp)%ssi =  &
-            ( tpsit(jk,jp)%ssi*phsi(jk,jp)+zssib(jp)*zdhsib(jp) ) / zhsinew
+            & ( tpsit(jk,jp)%ssi*phsi(jk,jp)+zssib(jp)*zdhsib(jp) ) / zhsinew 
           phsi(jk,jp) = zhsinew
           pssi(jk,jp) = zssib(jp)
 !
@@ -211,6 +214,10 @@ SUBROUTINE glt_frzvtp_r( tpmxl,tpsit,pqfac,phsi,pssi,tpsil,&
       ENDIF
     END DO
   END DO
+IF (LHOOK) CALL DR_HOOK('GLT_FRZVTP_R',1,ZHOOK_HANDLE)
 !
+CONTAINS
+#include "glt_interpz.func.h"
+#include "glt_vtpint.func.h"
 END SUBROUTINE glt_frzvtp_r
 

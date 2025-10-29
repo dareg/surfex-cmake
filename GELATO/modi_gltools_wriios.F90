@@ -89,9 +89,10 @@
 ! ----------------------- SUBROUTINE gltools_wriios -----------------------
 !
 SUBROUTINE gltools_wriios  &
-        ( hnam,pfield,nx,ny,pwgt)
+        & ( hnam,pfield,nx,ny,pwgt) 
 !
   USE modd_glt_const_thm
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
 #if ! defined in_surfex
   USE iom
   USE par_kind
@@ -105,21 +106,23 @@ SUBROUTINE gltools_wriios  &
 !* Arguments
 !
   CHARACTER(LEN=*), INTENT(IN) :: &
-        hnam
-  REAL, DIMENSION(:,:), INTENT(in) ::  & 
-        pfield 
+        & hnam 
+  REAL, DIMENSION(:,:), INTENT(in) ::   &
+        & pfield  
   REAL, DIMENSION(:,:), OPTIONAL, INTENT(in) ::  &
-        pwgt
+        & pwgt 
 !
 !* Local variables
 !
   INTEGER ::  &
-        ix,iy
+        & ix,iy 
   REAL(wp), DIMENSION(:,:), ALLOCATABLE ::  &
-        zwork2 
+        & zwork2  
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 ! .. Get sizes of input data field
 !
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_WRIIOS',0,ZHOOK_HANDLE)
   ix = SIZE( pfield,1 )
   iy = SIZE( pfield,2 )
 
@@ -156,6 +159,7 @@ SUBROUTINE gltools_wriios  &
         write(*,*) 'Gelato cannot use IOserver for sizes : ', ix, iy , 'of field', hnam
      ENDIF
   ENDIF
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_WRIIOS',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE gltools_wriios
 !

@@ -83,9 +83,10 @@
 ! -------------------------- SUBROUTINE gltools_glterr --------------------------
 !
 SUBROUTINE gltools_glterr  &
-        ( hroutine,hmess,hflag,noutlu,lwg )
+        & ( hroutine,hmess,hflag,noutlu,lwg ) 
 !
 !
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   IMPLICIT NONE
   LOGICAL, INTENT(in) :: lwg
   INTEGER, INTENT(in) :: noutlu
@@ -98,21 +99,23 @@ SUBROUTINE gltools_glterr  &
 !  CHARACTER(4), INTENT(in) ::  &
 !    hflag
   CHARACTER(LEN=*), INTENT(in) ::  &
-        hroutine
+        & hroutine 
   CHARACTER(LEN=*), INTENT(in) ::  &
-        hmess
+        & hmess 
   CHARACTER(LEN=*), INTENT(in) ::  &
-        hflag
+        & hflag 
 !
   CHARACTER(7) ::  &
-    ydiag
+    & ydiag 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_GLTERR',0,ZHOOK_HANDLE)
   IF ( hflag/='STOP' .AND. hflag/='stop' .AND.   &
-       hflag/='WARN' .AND. hflag/='warn' ) THEN
+       & hflag/='WARN' .AND. hflag/='warn' ) THEN 
       IF(lwg) THEN
         WRITE(noutlu,*) 'Incorrect flag = ' // hflag //  &
-          ' for routine GLTERR. We stop.'
+          & ' for routine GLTERR. We stop.' 
         IF ( noutlu/=6 ) CLOSE(noutlu)
       ENDIF
       STOP
@@ -131,11 +134,12 @@ SUBROUTINE gltools_glterr  &
   ENDIF
   IF ( ydiag(1:4)=='STOP' ) THEN
       IF (lwg) THEN
-        WRITE(noutlu,*) '                >>>> WE STOP ! <<<<'           
+        WRITE(noutlu,*) '                >>>> WE STOP $2           '
         IF ( noutlu/=6 ) CLOSE(noutlu)
       ENDIF
       STOP
   ENDIF
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_GLTERR',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE gltools_glterr
 !

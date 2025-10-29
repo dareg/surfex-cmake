@@ -117,9 +117,9 @@
 ! ----------------------- SUBROUTINE glt_thermo -----------------------------
 !
 SUBROUTINE glt_thermo  &
-  (ygltparam,ygltvhd,&
-    tpdom,pustar,tpmxl,tpatm,  &
-    tpblkw,tpblki,tpbud,tpdia,tptfl,tpsit,tpsil,tpsit_d )
+  & (ygltparam,ygltvhd,&
+    & tpdom,pustar,tpmxl,tpatm,  &
+    & tpblkw,tpblki,tpbud,tpdia,tptfl,tpsit,tpsil,tpsit_d ) 
 !
 !
 ! 1. DECLARATIONS
@@ -129,6 +129,7 @@ SUBROUTINE glt_thermo  &
 ! ------------------------
 !
   USE modd_glt_const_thm
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_types_glt, only: t_dom, t_mxl, t_atm, t_blk, t_bud, t_tfl, t_vtp, t_sit, t_dia
   USE mode_glt_stats
   USE mode_glt_stats_r
@@ -146,50 +147,50 @@ SUBROUTINE glt_thermo  &
   TYPE(t_glt_vhd), INTENT(inout) :: ygltvhd  
   TYPE(t_glt_param), INTENT(inout) :: ygltparam
   TYPE(t_dom), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(in) ::  &
-        tpdom
+        & tpdom 
   REAL, DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(in) ::  &
-        pustar
+        & pustar 
   TYPE(t_mxl), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(in) ::  &
-        tpmxl
+        & tpmxl 
   TYPE(t_atm), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(in) ::  &
-        tpatm
+        & tpatm 
   TYPE(t_blk), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
-        tpblkw
+        & tpblkw 
   TYPE(t_blk), DIMENSION(ygltparam%nt,ygltparam%nx,ygltparam%ny), INTENT(in) ::  &
-        tpblki
+        & tpblki 
   TYPE(t_bud), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
-        tpbud
+        & tpbud 
   TYPE(t_dia), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
-        tpdia
+        & tpdia 
   TYPE(t_tfl), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
-        tptfl
+        & tptfl 
   TYPE(t_sit), DIMENSION(ygltparam%nt,ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
-        tpsit
+        & tpsit 
   TYPE(t_vtp), DIMENSION(ygltparam%nl,ygltparam%nt,ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
-        tpsil
+        & tpsil 
   TYPE(t_sit), DIMENSION(ygltparam%ntd,ygltparam%nx,ygltparam%ny), OPTIONAL, INTENT(in) ::  &
-        tpsit_d
+        & tpsit_d 
 !
 !
 ! 1.3. Local variables declarations
 ! ---------------------------------
 !
   INTEGER ::  &
-        jk,jl
+        & jk,jl 
   LOGICAL, DIMENSION(ygltparam%nx,ygltparam%ny) ::  &
-        gsel
+        & gsel 
   INTEGER, DIMENSION(ygltparam%nx,ygltparam%ny) ::  &
-        isel
+        & isel 
   REAL, DIMENSION(ygltparam%nx,ygltparam%ny) ::  &
-        zfsit,zsnflx
+        & zfsit,zsnflx 
   TYPE(t_dia), DIMENSION(ygltparam%nx,ygltparam%ny) ::  &
-        tzdia0
+        & tzdia0 
   TYPE(t_tfl), DIMENSION(ygltparam%nx,ygltparam%ny) ::  &
-        tztfl0
+        & tztfl0 
   TYPE(t_sit), DIMENSION(ygltparam%nt,ygltparam%nx,ygltparam%ny) ::  &
-        tzsit0
+        & tzsit0 
   TYPE(t_vtp), DIMENSION(ygltparam%nl,ygltparam%nt,ygltparam%nx,ygltparam%ny) ::  &
-        tzsil0
+        & tzsil0 
 !  INTEGER ::  &
 !        ji,jj
 !  INTEGER, DIMENSION(2,nx,ny) ::  &
@@ -197,34 +198,36 @@ SUBROUTINE glt_thermo  &
 !  INTEGER, DIMENSION(:,:), ALLOCATABLE ::  &
 !        ind_r
   TYPE(t_dom), DIMENSION(:), ALLOCATABLE ::  &
-        tzdom_r
+        & tzdom_r 
   REAL, DIMENSION(:), ALLOCATABLE ::  &
-        zustar_r
+        & zustar_r 
   TYPE(t_mxl), DIMENSION(:), ALLOCATABLE ::  &
-        tzmxl_r
+        & tzmxl_r 
   TYPE(t_atm), DIMENSION(:), ALLOCATABLE ::  &
-        tzatm_r
+        & tzatm_r 
   TYPE(t_blk), DIMENSION(:), ALLOCATABLE ::  &
-        tzblkw_r
+        & tzblkw_r 
   TYPE(t_blk), DIMENSION(:,:), ALLOCATABLE ::  &
-        tzblki_r
+        & tzblki_r 
   TYPE(t_bud), DIMENSION(:), ALLOCATABLE ::  &
-        tzbud_r
+        & tzbud_r 
   TYPE(t_dia), DIMENSION(:), ALLOCATABLE ::  &
-        tzdia_r
+        & tzdia_r 
   TYPE(t_tfl), DIMENSION(:), ALLOCATABLE ::  &
-        tztfl_r
+        & tztfl_r 
   TYPE(t_sit), DIMENSION(:,:), ALLOCATABLE ::  &
-        tzsit_d_r
+        & tzsit_d_r 
   TYPE(t_sit), DIMENSION(:,:), ALLOCATABLE ::  &
-        tzsit_r
+        & tzsit_r 
   TYPE(t_vtp), DIMENSION(:,:,:), ALLOCATABLE ::  &
-        tzsil_r
+        & tzsil_r 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 ! 1.4. Welcome message
 ! --------------------
 !
+IF (LHOOK) CALL DR_HOOK('GLT_THERMO',0,ZHOOK_HANDLE)
   IF (ygltparam%lp1) THEN
     WRITE(ygltparam%noutlu,*) ' '
     WRITE(ygltparam%noutlu,*) ' *** LEVEL 3 - SUBROUTINE THERMO'
@@ -247,7 +250,7 @@ SUBROUTINE glt_thermo  &
 ! purely 1d...)
 !
   WHERE( tpdom(:,:)%tmk==1 .AND.  &
-  (tpmxl(:,:)%tml <= 1. .OR. zfsit(:,:)>0.0) )
+  & (tpmxl(:,:)%tml <= 1. .OR. zfsit(:,:)>0.0) ) 
       isel(:,:) = 1
   ENDWHERE
 !
@@ -263,12 +266,12 @@ SUBROUTINE glt_thermo  &
 !
   IF (ygltparam%lp3) THEN
     WRITE(ygltparam%noutlu,*)  &
-      '**********************************************************'
+      & '**********************************************************' 
     WRITE(ygltparam%noutlu,*) 'REDUCED GRID:'
     WRITE(ygltparam%noutlu,1000) ygltparam%gelato_myrank, ygltparam%np,&
-        ygltparam%nx*ygltparam%ny, ygltparam%nx, ygltparam%ny
+        & ygltparam%nx*ygltparam%ny, ygltparam%nx, ygltparam%ny 
     WRITE(ygltparam%noutlu,*)  &
-      '**********************************************************'
+      & '**********************************************************' 
   ENDIF
 !
 ! .. Note that on some platforms, every locally-allocated array needs to be
@@ -492,9 +495,9 @@ SUBROUTINE glt_thermo  &
   IF ( ygltparam%np /= 0 ) THEN   
     IF ( ygltparam%nthermo==1 ) THEN
       CALL glt_thermo_r  &
-        ( tzdom_r,zustar_r,tzmxl_r,tzatm_r,tzblkw_r,tzblki_r,tzbud_r,tzdia_r,  &
-        tztfl_r,tzsit_r,tzsil_r,&
-        ygltparam,ygltvhd)
+        & ( tzdom_r,zustar_r,tzmxl_r,tzatm_r,tzblkw_r,tzblki_r,tzbud_r,tzdia_r,  &
+        & tztfl_r,tzsit_r,tzsil_r,&
+        & ygltparam,ygltvhd) 
 
   
     ENDIF
@@ -505,9 +508,9 @@ SUBROUTINE glt_thermo  &
 !
     IF ( ygltparam%ntd==1 ) THEN
       CALL glt_constrain_r( tzdom_r,tzmxl_r,tzsit_r,tzsil_r,tzdia_r,tzsit_d_r,&
-     ygltparam%nilay,ygltparam%nslay,ygltparam%nl,ygltparam%noutlu,ygltparam%np,ygltparam%nt,ygltparam%ntd,&
-     ygltparam%dtt,ygltparam%xfsidmpeft,ygltparam%xfsimax,ygltparam%xhsidmpeft,&
-     ygltparam%xhsimin,ygltparam%lwg,ygltparam%ccsvdmp,ygltparam%cfsidmp,ygltparam%chsidmp,ygltparam%sf3tinv )
+     & ygltparam%nilay,ygltparam%nslay,ygltparam%nl,ygltparam%noutlu,ygltparam%np,ygltparam%nt,ygltparam%ntd,&
+     & ygltparam%dtt,ygltparam%xfsidmpeft,ygltparam%xfsimax,ygltparam%xhsidmpeft,&
+     & ygltparam%xhsimin,ygltparam%lwg,ygltparam%ccsvdmp,ygltparam%cfsidmp,ygltparam%chsidmp,ygltparam%sf3tinv ) 
     ENDIF
   ENDIF 
 !
@@ -639,12 +642,12 @@ SUBROUTINE glt_thermo  &
         zsnflx(:,:) = 0.
     ENDIF
     tztfl0(:,:)%tlo = tptfl(:,:)%tlo +  &
-      tpmxl(:,:)%qml + tpblkw(:,:)%nsf + zsnflx(:,:)
+      & tpmxl(:,:)%qml + tpblkw(:,:)%nsf + zsnflx(:,:) 
     tptfl%tlo = UNPACK( tztfl_r%tlo,gsel,tztfl0%tlo )
 !
 ! Water flux on leads
     tztfl0(:,:)%wlo = tptfl(:,:)%wlo +  &
-      tpatm(:,:)%lip + tpatm(:,:)%sop + tpblkw(:,:)%eva
+      & tpatm(:,:)%lip + tpatm(:,:)%sop + tpblkw(:,:)%eva 
     tptfl%wlo = UNPACK( tztfl_r%wlo,gsel,tztfl0%wlo )
 !
 ! Short wave flux on leads
@@ -708,7 +711,7 @@ SUBROUTINE glt_thermo  &
     DO jl=1,ygltparam%nl
       DO jk=1,ygltparam%nt
         tpsil(jl,jk,:,:)%ent = UNPACK( tzsil_r(jl,jk,:)%ent,gsel,  &
-          tzsil0(jl,jk,:,:)%ent )
+          & tzsil0(jl,jk,:,:)%ent ) 
       END DO
     END DO
 !
@@ -743,13 +746,14 @@ SUBROUTINE glt_thermo  &
 ! ==============================
 !
 1000 FORMAT( " Processor ", I5," ==> Running on ", I5,  &
-  " points instead of ", I6, "(" I5, " times " , I5, ")" ) 
+  & " points instead of ", I6, "(" I5, " times " , I5, ")" )  
 !
   IF (ygltparam%lp1) THEN
     WRITE(ygltparam%noutlu,*) ' '
     WRITE(ygltparam%noutlu,*) ' *** LEVEL 3 - END SUBROUTINE THERMO'
     WRITE(ygltparam%noutlu,*) ' '
   ENDIF
+IF (LHOOK) CALL DR_HOOK('GLT_THERMO',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE glt_thermo
 

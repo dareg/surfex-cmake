@@ -83,9 +83,10 @@
 ! field, plus field values at one specified grid point.
 !
 SUBROUTINE gltools_chkout(    kdate,tpglt,&
-        n0vilu,n2vilu,nnflxin,noutlu,nprinto,nsavlu,nsavout,nt,nx,nxglo,ny,nyglo,xdomsrf_g,lp1,lwg,ciopath )
+        & n0vilu,n2vilu,nnflxin,noutlu,nprinto,nsavlu,nsavout,nt,nx,nxglo,ny,nyglo,xdomsrf_g,lp1,lwg,ciopath ) 
 !
   USE modd_types_glt, only: t_glt, t_def
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modi_gltools_nwords
   USE modi_gltools_strsplit
   USE mode_gltools_wrivais
@@ -95,41 +96,43 @@ SUBROUTINE gltools_chkout(    kdate,tpglt,&
 ! .. Dummy arguments
 !
   INTEGER, INTENT(in) ::  &
-    kdate,nprinto,nnflxin,noutlu,nsavout,nsavlu,nt,nx,ny,nxglo,nyglo,n2vilu,n0vilu
+    & kdate,nprinto,nnflxin,noutlu,nsavout,nsavlu,nt,nx,ny,nxglo,nyglo,n2vilu,n0vilu 
   REAL, INTENT(in) ::  xdomsrf_g
   LOGICAL, INTENT(in) ::  lp1,lwg
   CHARACTER(*), INTENT(in) ::  ciopath
 
   TYPE(t_glt), INTENT(inout) ::  &
-    tpglt
+    & tpglt 
 !
 ! .. Local variables
 !
   LOGICAL ::  &
-        y3d,ydo
+        & y3d,ydo 
   CHARACTER(2) ::  &
-        ynum
+        & ynum 
   CHARACTER(80) ::  &
-        ystep,yfile
+        & ystep,yfile 
   CHARACTER(200) ::  &
-        yfld
+        & yfld 
   CHARACTER(80), DIMENSION(:), ALLOCATABLE ::  &
-        ylistfld
+        & ylistfld 
   INTEGER ::  &
-        infld,imonth,jf,jk
+        & infld,imonth,jf,jk 
   REAL ::  &
-        zofac,zmin,zmax,zsum
+        & zofac,zmin,zmax,zsum 
   REAL, DIMENSION(SIZE(tpglt%dom,1),SIZE(tpglt%dom,2)) ::  &
-        zwork2
+        & zwork2 
   REAL, DIMENSION(SIZE(tpglt%ice_atm,1),SIZE(tpglt%dom,1),SIZE(tpglt%dom,2)) ::  &
-        zwork3
+        & zwork3 
   TYPE(t_def) ::  &
-        tznam
+        & tznam 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !  
 !
 ! 1. Initialisations
 ! ===================
 !
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_CHKOUT',0,ZHOOK_HANDLE)
   IF ( nprinto >= 2 ) THEN
 !
 ! .. List of all fields to be analysed (in a single string variable)
@@ -141,12 +144,12 @@ SUBROUTINE gltools_chkout(    kdate,tpglt,&
 !
       IF ( nnflxin==0 ) THEN
           yfld='pfsit palbm ptsfm  &
-&           pnsfi pswai pcdfli  &
-&           pwatfli ptauxg ptauyg pustar psalf'
+           & pnsfi pswai pcdfli  &
+           & pwatfli ptauxg ptauyg pustar psalf' 
         ELSE
           yfld='pfsit palbi ptsfi  &
-&           pnsfi pswai pcdfli  &
-&           pwatfli ptauxg ptauyg pustar psalf'
+           & pnsfi pswai pcdfli  &
+           & pwatfli ptauxg ptauyg pustar psalf' 
       ENDIF
 !
 ! .. Get number of words in yfld, then get the list of fields in a vector
@@ -171,8 +174,8 @@ SUBROUTINE gltools_chkout(    kdate,tpglt,&
       IF ( lwg ) THEN
         WRITE(noutlu,*) 
         WRITE(noutlu,*)  &
-          '===================== Control Gelato output data ' //  &
-          '====================='
+          & '===================== Control Gelato output data ' //  &
+          & '=====================' 
 !
         WRITE(noutlu,*) 'First Time-Step  :',tpglt%ind%beg
         WRITE(noutlu,*) 'Current Time-Step:',tpglt%ind%cur
@@ -180,9 +183,9 @@ SUBROUTINE gltools_chkout(    kdate,tpglt,&
 !
         WRITE(noutlu,*)
         WRITE(noutlu,*)  &
-          '  minimum         maximum         average'
+          & '  minimum         maximum         average' 
         WRITE(noutlu,*)  &
-          '  ============    ============    ============'
+          & '  ============    ============    ============' 
       ENDIF
 !
 !
@@ -233,7 +236,7 @@ SUBROUTINE gltools_chkout(    kdate,tpglt,&
               WRITE(noutlu,*) '**** WARNING ****'
               WRITE(noutlu,*) '   In routine imod_tools_chkout'
               WRITE(noutlu,*) '     ==> field ' // TRIM(ylistfld(jf)) //  &
-                ' is unknown.'
+                & ' is unknown.' 
             ENDIF
         ENDIF
 !
@@ -264,7 +267,7 @@ SUBROUTINE gltools_chkout(    kdate,tpglt,&
       IF ( lwg ) THEN
         WRITE(noutlu,*) 
         WRITE(noutlu,*)  &
-          '===================================================================='
+          & '====================================================================' 
         WRITE(noutlu,*) 
       ENDIF
       DEALLOCATE( ylistfld )
@@ -290,7 +293,7 @@ SUBROUTINE gltools_chkout(    kdate,tpglt,&
       imonth = ( kdate - 10000*( kdate/10000 ) ) / 100
       WRITE( ystep,FMT='(I7)' ) tpglt%ind%cur
       WRITE( yfile,FMT='("/outfld_",I2.2,"_",A)' )  &
-        imonth,TRIM( ADJUSTL(ystep) )
+        & imonth,TRIM( ADJUSTL(ystep) ) 
       yfile = TRIM(ciopath) // TRIM( ADJUSTL(yfile) )
 !
 ! .. Open and write file
@@ -348,13 +351,14 @@ SUBROUTINE gltools_chkout(    kdate,tpglt,&
 !
   IF(lp1) THEN
     WRITE(noutlu,*)  &
-      '                ************************************'
+      & '                ************************************' 
     WRITE(noutlu,*)  &
-      '                 END OF gelato TIME STEP Nr =',tpglt%ind%cur
+      & '                 END OF gelato TIME STEP Nr =',tpglt%ind%cur 
     WRITE(noutlu,*)  &
-      '                ************************************'
+      & '                ************************************' 
     CALL FLUSH(noutlu)
   ENDIF
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_CHKOUT',1,ZHOOK_HANDLE)
 !
 !
 !

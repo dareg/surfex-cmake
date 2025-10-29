@@ -72,9 +72,9 @@ FUNCTION glt_swfrzt0d(ps)
   IMPLICIT NONE
 
   REAL ::  &
-    glt_swfrzt0d
+    & glt_swfrzt0d 
   REAL, INTENT(in) ::  &
-    ps
+    & ps 
 
   glt_swfrzt0d = (-0.0575 + 1.710523e-3*sqrt(ps) - 2.154996e-4*ps) * ps
 !
@@ -104,13 +104,13 @@ FUNCTION glt_swfrzt2d(ps,nx,ny)
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: nx,ny
   REAL, DIMENSION(nx,ny) ::  &
-    glt_swfrzt2d
+    & glt_swfrzt2d 
   REAL, DIMENSION(nx,ny), INTENT(in) ::  &
-    ps
+    & ps 
 
   glt_swfrzt2d(:,:) =  &
-    (-0.0575 + 1.710523e-3*sqrt(ps(:,:)) - 2.154996e-4*ps(:,:)) *  &
-    ps(:,:) 
+    & (-0.0575 + 1.710523e-3*sqrt(ps(:,:)) - 2.154996e-4*ps(:,:)) *  &
+    & ps(:,:)  
 !
 END FUNCTION glt_swfrzt2d
 
@@ -138,13 +138,13 @@ FUNCTION glt_swfrzt3d(ps,nt,nx,ny)
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: nt,nx,ny
   REAL, DIMENSION(nt,nx,ny) ::  &
-    glt_swfrzt3d
+    & glt_swfrzt3d 
   REAL, DIMENSION(nt,nx,ny), INTENT(in) ::  &
-    ps
+    & ps 
 
   glt_swfrzt3d(:,:,:) =  &
-    (-0.0575 + 1.710523e-3*sqrt(ps(:,:,:)) - 2.154996e-4*ps(:,:,:)) *  &
-    ps(:,:,:) 
+    & (-0.0575 + 1.710523e-3*sqrt(ps(:,:,:)) - 2.154996e-4*ps(:,:,:)) *  &
+    & ps(:,:,:)  
 !
 END FUNCTION glt_swfrzt3d
 END MODULE mode_gltools_swfrzt

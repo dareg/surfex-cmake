@@ -51,6 +51,7 @@
 ! -------------------- BEGIN MODULE mode_glt_stats_r ------------------------ 
 
 MODULE mode_glt_stats_r 
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
 CONTAINS
 
 ! --------------------- END MODULE mode_glt_stats_r -------------------------
@@ -70,9 +71,9 @@ FUNCTION glt_iceconcm_r(tpsit,np,nt)
   INTEGER, INTENT(in) :: nt,np
 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::                       &
-        tpsit
+        & tpsit 
   REAL, DIMENSION(np) ::                                             &
-        glt_iceconcm_r 
+        & glt_iceconcm_r  
 
 ! * Compute total sea ice concentration.
   glt_iceconcm_r(:) = SUM( tpsit(:,:)%fsi,DIM=1 )
@@ -99,12 +100,12 @@ FUNCTION glt_thinice_concm_r(tpsit,np,nt,xicethcr)
   REAL   , INTENT(in) :: xicethcr
 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::               &
-        tpsit
+        & tpsit 
   REAL, DIMENSION(np) ::                                             &
-        glt_thinice_concm_r 
+        & glt_thinice_concm_r  
 
   glt_thinice_concm_r(:) =                                                  &
-    SUM(tpsit(:,:)%fsi,MASK=(tpsit(:,:)%hsi<xicethcr),DIM=1)
+    & SUM(tpsit(:,:)%fsi,MASK=(tpsit(:,:)%hsi<xicethcr),DIM=1) 
 !
 END FUNCTION glt_thinice_concm_r
                                                                         
@@ -128,12 +129,12 @@ FUNCTION glt_thickice_concm_r(tpsit,np,nt,xicethcr)
   REAL   , INTENT(in) :: xicethcr
 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::               &
-        tpsit
+        & tpsit 
   REAL, DIMENSION(np) ::                                             &
-        glt_thickice_concm_r 
+        & glt_thickice_concm_r  
 
   glt_thickice_concm_r(:) =                                                 &
-    SUM(tpsit(:,:)%fsi,MASK=(tpsit(:,:)%hsi>xicethcr),DIM=1)
+    & SUM(tpsit(:,:)%fsi,MASK=(tpsit(:,:)%hsi>xicethcr),DIM=1) 
 !
 END FUNCTION glt_thickice_concm_r
                                                                         
@@ -154,16 +155,19 @@ FUNCTION glt_icesurfg_r(tpdom,tpsit,np,nt)
   INTEGER, INTENT(in) :: nt,np
 
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::                          &
-        tpdom
+        & tpdom 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::                       &
-        tpsit
+        & tpsit 
   REAL ::                                                                &
-        glt_icesurfg_r
+        & glt_icesurfg_r 
   REAL, DIMENSION(np) ::                                             &
-        z2_sumfsi
+        & z2_sumfsi 
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
+  IF (LHOOK) CALL DR_HOOK('MODE_GLT_STATS_R:GLT_ICESURFG_R',0,ZHOOK_HANDLE)
   z2_sumfsi(:) = SUM( tpsit(:,:)%fsi,DIM=1 )
   glt_icesurfg_r = SUM( z2_sumfsi(:)*tpdom(:)%srf )
+  IF (LHOOK) CALL DR_HOOK('MODE_GLT_STATS_R:GLT_ICESURFG_R',1,ZHOOK_HANDLE)
 !
 END FUNCTION glt_icesurfg_r
                                                                         
@@ -188,19 +192,22 @@ FUNCTION glt_avg_r(tpdom,pfield,ktot,np,xdomsrf_r)
   REAL   , INTENT(in) :: xdomsrf_r
 !
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
-    tpdom 
+    & tpdom  
   REAL, DIMENSION(np), INTENT(in) ::  &
-    pfield
+    & pfield 
   INTEGER, INTENT(in) ::  &
-    ktot
+    & ktot 
   REAL ::  &
-    glt_avg_r
+    & glt_avg_r 
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
+  IF (LHOOK) CALL DR_HOOK('MODE_GLT_STATS_R:GLT_AVG_R',0,ZHOOK_HANDLE)
   glt_avg_r = SUM( pfield(:)*tpdom(:)%srf )
 !
   IF ( ktot==0 ) THEN
       glt_avg_r = glt_avg_r / AMAX1(xdomsrf_r,epsil2)
   ENDIF
+  IF (LHOOK) CALL DR_HOOK('MODE_GLT_STATS_R:GLT_AVG_R',1,ZHOOK_HANDLE)
 !
 END FUNCTION glt_avg_r
                                                                         
@@ -222,9 +229,9 @@ FUNCTION glt_avhicem_r(tpsit,np,nt)
   INTEGER, INTENT(in) :: nt,np
 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::                       &
-    tpsit
+    & tpsit 
   REAL, DIMENSION(np) ::                                             &
-    glt_avhicem_r
+    & glt_avhicem_r 
 
   glt_avhicem_r(:) = SUM( tpsit(:,:)%fsi*tpsit(:,:)%hsi,DIM=1 )
 !
@@ -247,9 +254,9 @@ FUNCTION glt_avhsnwm_r(tpsit,np,nt)
   INTEGER, INTENT(in) :: nt,np
 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::                       &
-    tpsit
+    & tpsit 
   REAL, DIMENSION(np) ::                                             &
-    glt_avhsnwm_r
+    & glt_avhsnwm_r 
 
   glt_avhsnwm_r(:) = SUM(tpsit(:,:)%fsi*tpsit(:,:)%hsn,DIM=1)
 !
@@ -273,12 +280,12 @@ FUNCTION glt_avmsnwm_r(tpsit,np,nt)
   INTEGER, INTENT(in) :: nt,np
 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::  &
-    tpsit
+    & tpsit 
   REAL, DIMENSION(np) ::  &
-    glt_avmsnwm_r
+    & glt_avmsnwm_r 
 
   glt_avmsnwm_r(:) = SUM(  &
-    tpsit(:,:)%fsi*tpsit(:,:)%rsn*tpsit(:,:)%hsn, DIM=1 )
+    & tpsit(:,:)%fsi*tpsit(:,:)%rsn*tpsit(:,:)%hsn, DIM=1 ) 
 !
 END FUNCTION glt_avmsnwm_r
 
@@ -300,17 +307,20 @@ FUNCTION glt_avhiceg_r(tpdom,tpsit,np,nt,xdomsrf)
   REAL   , INTENT(in) :: xdomsrf
 
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::                           &
-        tpdom
+        & tpdom 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::                       &
-        tpsit
+        & tpsit 
   REAL ::                                                               &
-        glt_avhiceg_r
+        & glt_avhiceg_r 
   REAL, DIMENSION(np) ::                                             &
-        z2_avhsi
+        & z2_avhsi 
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
+  IF (LHOOK) CALL DR_HOOK('MODE_GLT_STATS_R:GLT_AVHICEG_R',0,ZHOOK_HANDLE)
   z2_avhsi(:) =                                                       &
-    SUM( tpsit(:,:)%fsi*tpsit(:,:)%hsi,DIM=1 )
+    & SUM( tpsit(:,:)%fsi*tpsit(:,:)%hsi,DIM=1 ) 
   glt_avhiceg_r = SUM( z2_avhsi(:)*tpdom(:)%srf ) / xdomsrf
+  IF (LHOOK) CALL DR_HOOK('MODE_GLT_STATS_R:GLT_AVHICEG_R',1,ZHOOK_HANDLE)
 !
 END FUNCTION glt_avhiceg_r
                                                                         
@@ -332,16 +342,19 @@ FUNCTION glt_voliceg_r(tpdom,tpsit,np,nt)
   INTEGER, INTENT(in) :: nt,np
 
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::                          &
-        tpdom
+        & tpdom 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::                              &
-        tpsit
+        & tpsit 
   REAL ::                                                               &
-        glt_voliceg_r
+        & glt_voliceg_r 
   REAL, DIMENSION(np) ::                                             &
-        z2_avhsi
+        & z2_avhsi 
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
+  IF (LHOOK) CALL DR_HOOK('MODE_GLT_STATS_R:GLT_VOLICEG_R',0,ZHOOK_HANDLE)
   z2_avhsi(:) = SUM( tpsit(:,:)%fsi*tpsit(:,:)%hsi,DIM=1 )
   glt_voliceg_r = SUM( z2_avhsi(:)*tpdom(:)%srf )
+  IF (LHOOK) CALL DR_HOOK('MODE_GLT_STATS_R:GLT_VOLICEG_R',1,ZHOOK_HANDLE)
 !
 END FUNCTION glt_voliceg_r
 END MODULE mode_glt_stats_r

@@ -80,9 +80,10 @@
 ! ------------------------- SUBROUTINE glt_icevsp_r -------------------------
 !
 SUBROUTINE glt_icevsp_r( tpsit,pvsp,&
-  nilay,nl,np,nt,height,sf3tinv )
+  & nilay,nl,np,nt,height,sf3tinv ) 
 !
   USE modd_glt_const_thm
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_types_glt, only: t_sit
 !
   IMPLICIT NONE
@@ -90,31 +91,32 @@ SUBROUTINE glt_icevsp_r( tpsit,pvsp,&
   INTEGER,INTENT(IN) :: nl,nt,np,nilay
   REAL,DIMENSION(:),INTENT(IN) :: height,sf3tinv
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::  &
-        tpsit   
+        & tpsit    
   REAL, DIMENSION(nl,nt,np), INTENT(inout) ::  &
-        pvsp
+        & pvsp 
 !
 ! .. Local variables
 !
   REAL, DIMENSION(np) ::  &
-    zqsalt
+    & zqsalt 
   REAL, DIMENSION(nt,np) ::  &
-    zdssi,zssieq
+    & zdssi,zssieq 
 ! Coefficients of the MY ice salinity profile (Schwarzacher, JGR 64:2357-2367,
 ! 1959)
   REAL, PARAMETER ::  &
-    ppa=0.407, ppb=0.573
+    & ppa=0.407, ppb=0.573 
 ! Low salinity and high salinity transition coefficients
   REAL, PARAMETER ::  &
-    ppslo=3., ppshi=4.5
+    & ppslo=3., ppshi=4.5 
   INTEGER ::  &
-    jl
+    & jl 
   REAL ::  &
-    zint,z 
+    & zint,z  
   REAL, DIMENSION(nilay) ::  &
-    zdepth,zsalt0
+    & zdepth,zsalt0 
   REAL, DIMENSION(nt,np) ::  &
-    zalf
+    & zalf 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -124,6 +126,7 @@ SUBROUTINE glt_icevsp_r( tpsit,pvsp,&
 ! .. We need to know at what depth wrt the ice-atm or ice-snow 
 ! interface every point lies.
 !
+IF (LHOOK) CALL DR_HOOK('GLT_ICEVSP_R',0,ZHOOK_HANDLE)
 DO jl=1,nilay
   zdepth(jl) = 1. - 0.5*( height(jl)+height(jl+1) )
 END DO
@@ -163,7 +166,7 @@ DO jl=1,nilay
 !
     ELSEWHERE
       pvsp(jl,:,:) = tpsit(:,:)%ssi *  &
-        ( zalf(:,:) * zsalt0(jl) + ( 1.-zalf(:,:) ) )
+        & ( zalf(:,:) * zsalt0(jl) + ( 1.-zalf(:,:) ) ) 
     ENDWHERE
   ELSEWHERE
 !
@@ -176,6 +179,7 @@ END DO
 ! .. Snow salinity is zero !
 !
 pvsp(nilay+1,:,:) = 0.
+IF (LHOOK) CALL DR_HOOK('GLT_ICEVSP_R',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE glt_icevsp_r
 !

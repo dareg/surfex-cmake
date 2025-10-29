@@ -115,6 +115,7 @@
 SUBROUTINE glt_icetrans_r(tpblki,tpmxl,tptfl,tpsit,tpdia,pswtra,nilay,nl,np,nt,depth )
 !
   USE modd_glt_const_thm
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_types_glt, only: t_blk, t_mxl, t_tfl, t_sit, t_dia
 !
   IMPLICIT NONE
@@ -124,28 +125,29 @@ SUBROUTINE glt_icetrans_r(tpblki,tpmxl,tptfl,tpsit,tpdia,pswtra,nilay,nl,np,nt,d
   INTEGER          ,INTENT(in) :: nl,nt,np,nilay
   REAL,DIMENSION(:),INTENT(in) :: depth
   TYPE(t_blk), DIMENSION(nt,np), INTENT(in) ::   &
-        tpblki
+        & tpblki 
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
-        tpmxl
+        & tpmxl 
   TYPE(t_tfl), DIMENSION(np), INTENT(inout) ::  &
-        tptfl
+        & tptfl 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::  &
-        tpsit
+        & tpsit 
   TYPE(t_dia), DIMENSION(np), INTENT(inout) ::  &
-        tpdia
+        & tpdia 
   REAL, DIMENSION(nl,nt,np), INTENT(out) ::  &
-        pswtra 
+        & pswtra  
 !
 !* Local variables
 !
   INTEGER ::  &
-        jk,jl
+        & jk,jl 
   REAL, DIMENSION(nilay+1) ::  &
-        zaux
+        & zaux 
   REAL, DIMENSION(np) ::  &
-        zfsit,zalbm,zswnet
+        & zfsit,zalbm,zswnet 
   REAL, DIMENSION(nt,np) ::  &
-        zqsw2si,ztraml,zdmsn3,zqmelt
+        & zqsw2si,ztraml,zdmsn3,zqmelt 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -154,6 +156,7 @@ SUBROUTINE glt_icetrans_r(tpblki,tpmxl,tptfl,tpsit,tpdia,pswtra,nilay,nl,np,nt,d
 !
 ! .. Trends
 !
+IF (LHOOK) CALL DR_HOOK('GLT_ICETRANS_R',0,ZHOOK_HANDLE)
   pswtra(:,:,:) = 0. 
 !
 !
@@ -221,7 +224,7 @@ SUBROUTINE glt_icetrans_r(tpblki,tpmxl,tptfl,tpsit,tpdia,pswtra,nilay,nl,np,nt,d
 ! .. Impact on mixed layer (transmitted radiative flux)
 !
   tptfl(:)%lio = tptfl(:)%lio +  &
-    SUM( tpsit(:,:)%fsi*ztraml(:,:)*zqsw2si(:,:), DIM=1 )
+    & SUM( tpsit(:,:)%fsi*ztraml(:,:)*zqsw2si(:,:), DIM=1 ) 
 !
 ! * Compute the trend on vertical temperature profile due to
 ! solar short wave absorption
@@ -229,11 +232,12 @@ SUBROUTINE glt_icetrans_r(tpblki,tpmxl,tptfl,tpsit,tpdia,pswtra,nilay,nl,np,nt,d
   DO jl = 1,nilay
     WHERE ( tpsit(:,:)%hsi>epsil1 .AND. tpsit(:,:)%hsn<=epsil1 )
       pswtra(jl,:,:) =  zqsw2si(:,:)*  &
-        ( zaux(jl+1)**tpsit(:,:)%hsi -  &
-          zaux(jl)**tpsit(:,:)%hsi  &
-        )
+        & ( zaux(jl+1)**tpsit(:,:)%hsi -  &
+          & zaux(jl)**tpsit(:,:)%hsi  &
+        & ) 
     ENDWHERE
   END DO 
+IF (LHOOK) CALL DR_HOOK('GLT_ICETRANS_R',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE glt_icetrans_r
 !

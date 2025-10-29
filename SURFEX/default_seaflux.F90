@@ -5,7 +5,7 @@
 !     #########
       SUBROUTINE DEFAULT_SEAFLUX(PTSTEP,POUT_TSTEP,HSEA_ALB,HSEA_FLUX,   &
                                    OPWG, OPRECIP, OPWEBB, KZ0, KGRVWAVES,&
-                                   OPROGSST, KTIME_COUPLING,POCEAN_TSTEP,&
+                                   OPROGSST,KTIME_COUPLING,POCEAN_TSTEP,PCMO_COEF,&
                                    PICHCE, HINTERPOL_SST, HINTERPOL_SSS  )  
 !     ########################################################################
 !
@@ -67,6 +67,7 @@ LOGICAL,           INTENT(OUT) :: OPROGSST      !two-way coupling
 INTEGER,           INTENT(OUT) :: KTIME_COUPLING!coupling frequency
 REAL,              INTENT(OUT) :: PICHCE        !CE coef calculation for ECUME
 REAL,              INTENT(OUT) :: POCEAN_TSTEP  !ocean 1D model time-step
+REAL,              INTENT(OUT) :: PCMO_COEF
 CHARACTER(LEN=6),  INTENT(OUT) :: HINTERPOL_SST ! Quadratic interpolation of monthly SST
 CHARACTER(LEN=6),  INTENT(OUT) :: HINTERPOL_SSS ! Quadratic interpolation of monthly SSS
 REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
@@ -94,6 +95,7 @@ KGRVWAVES = 0
 OPROGSST = .FALSE.
 KTIME_COUPLING = 300
 POCEAN_TSTEP = 300.
+PCMO_COEF = 1.0
 !
 PICHCE = 0.0
 !

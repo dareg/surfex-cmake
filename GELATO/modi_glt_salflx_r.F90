@@ -100,6 +100,7 @@
 SUBROUTINE glt_salflx_r(pqsalt,tpmxl,tptfl,ncdlssh,np,nsalflx,nt,dtt,rn_htopoc,pdmass,psalt)
 !
   USE modd_glt_const_thm
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_types_glt, only: t_mxl, t_tfl
 !
   IMPLICIT NONE
@@ -107,25 +108,27 @@ SUBROUTINE glt_salflx_r(pqsalt,tpmxl,tptfl,ncdlssh,np,nsalflx,nt,dtt,rn_htopoc,p
   INTEGER, INTENT(in) ::  ncdlssh,nsalflx,nt,np
   REAL, INTENT(in) ::  dtt,rn_htopoc
   REAL, DIMENSION(nt,np), INTENT(in) ::  &
-        pqsalt
+        & pqsalt 
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
-        tpmxl
+        & tpmxl 
   TYPE(t_tfl), DIMENSION(np), INTENT(inout) ::  &
-        tptfl
+        & tptfl 
   REAL, DIMENSION(nt,np),OPTIONAL, INTENT(in) ::  &
-        pdmass,psalt
+        & pdmass,psalt 
 !
 ! .. Local variables
 !
   REAL, DIMENSION(nt,np) ::  &
-        zaux,zsml,zssh,zdmass,zsalt
+        & zaux,zsml,zssh,zdmass,zsalt 
   REAL, parameter :: ssmr=34.
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
 ! 1. Initialisations
 ! ===================
 !
+IF (LHOOK) CALL DR_HOOK('GLT_SALFLX_R',0,ZHOOK_HANDLE)
   IF ( PRESENT(pdmass) ) THEN
     zdmass(:,:) = pdmass(:,:) 
   ELSE
@@ -156,8 +159,8 @@ SUBROUTINE glt_salflx_r(pqsalt,tpmxl,tptfl,ncdlssh,np,nsalflx,nt,dtt,rn_htopoc,p
 !
   IF ( nsalflx==1 ) THEN
     tptfl(:)%cio = tptfl(:)%cio -  &
-      SUM( zdmass(:,:) - pqsalt(:,:)/AMAX1( zsml(:,:),epsil1 ),  &
-          DIM=1) / dtt
+      & SUM( zdmass(:,:) - pqsalt(:,:)/AMAX1( zsml(:,:),epsil1 ),  &
+          & DIM=1) / dtt 
 !
 ! Method 2:
 !  -> we do not make the approximation that the change in ice thickness 
@@ -167,10 +170,10 @@ SUBROUTINE glt_salflx_r(pqsalt,tpmxl,tptfl,ncdlssh,np,nsalflx,nt,dtt,rn_htopoc,p
   ELSE IF ( nsalflx==2 ) THEN
     zaux(:,:) = 1. / ( rhofw + zsalt(:,:) )
     tptfl(:)%cio = tptfl(:)%cio -       &
-      SUM( ( rhoice*zdmass(:,:)*zaux(:,:) -  &
-          rhoice/rhosw * pqsalt(:,:)/AMAX1( zsml(:,:),epsil1 ) ) /  &
-           ( 1. - zaux(:,:)*zdmass(:,:)/( rn_htopoc+zssh(:,:) ) ),  &
-          DIM=1 ) / dtt
+      & SUM( ( rhoice*zdmass(:,:)*zaux(:,:) -  &
+          & rhoice/rhosw * pqsalt(:,:)/AMAX1( zsml(:,:),epsil1 ) ) /  &
+           & ( 1. - zaux(:,:)*zdmass(:,:)/( rn_htopoc+zssh(:,:) ) ),  &
+          & DIM=1 ) / dtt 
 !
 ! Method 3:
 !  -> we use a reference salinity to describe ocean salinity (and still do not
@@ -179,25 +182,26 @@ SUBROUTINE glt_salflx_r(pqsalt,tpmxl,tptfl,ncdlssh,np,nsalflx,nt,dtt,rn_htopoc,p
   ELSE IF ( nsalflx==3 ) THEN
     zaux(:,:) = 1. / ( rhofw + zsalt(:,:) )
     tptfl(:)%cio = tptfl(:)%cio -       &
-      SUM( ( rhoice*zdmass(:,:)*zaux(:,:) -  &
-          rhoice/rhosw * pqsalt(:,:)/ssw0 ) /  &
-           ( 1. - zaux(:,:)*zdmass(:,:)/( rn_htopoc+zssh(:,:) ) ),  &
-          DIM=1 ) / dtt
+      & SUM( ( rhoice*zdmass(:,:)*zaux(:,:) -  &
+          & rhoice/rhosw * pqsalt(:,:)/ssw0 ) /  &
+           & ( 1. - zaux(:,:)*zdmass(:,:)/( rn_htopoc+zssh(:,:) ) ),  &
+          & DIM=1 ) / dtt 
 !
 ! Method 4: 
 !   -> As method 1 but salinity is considered as fixed.
 ! Method 1 may be the more "accurate", since pqsalt should be taken into account 
   ELSE IF ( nsalflx==4 ) THEN
     tptfl(:)%cio = tptfl(:)%cio -  &
-      SUM( zdmass(:,:) * (ssmr - sice)/AMAX1( zsml(:,:),epsil1 ),  &
-          DIM=1) / dtt
+      & SUM( zdmass(:,:) * (ssmr - sice)/AMAX1( zsml(:,:),epsil1 ),  &
+          & DIM=1) / dtt 
 !
 ! Method 5:
   ELSE IF ( nsalflx==5 ) THEN
     tptfl(:)%cio = tptfl(:)%cio -  &
-      SUM( zdmass(:,:), DIM=1) / dtt
+      & SUM( zdmass(:,:), DIM=1) / dtt 
 !
   ENDIF
+IF (LHOOK) CALL DR_HOOK('GLT_SALFLX_R',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE glt_salflx_r
 !

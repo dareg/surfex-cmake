@@ -94,28 +94,30 @@
 ! density, and vertical temperature profiles. 
 !
 SUBROUTINE gltools_mixice_r(tpmxl,tplsit,tplsil,tpsit,tpsil,&
-niceage,nicesal,nilay,nl,nmponds,np,nt )
+& niceage,nicesal,nilay,nl,nmponds,np,nt ) 
 !
   USE modd_types_glt, only: t_mxl, t_sit, t_vtp
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_thm
 !
   IMPLICIT NONE
   INTEGER,INTENT(IN) :: niceage,nicesal,nmponds,nilay,nl,nt,np
 !
   TYPE(t_mxl),DIMENSION(np), INTENT(in) ::                           &
-        tpmxl
+        & tpmxl 
   TYPE(t_sit), DIMENSION(:,:,:), INTENT(in) ::                        &
-        tplsit
+        & tplsit 
   TYPE(t_vtp), DIMENSION(:,:,:,:), INTENT(in) ::                      &
-        tplsil
+        & tplsil 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::                    &
-        tpsit
+        & tpsit 
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(inout) ::                 &
-        tpsil
+        & tpsil 
   INTEGER ::                                                            &
-        jl,jt
+        & jl,jt 
   REAL, DIMENSION(nt,np) ::                                          &
-        zmlf3,zvsi,zvsn,zmsn,zagevsi,zssivsi,zaux,zvmpvsi
+        & zmlf3,zvsi,zvsn,zmsn,zagevsi,zssivsi,zaux,zvmpvsi 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -124,6 +126,7 @@ niceage,nicesal,nilay,nl,nmponds,np,nt )
 !
 ! .. Expanded mixed layer freezing point
 !
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_MIXICE_R',0,ZHOOK_HANDLE)
   zmlf3(:,:) = SPREAD(tpmxl(:)%mlf,1,nt) 
 !
 ! .. For every ice category, volume of ice per sq. meter
@@ -134,25 +137,25 @@ niceage,nicesal,nilay,nl,nmponds,np,nt )
 !
   zvsn(:,:) = SUM( tplsit(:,:,:)%fsi*tplsit(:,:,:)%hsn,DIM=1 )
   zmsn(:,:) = SUM( tplsit(:,:,:)%fsi*tplsit(:,:,:)%hsn*  &
-    tplsit(:,:,:)%rsn,DIM=1 )
+    & tplsit(:,:,:)%rsn,DIM=1 ) 
 !
 ! .. For every ice category, volume x age
 !
   IF ( niceage==1 )  &
-    zagevsi(:,:) = SUM( tplsit(:,:,:)%fsi*tplsit(:,:,:)%hsi*  &
-      tplsit(:,:,:)%age,DIM=1 )
+    & zagevsi(:,:) = SUM( tplsit(:,:,:)%fsi*tplsit(:,:,:)%hsi*  &
+      & tplsit(:,:,:)%age,DIM=1 ) 
 !
 ! .. For every ice category, volume x ssi
 !
   IF ( nicesal==1 )  &
-    zssivsi(:,:) = SUM( tplsit(:,:,:)%fsi*tplsit(:,:,:)%hsi*  &
-      tplsit(:,:,:)%ssi,DIM=1 )
+    & zssivsi(:,:) = SUM( tplsit(:,:,:)%fsi*tplsit(:,:,:)%hsi*  &
+      & tplsit(:,:,:)%ssi,DIM=1 ) 
 !
 ! .. For every ice category, volume x vmp
 !
   IF ( nmponds==1 )  &
-    zvmpvsi(:,:) = SUM( tplsit(:,:,:)%fsi*tplsit(:,:,:)%hsi*  &
-      tplsit(:,:,:)%vmp,DIM=1 )
+    & zvmpvsi(:,:) = SUM( tplsit(:,:,:)%fsi*tplsit(:,:,:)%hsi*  &
+      & tplsit(:,:,:)%vmp,DIM=1 ) 
 !
 !
 ! 2. Compute all ice state variables
@@ -179,11 +182,11 @@ niceage,nicesal,nilay,nl,nmponds,np,nt )
     tpsit(:,:)%hsi = zvsi(:,:) / tpsit(:,:)%fsi
     tpsit(:,:)%hsn = zvsn(:,:) / tpsit(:,:)%fsi
     tpsit(:,:)%tsf = SUM(  &
-      tplsit(:,:,:)%fsi*tplsit(:,:,:)%tsf, DIM=1 ) /  &
-      tpsit(:,:)%fsi 
+      & tplsit(:,:,:)%fsi*tplsit(:,:,:)%tsf, DIM=1 ) /  &
+      & tpsit(:,:)%fsi  
     tpsit(:,:)%asn = SUM(  &
-      tplsit(:,:,:)%fsi*tplsit(:,:,:)%asn, DIM=1 ) /  &
-      tpsit(:,:)%fsi 
+      & tplsit(:,:,:)%fsi*tplsit(:,:,:)%asn, DIM=1 ) /  &
+      & tpsit(:,:)%fsi  
   ENDWHERE
   WHERE ( tpsit(:,:)%fsi<=epsil1 )
     tpsit(:,:)%esi = .FALSE.
@@ -197,7 +200,7 @@ niceage,nicesal,nilay,nl,nmponds,np,nt )
 !
   WHERE ( tpsit(:,:)%fsi>epsil1 .AND. tpsit(:,:)%hsn>epsil1 )   
     tpsit(:,:)%rsn = zmsn(:,:) /  &
-      ( tpsit(:,:)%fsi*tpsit(:,:)%hsn )
+      & ( tpsit(:,:)%fsi*tpsit(:,:)%hsn ) 
   ENDWHERE
   WHERE ( tpsit(:,:)%fsi<=epsil1 .OR. tpsit(:,:)%hsn<=epsil1 )
     tpsit(:,:)%rsn = rhosnwmin
@@ -208,7 +211,7 @@ niceage,nicesal,nilay,nl,nmponds,np,nt )
   IF ( niceage==1 ) THEN
       WHERE ( tpsit(:,:)%fsi>epsil1 .AND. tpsit(:,:)%hsi>epsil1 )   
         tpsit(:,:)%age = zagevsi(:,:) /  &
-          ( tpsit(:,:)%fsi*tpsit(:,:)%hsi )
+          & ( tpsit(:,:)%fsi*tpsit(:,:)%hsi ) 
       ENDWHERE
       WHERE ( tpsit(:,:)%fsi<=epsil1 .OR. tpsit(:,:)%hsi<=epsil1 )
         tpsit(:,:)%age = 0.
@@ -222,7 +225,7 @@ niceage,nicesal,nilay,nl,nmponds,np,nt )
   IF ( nicesal==1 ) THEN
       WHERE ( tpsit(:,:)%fsi>epsil1 .AND. tpsit(:,:)%hsi>epsil1 )   
         tpsit(:,:)%ssi = zssivsi(:,:) /  &
-          ( tpsit(:,:)%fsi*tpsit(:,:)%hsi )
+          & ( tpsit(:,:)%fsi*tpsit(:,:)%hsi ) 
       ENDWHERE
       WHERE ( tpsit(:,:)%fsi<=epsil1 .OR. tpsit(:,:)%hsi<=epsil1 )
         tpsit(:,:)%ssi = 0.
@@ -234,7 +237,7 @@ niceage,nicesal,nilay,nl,nmponds,np,nt )
   IF ( nmponds==1 ) THEN
       WHERE ( tpsit(:,:)%fsi>epsil1 .AND. tpsit(:,:)%hsi>epsil1 )   
         tpsit(:,:)%vmp = zvmpvsi(:,:) /  &
-          ( tpsit(:,:)%fsi*tpsit(:,:)%hsi )
+          & ( tpsit(:,:)%fsi*tpsit(:,:)%hsi ) 
       ENDWHERE
       WHERE ( tpsit(:,:)%fsi<=epsil1 .OR. tpsit(:,:)%hsi<=epsil1 )
         tpsit(:,:)%vmp = 0.
@@ -253,10 +256,10 @@ niceage,nicesal,nilay,nl,nmponds,np,nt )
 !
   DO jl = 1,nilay
     zaux(:,:) = SUM( tplsit(:,:,:)%fsi*tplsit(:,:,:)%hsi*          &
-      tplsil(:,jl,:,:)%ent,DIM=1 )
+      & tplsil(:,jl,:,:)%ent,DIM=1 ) 
     WHERE ( tpsit(:,:)%fsi>epsil1 .AND. tpsit(:,:)%hsi>epsil1 )
       tpsil(jl,:,:)%ent = zaux(:,:) /  &
-        ( tpsit(:,:)%fsi*tpsit(:,:)%hsi )
+        & ( tpsit(:,:)%fsi*tpsit(:,:)%hsi ) 
     ENDWHERE
   END DO
 !
@@ -264,11 +267,11 @@ niceage,nicesal,nilay,nl,nmponds,np,nt )
 !
   DO jl = nilay+1,nl
     zaux(:,:) = SUM( tplsit(:,:,:)%fsi*tplsit(:,:,:)%hsn*         &
-      tplsit(:,:,:)%rsn*tplsil(:,jl,:,:)%ent,DIM=1 )
+      & tplsit(:,:,:)%rsn*tplsil(:,jl,:,:)%ent,DIM=1 ) 
     WHERE ( tpsit(:,:)%fsi>epsil1 .AND. tpsit(:,:)%hsn>epsil1 .AND. &
-    tpsit(:,:)%rsn>epsil1 )
+    & tpsit(:,:)%rsn>epsil1 ) 
       tpsil(jl,:,:)%ent = zaux(:,:) /  &
-        ( tpsit(:,:)%fsi*tpsit(:,:)%hsn*tpsit(:,:)%rsn )
+        & ( tpsit(:,:)%fsi*tpsit(:,:)%hsn*tpsit(:,:)%rsn ) 
     ENDWHERE
   END DO
 !
@@ -277,6 +280,7 @@ niceage,nicesal,nilay,nl,nmponds,np,nt )
       tpsil(jl,:,:)%ent = 0.
     ENDWHERE
   END DO
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_MIXICE_R',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE gltools_mixice_r
 !

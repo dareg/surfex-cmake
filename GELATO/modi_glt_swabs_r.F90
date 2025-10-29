@@ -76,10 +76,11 @@
 ! ------------------------- SUBROUTINE glt_swabs_r --------------------------
 !
 SUBROUTINE glt_swabs_r  &
-        ( tpsit,pswtra,pent,pvsp,pdhmelt,&
-      nilay,nl,noutlu,np,nt,dtt,sf3tinv,lp1)
+        & ( tpsit,pswtra,pent,pvsp,pdhmelt,&
+      & nilay,nl,noutlu,np,nt,dtt,sf3tinv,lp1) 
 !
   USE modd_glt_const_thm
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_types_glt, only: t_sit
 !
   IMPLICIT NONE
@@ -99,34 +100,35 @@ SUBROUTINE glt_swabs_r  &
 ! 1.1. Dummy arguments
 ! --------------------
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::  &
-        tpsit
+        & tpsit 
   REAL, DIMENSION(nl,nt,np), INTENT(in) ::  &
-        pswtra
+        & pswtra 
   REAL, DIMENSION(nl,nt,np), INTENT(inout) ::  &
-        pent
+        & pent 
   REAL, DIMENSION(nl,nt,np), INTENT(inout) ::  &
-        pvsp
+        & pvsp 
   REAL, DIMENSION(nl,nt,np), INTENT(inout) ::  &
-        pdhmelt
+        & pdhmelt 
 !
 !
 ! 1.2. Local variables
 ! --------------------
 !
   LOGICAL, DIMENSION(nt,np) ::  &
-        omask
+        & omask 
   CHARACTER(80) ::  &
-        ymess
+        & ymess 
   INTEGER ::  &
-        jl
+        & jl 
   REAL ::  &
-        zdhmelt
+        & zdhmelt 
   REAL ::  &
-        zicondt,zicondb,zidhi_swa,zidhs_swa,ziswa,zinrg,zfsit
+        & zicondt,zicondb,zidhi_swa,zidhs_swa,ziswa,zinrg,zfsit 
   REAL, DIMENSION(nilay,nt,np) ::  &
-        ztsi_m
+        & ztsi_m 
   REAL, DIMENSION(nl,nt,np) ::  &
-        zento
+        & zento 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -138,6 +140,7 @@ SUBROUTINE glt_swabs_r  &
 !
 ! .. Sea ice and snow melting point
 !
+IF (LHOOK) CALL DR_HOOK('GLT_SWABS_R',0,ZHOOK_HANDLE)
   ztsi_m(:,:,:) = -mu * pvsp(1:nilay,:,:)
 !
 ! .. Initial gltools_enthalpy
@@ -161,7 +164,7 @@ SUBROUTINE glt_swabs_r  &
   DO jl=1,nilay
     WHERE ( tpsit(:,:)%fsi>epsil1 .AND. tpsit(:,:)%hsi>epsil1 )
       pent(jl,:,:) = pent(jl,:,:) +  &
-        dtt*pswtra(jl,:,:)/( rhoice*sf3tinv(jl)*tpsit(:,:)%hsi )
+        & dtt*pswtra(jl,:,:)/( rhoice*sf3tinv(jl)*tpsit(:,:)%hsi ) 
     ENDWHERE
   END DO
 !!!
@@ -189,7 +192,7 @@ SUBROUTINE glt_swabs_r  &
 !!    sum(tpsit%fsi*tpsit(:,:)%rsn*tpsit%hsn*pent(nilay+1,:,:))
   WHERE ( tpsit(:,:)%fsi>epsil1 .AND. tpsit(:,:)%hsn>epsil1 )
     pent(nilay+1,:,:) = pent(nilay+1,:,:) +  &
-      dtt*pswtra(nilay+1,:,:)/( tpsit(:,:)%rsn*tpsit(:,:)%hsn )
+      & dtt*pswtra(nilay+1,:,:)/( tpsit(:,:)%rsn*tpsit(:,:)%hsn ) 
   ENDWHERE
 !!  write(noutlu,*)'enth. snow max=',-xmhofusn0
 !!  write(noutlu,*)'enth. snow apres=',  &
@@ -202,8 +205,8 @@ SUBROUTINE glt_swabs_r  &
   DO jl=1,nilay
     WHERE ( pent(jl,:,:)>cpsw*ztsi_m(jl,:,:) )
       pdhmelt(jl,:,:) = pdhmelt(jl,:,:) +  &
-        rhoice*tpsit(:,:)%hsi*sf3tinv(jl)*  &
-        ( pent(jl,:,:)-cpsw*ztsi_m(jl,:,:) )
+        & rhoice*tpsit(:,:)%hsi*sf3tinv(jl)*  &
+        & ( pent(jl,:,:)-cpsw*ztsi_m(jl,:,:) ) 
       pent(jl,:,:) = cpsw*ztsi_m(jl,:,:)
     ENDWHERE
   END DO
@@ -221,7 +224,7 @@ SUBROUTINE glt_swabs_r  &
 ! Snow part
   WHERE ( pent(nilay+1,:,:)>-xmhofusn0 )
     pdhmelt(nilay+1,:,:) = pdhmelt(nilay+1,:,:) +  &
-      tpsit(:,:)%rsn*tpsit(:,:)%hsn*( pent(nilay+1,:,:)+xmhofusn0 )
+      & tpsit(:,:)%rsn*tpsit(:,:)%hsn*( pent(nilay+1,:,:)+xmhofusn0 ) 
     pent(nilay+1,:,:) = -xmhofusn0
   ENDWHERE
 !!write(noutlu,*)'pdhmelt (3)=',sum(pdhmelt,dim=1)/dtt
@@ -236,7 +239,7 @@ SUBROUTINE glt_swabs_r  &
   IF (lp1) THEN 
       WRITE(noutlu,*)
       WRITE(noutlu,*)  &
-        'At the end of SWABS (vert. heat diffusion scheme), W/m2 of ice'
+        & 'At the end of SWABS (vert. heat diffusion scheme), W/m2 of ice' 
 !
 ! Total sea ice concentration
       omask(:,:) = .FALSE.
@@ -254,7 +257,7 @@ SUBROUTINE glt_swabs_r  &
      END DO
 !
      WRITE(noutlu,*)  &
-       '    Input solar energy:', ziswa
+       & '    Input solar energy:', ziswa 
 !!       write(noutlu,*) SUM( pswtra(:,:,1),DIM=1 )
 !
 ! .. Print ice gltools_enthalpy change integral (solar)
@@ -262,40 +265,40 @@ SUBROUTINE glt_swabs_r  &
      zidhi_swa = 0.
      DO jl=1,nilay
        zidhi_swa = zidhi_swa +  &
-         rhoice*sf3tinv(jl)*  &
-         SUM( tpsit(:,:)%fsi*tpsit(:,:)%hsi*( pent(jl,:,:)-zento(jl,:,:) ) )
+         & rhoice*sf3tinv(jl)*  &
+         & SUM( tpsit(:,:)%fsi*tpsit(:,:)%hsi*( pent(jl,:,:)-zento(jl,:,:) ) ) 
      END DO
      zidhi_swa = zidhi_swa / (zfsit*dtt)
 !
      WRITE(noutlu,*)  &
-       '    Ice gltools_enthalpy change due to solar warming:',  &
-       zidhi_swa
+       & '    Ice gltools_enthalpy change due to solar warming:',  &
+       & zidhi_swa 
 !
 ! .. Print snow gltools_enthalpy change integral (solar)
 !
       zidhs_swa =  &
-        SUM( tpsit(:,:)%fsi*tpsit(:,:)%rsn*tpsit(:,:)%hsn*  &
-        ( pent(nilay+1,:,:)-zento(nilay+1,:,:) ) ) / (zfsit*dtt)
+        & SUM( tpsit(:,:)%fsi*tpsit(:,:)%rsn*tpsit(:,:)%hsn*  &
+        & ( pent(nilay+1,:,:)-zento(nilay+1,:,:) ) ) / (zfsit*dtt) 
 !
       WRITE(noutlu,*)  &
-        '    Snow gltools_enthalpy change due to solar warming:',  &
-        zidhs_swa
+        & '    Snow gltools_enthalpy change due to solar warming:',  &
+        & zidhs_swa 
 !
       zdhmelt = 0.
       DO jl=1,nl
         zdhmelt = zdhmelt +  &
-          SUM( tpsit(:,:)%fsi*pdhmelt(jl,:,:) ) / (zfsit*dtt)
+          & SUM( tpsit(:,:)%fsi*pdhmelt(jl,:,:) ) / (zfsit*dtt) 
       END DO
 !
       WRITE(noutlu,*)  &
-        '    dhmelt:', zdhmelt
+        & '    dhmelt:', zdhmelt 
 !
 ! .. Energy variation of the whole system (due to non-solar + solar flux)
 !
       zinrg = ziswa - ( zdhmelt + zidhi_swa + zidhs_swa )
 !
       WRITE(noutlu,*)  &
-        '    Energy variation of the whole system (solar):', zinrg
+        & '    Energy variation of the whole system (solar):', zinrg 
 !
 ! .. If the energy variation of the system is too large, issue a warning
 !
@@ -303,11 +306,12 @@ SUBROUTINE glt_swabs_r  &
           WRITE(noutlu,*)
           WRITE(noutlu,*) '                         ** WARNING **'
           WRITE(noutlu,*)  &
-            '          Heat conduction scheme not conservative'
+            & '          Heat conduction scheme not conservative' 
           WRITE(noutlu,*)  &
-            '         ========================================='
+            & '         =========================================' 
       ENDIF
 !
   ENDIF
+IF (LHOOK) CALL DR_HOOK('GLT_SWABS_R',1,ZHOOK_HANDLE)
 !
   END SUBROUTINE glt_swabs_r

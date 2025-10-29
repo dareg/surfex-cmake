@@ -72,6 +72,7 @@
 SUBROUTINE gltools_updaponds_r(np,nt,dtt,omelt,tpatm,tpblki,tpdia,tpsit,pasi)
 !
   USE modd_glt_const_thm
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_types_glt, only: t_atm, t_blk, t_dia, t_sit
 !
   IMPLICIT NONE
@@ -79,35 +80,37 @@ SUBROUTINE gltools_updaponds_r(np,nt,dtt,omelt,tpatm,tpblki,tpdia,tpsit,pasi)
   INTEGER,INTENT(IN) :: nt,np
   REAL,INTENT(IN) :: dtt
   LOGICAL, DIMENSION(nt,np), INTENT(in) :: &
-        omelt
+        & omelt 
   TYPE(t_atm), DIMENSION(np), INTENT(in) :: &
-        tpatm  
+        & tpatm   
   TYPE(t_blk), DIMENSION(nt,np), INTENT(in) :: &
-        tpblki
+        & tpblki 
   TYPE(t_dia), DIMENSION(np), INTENT(inout) :: &
-        tpdia
+        & tpdia 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) :: &
-        tpsit
+        & tpsit 
   REAL, DIMENSION(nt,np), INTENT(inout) :: &
-        pasi
+        & pasi 
 !
   LOGICAL, DIMENSION(nt,np) :: &
-        gsipond, gsnpond
+        & gsipond, gsnpond 
   INTEGER :: &
-        jp,jt
+        & jp,jt 
   REAL :: &
-        zrhwinv, zdelta
+        & zrhwinv, zdelta 
   REAL, DIMENSION(np) :: &
-        zwork1, zwork2
+        & zwork1, zwork2 
   REAL, DIMENSION(nt,np) :: &
-        zvmp, zpcpr, ztsf,zmeltt, zmelts, &
-        zfmp, zdmp, zamp, zdiftp, zfblki
+        & zvmp, zpcpr, ztsf,zmeltt, zmelts, &
+        & zfmp, zdmp, zamp, zdiftp, zfblki 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 ! 1. Initializations
 ! ==================
 !
 ! Volume (fraction * depth) of melt ponds covering the fractional cell
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_UPDAPONDS_R',0,ZHOOK_HANDLE)
   zvmp(:,:) = tpsit(:,:)%vmp
 !
   ztsf(:,:) = tpsit(:,:)%tsf
@@ -140,7 +143,7 @@ SUBROUTINE gltools_updaponds_r(np,nt,dtt,omelt,tpatm,tpblki,tpdia,tpsit,pasi)
 ! .. Snow ablation (positive values)
 !
   zwork2(:) =  ( SUM( tpsit(:,:)%rsn*tpsit(:,:)%fsi*tpsit(:,:)%hsn, DIM=1 )-  &
-        tpdia(:)%dsn )/ dtt  
+        & tpdia(:)%dsn )/ dtt   
 ! .. Only consider melting snow: dhsn<0 i.e. -zworks2(:)>0.
   zwork2(:) = MAX( -zwork2(:),0. )
 !
@@ -200,7 +203,7 @@ SUBROUTINE gltools_updaponds_r(np,nt,dtt,omelt,tpatm,tpblki,tpdia,tpsit,pasi)
 ! .. No ponds.
 !
        zvmp(jt,jp) = zvmp(jt,jp) + &
-                 zrhwinv * ( zmeltt(jt,jp) + zmelts(jt,jp) + zpcpr(jt,jp) )
+                 & zrhwinv * ( zmeltt(jt,jp) + zmelts(jt,jp) + zpcpr(jt,jp) ) 
        zfmp(jt,jp) = 0.
        zdmp(jt,jp) = 0.
 ! 
@@ -228,7 +231,7 @@ SUBROUTINE gltools_updaponds_r(np,nt,dtt,omelt,tpatm,tpblki,tpdia,tpsit,pasi)
 ! ------------------------------
 !
           zvmp(jt,jp) = zvmp(jt,jp) + xr1 * &
-              zrhwinv * ( zmeltt(jt,jp) + zmelts(jt,jp) + zpcpr(jt,jp) )
+              & zrhwinv * ( zmeltt(jt,jp) + zmelts(jt,jp) + zpcpr(jt,jp) ) 
 !
 !    zvmp(:,:) = zvmp(:,:) - drainrate * dtt / xday2sec !(MAYBE NOT)!
 !
@@ -238,7 +241,7 @@ SUBROUTINE gltools_updaponds_r(np,nt,dtt,omelt,tpatm,tpblki,tpdia,tpsit,pasi)
 !          zvmp(jt,jp) = zvmp(jt,jp)*exp(xr2 * zdiftp(jt,jp))
 !
           zvmp(jt,jp) = zvmp(jt,jp) +  &
-                AMIN1 ( zrhwinv * hofusni0 * rhoice0 * zfblki(jt,jp), 0.)
+                & AMIN1 ( zrhwinv * hofusni0 * rhoice0 * zfblki(jt,jp), 0.) 
 !
 ! 2.2.2 Compute melt pond fraction and depth
 ! ------------------------------------------
@@ -270,7 +273,7 @@ SUBROUTINE gltools_updaponds_r(np,nt,dtt,omelt,tpatm,tpblki,tpdia,tpsit,pasi)
              !zvmp(jt,jp) = zvmp(jt,jp)*EXP(xr2 * zdiftp(jt,jp))
 !             print*, 'DVPI = ', zrhwinv * hofusni0 * rhoice0 * zfblki(jt,jp)
              zvmp(jt,jp) = zvmp(jt,jp) +  &
-                AMIN1 ( zrhwinv * hofusni0 * rhoice0 * zfblki(jt,jp), 0.)
+                & AMIN1 ( zrhwinv * hofusni0 * rhoice0 * zfblki(jt,jp), 0.) 
 !            zfmp(jt,jp) = 0.
 !            zdmp(jt,jp) = 0.
 !
@@ -335,6 +338,7 @@ SUBROUTINE gltools_updaponds_r(np,nt,dtt,omelt,tpatm,tpblki,tpdia,tpsit,pasi)
 !
 !
   tpdia(:)%amp = SUM( tpsit(:,:)%fsi * pasi(:,:), DIM=1 ) 
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_UPDAPONDS_R',1,ZHOOK_HANDLE)
 !
 !
 !

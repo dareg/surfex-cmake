@@ -37,6 +37,7 @@
 !GLT_LIC  may lead to prosecution. 
 !GLT_LIC 
 MODULE mode_glt_nemo_bound
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
 
    !!======================================================================
    !!                       ***  MODULE  lbclnk  ***
@@ -158,19 +159,22 @@ CONTAINS
       !!----------------------------------------------------------------------
       !! * Arguments
       CHARACTER(len=1), INTENT( in ) ::   &
-         cd_type1, cd_type2       ! nature of pt3d grid-points
+         & cd_type1, cd_type2       ! nature of pt3d grid-points 
       !             !   = T ,  U , V , F or W  gridpoints
       REAL, DIMENSION(jpi,jpj,jpk), INTENT( inout ) ::   &
-         pt3d1, pt3d2          ! 3D array on which the boundary condition is applied
+         & pt3d1, pt3d2          ! 3D array on which the boundary condition is applied 
       REAL, INTENT( in ) ::   &
-         psgn          ! control of the sign change
+         & psgn          ! control of the sign change 
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !             !   =-1 , the sign is changed if north fold boundary
       !             !   = 1 , no sign change
       !             !   = 0 , no sign change and > 0 required (use the inner
       !             !         row/column if closed boundary)
 
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:LBC_LNK_3D_GATHER',0,ZHOOK_HANDLE)
       CALL lbc_lnk_3d( pt3d1, cd_type1, psgn)
       CALL lbc_lnk_3d( pt3d2, cd_type2, psgn)
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:LBC_LNK_3D_GATHER',1,ZHOOK_HANDLE)
 
    END SUBROUTINE lbc_lnk_3d_gather
 
@@ -190,23 +194,25 @@ CONTAINS
       !!----------------------------------------------------------------------
       !! * Arguments
       CHARACTER(len=1), INTENT( in ) ::   &
-         cd_type       ! nature of pt3d grid-points
+         & cd_type       ! nature of pt3d grid-points 
       !             !   = T ,  U , V , F or W  gridpoints
       REAL, DIMENSION(jpi,jpj,jpk), INTENT( inout ) ::   &
-         pt3d          ! 3D array on which the boundary condition is applied
+         & pt3d          ! 3D array on which the boundary condition is applied 
       REAL, INTENT( in ) ::   &
-         psgn          ! control of the sign change
+         & psgn          ! control of the sign change 
       !             !   =-1 , the sign is changed if north fold boundary
       !             !   = 1 , no sign change
       !             !   = 0 , no sign change and > 0 required (use the inner
       !             !         row/column if closed boundary)
       CHARACTER(len=3), INTENT( in ), OPTIONAL ::    &
-         cd_mpp        ! fill the overlap area only (here do nothing)
+         & cd_mpp        ! fill the overlap area only (here do nothing) 
       REAL        , INTENT(in   ), OPTIONAL           ::   pval      ! background value (used at closed boundaries)
 
       !! * Local declarations
       REAL ::   zland
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:LBC_LNK_3D',0,ZHOOK_HANDLE)
       IF( PRESENT( pval ) ) THEN      ! set land value (zero by default)
          zland = pval
       ELSE
@@ -274,6 +280,7 @@ CONTAINS
          END SELECT
 
       ENDIF
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:LBC_LNK_3D',1,ZHOOK_HANDLE)
 
    END SUBROUTINE lbc_lnk_3d
 
@@ -294,22 +301,24 @@ CONTAINS
       !!----------------------------------------------------------------------
       !! * Arguments
       CHARACTER(len=1), INTENT( in ) ::   &
-         cd_type       ! nature of pt2d grid-point
+         & cd_type       ! nature of pt2d grid-point 
          !             !   = T , U , V , F or W  gridpoints
          !             !   = I sea-ice U-V gridpoint (= F ocean grid point with indice shift)
       REAL, INTENT( in ) ::   &
-         psgn          ! control of the sign change
+         & psgn          ! control of the sign change 
          !             !   =-1 , the sign is modified following the type of b.c. used
          !             !   = 1 , no sign change
       REAL, DIMENSION(jpi,jpj), INTENT( inout ) ::   &
-         pt2d          ! 2D array on which the boundary condition is applied
+         & pt2d          ! 2D array on which the boundary condition is applied 
       CHARACTER(len=3), INTENT( in ), OPTIONAL ::    &
-         cd_mpp        ! fill the overlap area only (here do nothing)
+         & cd_mpp        ! fill the overlap area only (here do nothing) 
       REAL        , INTENT(in   ), OPTIONAL           ::   pval      ! background value (used at closed boundaries)
 
       !! * Local declarations
       REAL ::   zland
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:LBC_LNK_2D',0,ZHOOK_HANDLE)
       IF( PRESENT( pval ) ) THEN      ! set land value (zero by default)
          zland = pval
       ELSE
@@ -377,6 +386,7 @@ CONTAINS
          END SELECT
 
       ENDIF
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:LBC_LNK_2D',1,ZHOOK_HANDLE)
       
    END SUBROUTINE lbc_lnk_2d
 
@@ -412,12 +422,14 @@ CONTAINS
       INTEGER  ::   imigr, iihom, ijhom        ! temporary integers
       INTEGER  ::   ml_req1, ml_req2, ml_err   ! for key_mpi_isend
       INTEGER, DIMENSION(MPI_STATUS_SIZE) ::   ml_stat   ! for key_mpi_isend
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!----------------------------------------------------------------------
 
       ! 1. standard boundary treatment
       ! ------------------------------
       !                                      ! East-West boundaries
       !                                           !* Cyclic east-west
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_LNK_3D_GATHER',0,ZHOOK_HANDLE)
       IF( nbondi == 2 .AND. (nperio == 1 .OR. nperio == 4 .OR. nperio == 6) ) THEN
          ptab1( 1 ,:,:) = ptab1(jpim1,:,:)
          ptab1(jpi,:,:) = ptab1(  2  ,:,:)
@@ -571,6 +583,7 @@ CONTAINS
          END SELECT 
          !
       ENDIF
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_LNK_3D_GATHER',1,ZHOOK_HANDLE)
       !
    END SUBROUTINE mpp_lnk_3d_gather
 
@@ -609,8 +622,10 @@ CONTAINS
       INTEGER  ::   ml_req1, ml_req2, ml_err   ! for key_mpi_isend
       REAL ::   zland
       INTEGER, DIMENSION(MPI_STATUS_SIZE) ::   ml_stat   ! for key_mpi_isend
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!----------------------------------------------------------------------
 
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_LNK_3D',0,ZHOOK_HANDLE)
       IF( PRESENT( pval ) ) THEN   ;   zland = pval      ! set land value
       ELSE                         ;   zland = 0.e0      ! zero by default
       ENDIF
@@ -768,6 +783,7 @@ CONTAINS
          END SELECT
          !
       ENDIF
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_LNK_3D',1,ZHOOK_HANDLE)
       !
    END SUBROUTINE mpp_lnk_3d
 
@@ -804,8 +820,10 @@ CONTAINS
       INTEGER  ::   ml_req1, ml_req2, ml_err   ! for key_mpi_isend
       REAL ::   zland
       INTEGER, DIMENSION(MPI_STATUS_SIZE) ::   ml_stat   ! for key_mpi_isend
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!----------------------------------------------------------------------
 
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_LNK_2D',0,ZHOOK_HANDLE)
       IF( PRESENT( pval ) ) THEN   ;   zland = pval      ! set land value
       ELSE                         ;   zland = 0.e0      ! zero by default
       ENDIF
@@ -830,8 +848,8 @@ CONTAINS
       ELSE                              ! standard close or cyclic treatment 
          !
          !                                   ! East-West boundaries
-         IF( nbondi == 2 .AND.   &                ! Cyclic east-west
-            &    (nperio == 1 .OR. nperio == 4 .OR. nperio == 6) ) THEN
+         IF( nbondi == 2 .AND.                   &! Cyclic east-west
+                & (nperio == 1 .OR. nperio == 4 .OR. nperio == 6) ) THEN 
             pt2d( 1 ,:) = pt2d(jpim1,:)                                    ! west
             pt2d(jpi,:) = pt2d(  2  ,:)                                    ! east
          ELSE                                     ! closed
@@ -962,6 +980,7 @@ CONTAINS
          END SELECT
          !
       ENDIF
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_LNK_2D',1,ZHOOK_HANDLE)
       !
    END SUBROUTINE mpp_lnk_2d
 
@@ -997,8 +1016,10 @@ CONTAINS
       INTEGER  ::   ipreci, iprecj             ! temporary integers
       INTEGER  ::   ml_req1, ml_req2, ml_err   ! for key_mpi_isend
       INTEGER, DIMENSION(MPI_STATUS_SIZE) ::   ml_stat   ! for key_mpi_isend
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!----------------------------------------------------------------------
 
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_LNK_2D_E',0,ZHOOK_HANDLE)
       ipreci = jpreci + jpr2di      ! take into account outer extra 2D overlap area
       iprecj = jprecj + jpr2dj
 
@@ -1139,6 +1160,7 @@ CONTAINS
             pt2d(:,jl-jpr2dj) = tr2sn(:,jl,2)
          END DO
       END SELECT
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_LNK_2D_E',1,ZHOOK_HANDLE)
 
    END SUBROUTINE mpp_lnk_2d_e
 
@@ -1158,8 +1180,10 @@ CONTAINS
       INTEGER , INTENT(inout) ::   md_req     ! argument for isend
       !!
       INTEGER ::   iflag
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!----------------------------------------------------------------------
       !
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPSEND',0,ZHOOK_HANDLE)
       SELECT CASE ( cn_mpi_send )
       CASE ( 'S' )                ! Standard mpi send (blocking)
          CALL mpi_send ( pmess, kbytes, mpi_double_precision, kdest , ktyp, mpi_comm_opa        , iflag )
@@ -1169,6 +1193,7 @@ CONTAINS
          ! be carefull, one more argument here : the mpi request identifier..
          CALL mpi_isend( pmess, kbytes, mpi_double_precision, kdest , ktyp, mpi_comm_opa, md_req, iflag )
       END SELECT
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPSEND',1,ZHOOK_HANDLE)
       !
    END SUBROUTINE mppsend
 
@@ -1208,9 +1233,11 @@ CONTAINS
       !!
       INTEGER :: ierror, localcomm   ! temporary integer
       INTEGER, DIMENSION(kdim) ::   iwork
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!----------------------------------------------------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPMAX_A_INT',0,ZHOOK_HANDLE)
       localcomm = mpi_comm_opa
       IF( PRESENT(kcom) )   localcomm = kcom
       !
@@ -1219,6 +1246,7 @@ CONTAINS
 !$OMP END SINGLE
       !
       ktab(:) = iwork(:)
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPMAX_A_INT',1,ZHOOK_HANDLE)
 #endif
       !
    END SUBROUTINE mppmax_a_int
@@ -1235,9 +1263,11 @@ CONTAINS
       INTEGER, INTENT(in   ), OPTIONAL ::   kcom      ! ???
       !! 
       INTEGER ::   ierror, iwork, localcomm   ! temporary integer
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!----------------------------------------------------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPMAX_INT',0,ZHOOK_HANDLE)
       localcomm = mpi_comm_opa 
       IF( PRESENT(kcom) )   localcomm = kcom
       !
@@ -1246,6 +1276,7 @@ CONTAINS
 !$OMP END SINGLE
       !
       ktab = iwork
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPMAX_INT',1,ZHOOK_HANDLE)
 #endif
       !
    END SUBROUTINE mppmax_int
@@ -1264,9 +1295,11 @@ CONTAINS
       !!
       INTEGER ::   ierror, localcomm   ! temporary integer
       INTEGER, DIMENSION(kdim) ::   iwork
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!----------------------------------------------------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPMIN_A_INT',0,ZHOOK_HANDLE)
       localcomm = mpi_comm_opa
       IF( PRESENT(kcom) )   localcomm = kcom
       !
@@ -1275,6 +1308,7 @@ CONTAINS
 !$OMP END SINGLE
       !
       ktab(:) = iwork(:)
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPMIN_A_INT',1,ZHOOK_HANDLE)
 #endif
       !
    END SUBROUTINE mppmin_a_int
@@ -1291,9 +1325,11 @@ CONTAINS
       INTEGER , INTENT( in  ), OPTIONAL        ::   kcom        ! input array
       !!
       INTEGER ::  ierror, iwork, localcomm
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!----------------------------------------------------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPMIN_INT',0,ZHOOK_HANDLE)
       localcomm = mpi_comm_opa
       IF( PRESENT(kcom) )   localcomm = kcom
       !
@@ -1302,6 +1338,7 @@ CONTAINS
 !$OMP END SINGLE
       !
       ktab = iwork
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPMIN_INT',1,ZHOOK_HANDLE)
 #endif
       !
    END SUBROUTINE mppmin_int
@@ -1319,14 +1356,17 @@ CONTAINS
       !!
       INTEGER :: ierror
       INTEGER, DIMENSION (kdim) ::  iwork
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!----------------------------------------------------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
 !$OMP SINGLE
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPSUM_A_INT',0,ZHOOK_HANDLE)
       CALL mpi_allreduce( ktab, iwork, kdim, mpi_integer, mpi_sum, mpi_comm_opa, ierror )
 !$OMP END SINGLE
       !
       ktab(:) = iwork(:)
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPSUM_A_INT',1,ZHOOK_HANDLE)
 #endif
       !
    END SUBROUTINE mppsum_a_int
@@ -1342,14 +1382,17 @@ CONTAINS
       INTEGER, INTENT(inout) ::   ktab
       !! 
       INTEGER :: ierror, iwork
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!----------------------------------------------------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
 !$OMP SINGLE
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPSUM_INT',0,ZHOOK_HANDLE)
       CALL mpi_allreduce( ktab, iwork, 1, mpi_integer, mpi_sum, mpi_comm_opa, ierror )
 !$OMP END SINGLE
       !
       ktab = iwork
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPSUM_INT',1,ZHOOK_HANDLE)
 #endif
       !
    END SUBROUTINE mppsum_int
@@ -1368,9 +1411,11 @@ CONTAINS
       !!
       INTEGER :: ierror, localcomm
       REAL, DIMENSION(kdim) ::  zwork
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!----------------------------------------------------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPMAX_A_REAL',0,ZHOOK_HANDLE)
       localcomm = mpi_comm_opa
       IF( PRESENT(kcom) ) localcomm = kcom
       !
@@ -1378,6 +1423,7 @@ CONTAINS
       CALL mpi_allreduce( ptab, zwork, kdim, mpi_double_precision, mpi_max, localcomm, ierror )
 !$OMP END SINGLE
       ptab(:) = zwork(:)
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPMAX_A_REAL',1,ZHOOK_HANDLE)
 #endif
       !
    END SUBROUTINE mppmax_a_real
@@ -1395,9 +1441,11 @@ CONTAINS
       !!
       INTEGER  ::   ierror, localcomm
       REAL ::   zwork
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!----------------------------------------------------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPMAX_REAL',0,ZHOOK_HANDLE)
       localcomm = mpi_comm_opa 
       IF( PRESENT(kcom) )   localcomm = kcom
       !
@@ -1405,6 +1453,7 @@ CONTAINS
       CALL mpi_allreduce( ptab, zwork, 1, mpi_double_precision, mpi_max, localcomm, ierror )
 !$OMP END SINGLE
       ptab = zwork
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPMAX_REAL',1,ZHOOK_HANDLE)
 #endif
       !
    END SUBROUTINE mppmax_real
@@ -1423,9 +1472,11 @@ CONTAINS
       !!
       INTEGER :: ierror, localcomm
       REAL, DIMENSION(kdim) ::   zwork
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!-----------------------------------------------------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPMIN_A_REAL',0,ZHOOK_HANDLE)
       localcomm = mpi_comm_opa 
       IF( PRESENT(kcom) ) localcomm = kcom
       !
@@ -1433,6 +1484,7 @@ CONTAINS
       CALL mpi_allreduce( ptab, zwork, kdim, mpi_double_precision, mpi_min, localcomm, ierror )
 !$OMP END SINGLE
       ptab(:) = zwork(:)
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPMIN_A_REAL',1,ZHOOK_HANDLE)
 #endif
       !
    END SUBROUTINE mppmin_a_real
@@ -1451,9 +1503,11 @@ CONTAINS
       INTEGER  ::   ierror
       REAL ::   zwork
       INTEGER :: localcomm
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!-----------------------------------------------------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPMIN_REAL',0,ZHOOK_HANDLE)
       localcomm = mpi_comm_opa 
       IF( PRESENT(kcom) )   localcomm = kcom
       !
@@ -1461,6 +1515,7 @@ CONTAINS
       CALL mpi_allreduce( ptab, zwork, 1, mpi_double_precision, mpi_min, localcomm, ierror )
 !$OMP END SINGLE
       ptab = zwork
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPMIN_REAL',1,ZHOOK_HANDLE)
 #endif
       !
    END SUBROUTINE mppmin_real
@@ -1480,9 +1535,11 @@ CONTAINS
       INTEGER                   ::   ierror    ! temporary integer
       INTEGER                   ::   localcomm 
       REAL, DIMENSION(kdim) ::   zwork     ! temporary workspace 
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!-----------------------------------------------------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPSUM_A_REAL',0,ZHOOK_HANDLE)
       localcomm = mpi_comm_opa 
       IF( PRESENT(kcom) )   localcomm = kcom
       !
@@ -1490,6 +1547,7 @@ CONTAINS
       CALL mpi_allreduce( ptab, zwork, kdim, mpi_double_precision, mpi_sum, localcomm, ierror )
 !$OMP END SINGLE
       ptab(:) = zwork(:)
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPSUM_A_REAL',1,ZHOOK_HANDLE)
 #endif
       !
    END SUBROUTINE mppsum_a_real
@@ -1507,9 +1565,11 @@ CONTAINS
       !!
       INTEGER  ::   ierror, localcomm 
       REAL ::   zwork
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!-----------------------------------------------------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPSUM_REAL',0,ZHOOK_HANDLE)
       localcomm = mpi_comm_opa 
       IF( PRESENT(kcom) ) localcomm = kcom
       !
@@ -1517,6 +1577,7 @@ CONTAINS
       CALL mpi_allreduce( ptab, zwork, 1, mpi_double_precision, mpi_sum, localcomm, ierror )
 !$OMP END SINGLE
       ptab = zwork
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPPSUM_REAL',1,ZHOOK_HANDLE)
 #endif
       !
    END SUBROUTINE mppsum_real
@@ -1542,8 +1603,10 @@ CONTAINS
       INTEGER :: ierror
       REAL ::   zmin   ! local minimum
       REAL, DIMENSION(2,1) ::   zain, zaout
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!-----------------------------------------------------------------------
       !
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_MINLOC2D',0,ZHOOK_HANDLE)
       zmin  = MINVAL( ptab(:,:) , mask= pmask == 1.e0 )
       ilocs = MINLOC( ptab(:,:) , mask= pmask == 1.e0 )
       !
@@ -1558,6 +1621,7 @@ CONTAINS
       pmin = zaout(1,1)
       kj = INT(zaout(2,1)/10000.)
       ki = INT(zaout(2,1) - 10000.*kj )
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_MINLOC2D',1,ZHOOK_HANDLE)
       !
    END SUBROUTINE mpp_minloc2d
 
@@ -1581,8 +1645,10 @@ CONTAINS
       REAL ::   zmin     ! local minimum
       INTEGER , DIMENSION(3)   ::   ilocs
       REAL, DIMENSION(2,1) ::   zain, zaout
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!-----------------------------------------------------------------------
       !
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_MINLOC3D',0,ZHOOK_HANDLE)
       zmin  = MINVAL( ptab(:,:,:) , mask= pmask == 1.e0 )
       ilocs = MINLOC( ptab(:,:,:) , mask= pmask == 1.e0 )
       !
@@ -1599,6 +1665,7 @@ CONTAINS
       kk   = INT( zaout(2,1) / 100000000. )
       kj   = INT( zaout(2,1) - kk * 100000000. ) / 10000
       ki   = INT( zaout(2,1) - kk * 100000000. -kj * 10000. )
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_MINLOC3D',1,ZHOOK_HANDLE)
       !
    END SUBROUTINE mpp_minloc3d
 
@@ -1622,8 +1689,10 @@ CONTAINS
       INTEGER, DIMENSION (2)   ::   ilocs
       REAL :: zmax   ! local maximum
       REAL, DIMENSION(2,1) ::   zain, zaout
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!-----------------------------------------------------------------------
       !
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_MAXLOC2D',0,ZHOOK_HANDLE)
       zmax  = MAXVAL( ptab(:,:) , mask= pmask == 1.e0 )
       ilocs = MAXLOC( ptab(:,:) , mask= pmask == 1.e0 )
       !
@@ -1638,6 +1707,7 @@ CONTAINS
       pmax = zaout(1,1)
       kj   = INT( zaout(2,1) / 10000.     )
       ki   = INT( zaout(2,1) - 10000.* kj )
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_MAXLOC2D',1,ZHOOK_HANDLE)
       !
    END SUBROUTINE mpp_maxloc2d
 
@@ -1661,8 +1731,10 @@ CONTAINS
       REAL, DIMENSION(2,1) ::   zain, zaout
       INTEGER , DIMENSION(3)   ::   ilocs
       INTEGER :: ierror
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!-----------------------------------------------------------------------
       !
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_MAXLOC3D',0,ZHOOK_HANDLE)
       zmax  = MAXVAL( ptab(:,:,:) , mask= pmask == 1.e0 )
       ilocs = MAXLOC( ptab(:,:,:) , mask= pmask == 1.e0 )
       !
@@ -1679,6 +1751,7 @@ CONTAINS
       kk   = INT( zaout(2,1) / 100000000. )
       kj   = INT( zaout(2,1) - kk * 100000000. ) / 10000
       ki   = INT( zaout(2,1) - kk * 100000000. -kj * 10000. )
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_MAXLOC3D',1,ZHOOK_HANDLE)
       !
    END SUBROUTINE mpp_maxloc3d
 
@@ -1707,8 +1780,10 @@ CONTAINS
       INTEGER ::   ierr
       INTEGER ::   jjproc
       INTEGER ::   ii, ji
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!----------------------------------------------------------------------
       !
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_INI_NORTH',0,ZHOOK_HANDLE)
       njmppmax = MAXVAL( njmppt )
       !
       ! Look for how many procs on the northern boundary
@@ -1739,6 +1814,7 @@ CONTAINS
       !
       ! Create the North communicator , ie the pool of procs in the north group
       CALL MPI_COMM_CREATE( mpi_comm_opa, ngrp_north, ncomm_north, ierr )
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_INI_NORTH',1,ZHOOK_HANDLE)
       !
    END SUBROUTINE mpp_ini_north
 
@@ -1768,8 +1844,10 @@ CONTAINS
       REAL, DIMENSION(jpiglo,4,jpk)      ::   ztab
       REAL, DIMENSION(jpi   ,4,jpk)      ::   znorthloc
       REAL, DIMENSION(jpi   ,4,jpk,jpni) ::   znorthgloio
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!----------------------------------------------------------------------
       !   
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_LBC_NORTH_3D',0,ZHOOK_HANDLE)
       ijpj   = 4
       ijpjm1 = 3
       !
@@ -1781,7 +1859,7 @@ CONTAINS
       !                                     ! Build in procs of ncomm_north the znorthgloio
       itaille = jpi * jpk * ijpj
       CALL MPI_ALLGATHER( znorthloc  , itaille, MPI_DOUBLE_PRECISION,                &
-         &                znorthgloio, itaille, MPI_DOUBLE_PRECISION, ncomm_north, ierr )
+                         & znorthgloio, itaille, MPI_DOUBLE_PRECISION, ncomm_north, ierr ) 
       !
       !                                     ! recover the global north array
       DO jr = 1, ndim_rank_north
@@ -1804,6 +1882,7 @@ CONTAINS
             pt3d(ji,jj,:) = ztab(ji+nimpp-1,ij,:)
          END DO
       END DO
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_LBC_NORTH_3D',1,ZHOOK_HANDLE)
       !
    END SUBROUTINE mpp_lbc_north_3d
 
@@ -1833,8 +1912,10 @@ CONTAINS
       REAL, DIMENSION(jpiglo,4)      ::   ztab
       REAL, DIMENSION(jpi   ,4)      ::   znorthloc
       REAL, DIMENSION(jpi   ,4,jpni) ::   znorthgloio
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!----------------------------------------------------------------------
       !
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_LBC_NORTH_2D',0,ZHOOK_HANDLE)
       ijpj   = 4
       ijpjm1 = 3
       !
@@ -1846,7 +1927,7 @@ CONTAINS
       !                                     ! Build in procs of ncomm_north the znorthgloio
       itaille = jpi * ijpj
       CALL MPI_ALLGATHER( znorthloc  , itaille, MPI_DOUBLE_PRECISION,        &
-         &                znorthgloio, itaille, MPI_DOUBLE_PRECISION, ncomm_north, ierr )
+                         & znorthgloio, itaille, MPI_DOUBLE_PRECISION, ncomm_north, ierr ) 
       !
       DO jr = 1, ndim_rank_north            ! recover the global north array
          iproc = nrank_north(jr) + 1
@@ -1869,6 +1950,7 @@ CONTAINS
             pt2d(ji,jj) = ztab(ji+nimpp-1,ij)
          END DO
       END DO
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_LBC_NORTH_2D',1,ZHOOK_HANDLE)
       !
    END SUBROUTINE mpp_lbc_north_2d
 
@@ -1899,8 +1981,10 @@ CONTAINS
       REAL, DIMENSION(jpiglo,4+2*jpr2dj)      ::   ztab
       REAL, DIMENSION(jpi   ,4+2*jpr2dj)      ::   znorthloc
       REAL, DIMENSION(jpi   ,4+2*jpr2dj,jpni) ::   znorthgloio
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
       !!----------------------------------------------------------------------
       !
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_LBC_NORTH_E',0,ZHOOK_HANDLE)
       ijpj=4
 
       ij=0
@@ -1914,7 +1998,7 @@ CONTAINS
       !
       itaille = jpi * ( ijpj + 2 * jpr2dj )
       CALL MPI_ALLGATHER( znorthloc(1,1)    , itaille, MPI_DOUBLE_PRECISION,    &
-         &                znorthgloio(1,1,1), itaille, MPI_DOUBLE_PRECISION, ncomm_north, ierr )
+                         & znorthgloio(1,1,1), itaille, MPI_DOUBLE_PRECISION, ncomm_north, ierr ) 
       !
       DO jr = 1, ndim_rank_north            ! recover the global north array
          iproc = nrank_north(jr) + 1
@@ -1941,6 +2025,7 @@ CONTAINS
             pt2d(ji,jj) = ztab(ji+nimpp-1,ij)
          END DO
       END DO
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:MPP_LBC_NORTH_E',1,ZHOOK_HANDLE)
       !
    END SUBROUTINE mpp_lbc_north_e
 
@@ -1959,22 +2044,24 @@ CONTAINS
       !!----------------------------------------------------------------------
       !! * Arguments
       CHARACTER(len=1) , INTENT( in ) ::   &
-         cd_type       ! define the nature of ptab array grid-points
+         & cd_type       ! define the nature of ptab array grid-points 
       !             ! = T , U , V , F , W points
       !             ! = S : T-point, north fold treatment ???
       !             ! = G : F-point, north fold treatment ???
       REAL, INTENT( in ) ::   &
-         psgn          ! control of the sign change
+         & psgn          ! control of the sign change 
       !             !   = -1. , the sign is changed if north fold boundary
       !             !   =  1. , the sign is kept  if north fold boundary
       REAL, DIMENSION(:,:,:), INTENT( inout ) ::   &
-         pt3d          ! 3D array on which the boundary condition is applied
+         & pt3d          ! 3D array on which the boundary condition is applied 
 
       !! * Local declarations
       INTEGER  ::   ji, jk
       INTEGER  ::   ijt, iju, ijpj, ijpjm1
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:LBC_NFD_3D',0,ZHOOK_HANDLE)
       SELECT CASE ( jpni )
       CASE ( 1 )  ! only one proc along I
          ijpj = nlcj
@@ -2068,6 +2155,7 @@ CONTAINS
          END SELECT     !  npolj
 
       END DO
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:LBC_NFD_3D',1,ZHOOK_HANDLE)
 
    END SUBROUTINE lbc_nfd_3d
 
@@ -2086,22 +2174,24 @@ CONTAINS
       !!----------------------------------------------------------------------
       !! * Arguments
       CHARACTER(len=1) , INTENT( in ) ::   &
-         cd_type       ! define the nature of ptab array grid-points
+         & cd_type       ! define the nature of ptab array grid-points 
       !             ! = T , U , V , F , W points
       !             ! = S : T-point, north fold treatment ???
       !             ! = G : F-point, north fold treatment ???
       REAL, INTENT( in ) ::   &
-         psgn          ! control of the sign change
+         & psgn          ! control of the sign change 
       !             !   = -1. , the sign is changed if north fold boundary
       !             !   =  1. , the sign is kept  if north fold boundary
       REAL, DIMENSION(:,:), INTENT( inout ) ::   &
-         pt2d          ! 3D array on which the boundary condition is applied
+         & pt2d          ! 3D array on which the boundary condition is applied 
       INTEGER, OPTIONAL, INTENT(in) :: pr2dj
 
       !! * Local declarations
       INTEGER  ::   ji, jl, ipr2dj
       INTEGER  ::   ijt, iju, ijpj, ijpjm1
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:LBC_NFD_2D',0,ZHOOK_HANDLE)
       SELECT CASE ( jpni )
       CASE ( 1 )  ! only one proc along I
          ijpj = nlcj
@@ -2243,6 +2333,7 @@ CONTAINS
          END SELECT
 
       END SELECT
+      IF (LHOOK) CALL DR_HOOK('MODE_GLT_NEMO_BOUND:LBC_NFD_2D',1,ZHOOK_HANDLE)
 
    END SUBROUTINE lbc_nfd_2d
 #endif

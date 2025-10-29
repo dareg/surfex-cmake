@@ -66,26 +66,28 @@ CONTAINS
 !   The input argument is sea ice vertical gltools_enthalpy profile, in K.
 
 FUNCTION gltools_temper_r(pent,pvsp,&
-  nilay,nl,np,nt)
+  & nilay,nl,np,nt) 
 !
   USE modd_glt_const_thm
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
 !
   IMPLICIT NONE
   INTEGER,INTENT(in) :: nl,nt,np,nilay
 !
   REAL, DIMENSION(nl,nt,np), INTENT(in) ::  &
-    pent
+    & pent 
   REAL, DIMENSION(nl,nt,np), OPTIONAL, INTENT(in) ::  &
-    pvsp
+    & pvsp 
   REAL, DIMENSION(nl,nt,np) ::  &
-    gltools_temper_r
+    & gltools_temper_r 
 !
   INTEGER ::  &
-    jl
+    & jl 
   REAL, DIMENSION(nt,np) ::  &
-    zb,zc,zdelta
+    & zb,zc,zdelta 
   REAL, DIMENSION(nl,nt,np) ::  &
-    ztice_m
+    & ztice_m 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 ! 1. Initializations
@@ -93,6 +95,7 @@ FUNCTION gltools_temper_r(pent,pvsp,&
 !
 ! .. Compute sea ice melting point as a function of salinity 
 !
+IF (LHOOK) CALL DR_HOOK('MODI_GLTOOLS_TEMPER_R:GLTOOLS_TEMPER_R',0,ZHOOK_HANDLE)
   IF ( PRESENT(pvsp) ) THEN
 ! Salinity profile passed in argument
       ztice_m(:,:,:) = -mu * pvsp(:,:,:)
@@ -119,11 +122,11 @@ FUNCTION gltools_temper_r(pent,pvsp,&
 ! If gltools_enthalpy is lower than melted sea ice gltools_enthalpy
     WHERE ( pent(jl,:,:)<cpsw*ztice_m(jl,:,:) )
         zb(:,:) = (cpsw-cpice0)*ztice_m(jl,:,:)-  &
-          pent(jl,:,:)-xmhofusn0
+          & pent(jl,:,:)-xmhofusn0 
         zc(:,:) = xmhofusn0 * ztice_m(jl,:,:)
         zdelta(:,:) = zb(:,:)**2-4.*cpice0*zc(:,:)
         gltools_temper_r(jl,:,:) = -1./( 2.*cpice0 )*  &
-          ( zb(:,:)+zdelta(:,:)**0.5 ) 
+          & ( zb(:,:)+zdelta(:,:)**0.5 )  
       ELSEWHERE
 ! If gltools_enthalpy is higher than that of melting sea ice
         gltools_temper_r(jl,:,:) = ztice_m(jl,:,:)
@@ -139,12 +142,13 @@ FUNCTION gltools_temper_r(pent,pvsp,&
 ! If snow gltools_enthalpy is lower than melted snow gltools_enthalpy
     WHERE ( pent(jl,:,:)<-xmhofusn0 )
         gltools_temper_r(jl,:,:) = 1./cpice0 *  &
-          ( pent(jl,:,:) + xmhofusn0 )
+          & ( pent(jl,:,:) + xmhofusn0 ) 
       ELSEWHERE
 ! If snow gltools_enthalpy is higher than melted snow gltools_enthalpy
         gltools_temper_r(jl,:,:) = 0.
     ENDWHERE
   END DO
+IF (LHOOK) CALL DR_HOOK('MODI_GLTOOLS_TEMPER_R:GLTOOLS_TEMPER_R',1,ZHOOK_HANDLE)
 !
 END FUNCTION gltools_temper_r
 END MODULE modi_gltools_temper_r

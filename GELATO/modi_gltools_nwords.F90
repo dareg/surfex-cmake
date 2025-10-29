@@ -67,21 +67,24 @@
 !
 FUNCTION gltools_nwords( hval ) RESULT(nwords)
 !
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
 IMPLICIT NONE
 !
 CHARACTER(*), INTENT(in) ::  &
-  hval
+  & hval 
 INTEGER ::  &
-  nwords
+  & nwords 
 !
 INTEGER ::  &
-  inum
+  & inum 
 CHARACTER(1), PARAMETER ::  &
-  ysep=' '
+  & ysep=' ' 
 CHARACTER(LEN=LEN(hval)) ::  &
-  ystr
+  & ystr 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_NWORDS',0,ZHOOK_HANDLE)
 ystr=hval
 inum=0
 nwords=0
@@ -102,5 +105,6 @@ DO WHILE ( inum /= -1 )
       ENDIF
   ENDIF
 END DO
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_NWORDS',1,ZHOOK_HANDLE)
 !
 END FUNCTION gltools_nwords

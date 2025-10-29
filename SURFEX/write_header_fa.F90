@@ -196,7 +196,7 @@ IF (HGRID=="CONF PROJ ") THEN
   INLATI = ILAT+ILATE
   INXLON = ILON+ILONE
   !ITRONC = INT(REAL(INLATI-2)/ZTRUNC)
-  ITRONC=0 !ANTMPTEST : impose ITRONC to 0 as it is meaningless for Surfex grid point files
+  ITRONC=0 
   ITYPTR = -INT(REAL(INXLON-2)/ZTRUNC)
 
   IF (ILONE == 0 .AND. ILATE == 0) THEN
@@ -254,7 +254,7 @@ ELSEIF (HGRID=="CARTESIAN ") THEN
 !
   ITYPTR = -INT(REAL(ILON-1)/2.)
   !ITRONC = INT(REAL(ILAT-1)/2.)
-  ITRONC=0 !ANTMPTEST : impose ITRONC to 0 as it is meaningless for Surfex grid point files
+  ITRONC=0
 !
   INLATI = ILAT
   INXLON = ILON
@@ -284,7 +284,7 @@ ELSEIF (HGRID=="LONLAT REG") THEN
   ALLOCATE(INOZPA((1+ILAT)/2))
 !
   !ITRONC= MIN(INT((REAL(ILAT-2)/2.0)),21)
-  ITRONC=0 !ANTMPTEST : impose ITRONC to 0 as it is meaningless for Surfex grid point files
+  ITRONC=0
   ITYPTR=-MIN(INT((REAL(ILON-2)/2.0)),21)
   INLATI=ILAT
   INXLON=ILON
@@ -348,7 +348,7 @@ ELSEIF (HGRID=="GAUSS     ") THEN
   !  ITRONC=INT(REAL(INXLON-3)/2.)
   !ENDIF
 !
-  ITRONC=0 !ANTMPTEST : impose ITRONC to 0 as it is meaningless for Surfex grid point files
+  ITRONC=0
   INOZPA(:)=0
   DO JLAT = 1,INLATI
     INOZPA(JLAT) = INT(FLOOR(REAL(INLOPA(JLAT) - 1) / 2.)) ! 2:linear truncation

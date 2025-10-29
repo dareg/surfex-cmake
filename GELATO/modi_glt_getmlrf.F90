@@ -74,6 +74,7 @@
 
 SUBROUTINE glt_getmlrf( tpoce_all,tpml,nx,ny )
   USE modd_types_glt, only: t_mxl
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_thm
   USE mode_gltools_sigma
   USE mode_gltools_swfrzt
@@ -86,12 +87,14 @@ SUBROUTINE glt_getmlrf( tpoce_all,tpml,nx,ny )
 !
   INTEGER,INTENT(IN) :: nx,ny
   TYPE(t_mxl), DIMENSION(nx,ny), INTENT(in) ::  &
-    tpoce_all
+    & tpoce_all 
   TYPE(t_mxl), DIMENSION(nx,ny), INTENT(out) ::  &
-    tpml
+    & tpml 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !.. Recreate ocean type variable (see definition in dmod_types.f90)
 !
+IF (LHOOK) CALL DR_HOOK('GLT_GETMLRF',0,ZHOOK_HANDLE)
   tpml(:,:)%qoc = tpoce_all(:,:)%qoc
   tpml(:,:)%sml = tpoce_all(:,:)%sml
   tpml(:,:)%ssh = tpoce_all(:,:)%ssh
@@ -108,6 +111,7 @@ SUBROUTINE glt_getmlrf( tpoce_all,tpml,nx,ny )
   CALL gltools_bound( 'U','vector',tpml(:,:)%uml )
   CALL gltools_bound( 'V','vector',tpml(:,:)%vml )
 #endif
+IF (LHOOK) CALL DR_HOOK('GLT_GETMLRF',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE glt_getmlrf
 

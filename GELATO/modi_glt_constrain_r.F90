@@ -93,8 +93,9 @@
 !
 !
 SUBROUTINE glt_constrain_r(tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d,&
-    nilay,nslay,nl,noutlu,np,nt,ntd,dtt,xfsidmpeft,xfsimax,xhsidmpeft,xhsimin,lwg,ccsvdmp,cfsidmp,chsidmp,sf3tinv )
+    & nilay,nslay,nl,noutlu,np,nt,ntd,dtt,xfsidmpeft,xfsimax,xhsidmpeft,xhsimin,lwg,ccsvdmp,cfsidmp,chsidmp,sf3tinv ) 
   USE modd_types_glt, only: t_dom, t_mxl, t_sit, t_vtp, t_dia, t_sit
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_thm
   USE mode_glt_stats_r
   USE modi_gltools_newice_r
@@ -109,31 +110,32 @@ SUBROUTINE glt_constrain_r(tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d,&
   LOGICAL, INTENT(IN) :: lwg
   CHARACTER(*), INTENT(IN) :: ccsvdmp,chsidmp,cfsidmp
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
-        tpdom
+        & tpdom 
   TYPE(t_mxl), DIMENSION(np), INTENT(inout) ::  &
-        tpmxl
+        & tpmxl 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
-        tpsit
+        & tpsit 
   TYPE(t_vtp), DIMENSION(nt,np), INTENT(inout) ::  &
-        tpsil
+        & tpsil 
   TYPE(t_dia), DIMENSION(np), INTENT(inout) ::  &
-        tpdia
+        & tpdia 
   TYPE(t_sit), DIMENSION(ntd,np), INTENT(in) ::  &
-        tpsit_d
+        & tpsit_d 
 !
   LOGICAL ::  &
-        gcontinue
+        & gcontinue 
   INTEGER, PARAMETER ::  &
-        ppcent=0.01
+        & ppcent=0.01 
   INTEGER ::  &
-        jk,jp
+        & jk,jp 
   REAL ::  &
-        zmin,zdhsit,zfsit0
+        & zmin,zdhsit,zfsit0 
   REAL, DIMENSION(np) ::  &
-        zdamp,zwork,zfsit_i,zhsit_i,zfac,zfacfsi,  &
-        zenti_i,zents_i,zenti_f,zents_f
+        & zdamp,zwork,zfsit_i,zhsit_i,zfac,zfacfsi,  &
+        & zenti_i,zents_i,zenti_f,zents_f 
   REAL, DIMENSION(nt,np) ::  &
-        zfsi,zhsi,zfsinew,zhsinew
+        & zfsi,zhsi,zfsinew,zhsinew 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -142,6 +144,7 @@ SUBROUTINE glt_constrain_r(tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d,&
 !
 ! .. Initial snow and ice enthalpy
 !
+IF (LHOOK) CALL DR_HOOK('GLT_CONSTRAIN_R',0,ZHOOK_HANDLE)
   CALL glt_aventh( tpsit,tpsil,zenti_i,zents_i,nilay,nslay,nl,np,nt,sf3tinv )
 !
 ! .. Global initializations
@@ -171,7 +174,7 @@ SUBROUTINE glt_constrain_r(tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d,&
 ! .. Check thickness data toward which we would like to restore
 !
     IF ( (SIZE(tpsit_d(1,:)%hsi) > 0) .AND. &
-         (MAXVAL( tpsit_d(1,:)%hsi ) < -1.) ) THEN 
+         & (MAXVAL( tpsit_d(1,:)%hsi ) < -1.) ) THEN  
            CALL ABOR1_SFX('constrain_r: Wrong ice thickness damping data (all%hsi < -1).')
     ENDIF
 !
@@ -181,7 +184,7 @@ SUBROUTINE glt_constrain_r(tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d,&
 !
       IF ( chsidmp(1:4)=='DAMP' ) THEN
         zdhsit = dtt / ( xhsidmpeft*xday2sec ) *  &
-          ( tpsit_d(1,jp)%hsi - zhsit_i(jp) )
+          & ( tpsit_d(1,jp)%hsi - zhsit_i(jp) ) 
       ELSE IF ( TRIM(chsidmp)=='PRESCRIBE' ) THEN
         zdhsit = tpsit_d(1,jp)%hsi - zhsit_i(jp)
       ENDIF
@@ -290,7 +293,7 @@ SUBROUTINE glt_constrain_r(tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d,&
 ! Add rate of change of sea ice mass due to thickness constraint
 !
     tpdia(:)%dci = tpdia(:)%dci +  &
-      rhoice * ( glt_avhicem_r(tpsit,np,nt) - zhsit_i(:) ) / dtt
+      & rhoice * ( glt_avhicem_r(tpsit,np,nt) - zhsit_i(:) ) / dtt 
 !
   ENDIF
 !
@@ -326,8 +329,8 @@ SUBROUTINE glt_constrain_r(tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d,&
 ! .. Check concentration data toward which we would like to restore
 !
     IF ( (SIZE(tpsit_d(1,:)%fsi) > 0) .AND. &
-         ( MINVAL( tpsit_d(1,:)%fsi ) < 0. .OR.  &
-         MAXVAL( tpsit_d(1,:)%fsi ) > 1. )) THEN
+         & ( MINVAL( tpsit_d(1,:)%fsi ) < 0. .OR.  &
+         & MAXVAL( tpsit_d(1,:)%fsi ) > 1. )) THEN 
       CALL ABOR1_SFX('Wrong ice concentration damping data') 
     ENDIF
     DO jp=1,np
@@ -338,21 +341,21 @@ SUBROUTINE glt_constrain_r(tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d,&
 !
         IF ( TRIM(cfsidmp)=='DAMP' ) THEN
           zdamp(jp) = dtt / ( xfsidmpeft*xday2sec ) *  &
-            ( MIN(tpsit_d(1,jp)%fsi,xfsimax) - zfsit_i(jp) )
+            & ( MIN(tpsit_d(1,jp)%fsi,xfsimax) - zfsit_i(jp) ) 
 !
           DO jk=1,nt
             tpsit(jk,jp)%fsi = tpsit(jk,jp)%fsi *  &
-              ( 1. + zdamp(jp) / zfsit_i(jp) )
+              & ( 1. + zdamp(jp) / zfsit_i(jp) ) 
 ! Conserve sea ice volume
             IF ( TRIM(ccsvdmp)=='VOLUME' ) THEN
               tpsit(jk,jp)%hsi = tpsit(jk,jp)%hsi /  &
-                ( 1. + zdamp(jp) / zfsit_i(jp) )
+                & ( 1. + zdamp(jp) / zfsit_i(jp) ) 
             ENDIF
           END DO 
 !
         ELSE IF ( TRIM(cfsidmp)=='PRESCRIBE' ) THEN
           zwork(jp) = MAX(  &
-            MIN(tpsit_d(1,jp)%fsi,xfsimax) / zfsit_i(jp), epsil1 )
+            & MIN(tpsit_d(1,jp)%fsi,xfsimax) / zfsit_i(jp), epsil1 ) 
           DO jk=1,nt
             tpsit(jk,jp)%fsi = tpsit(jk,jp)%fsi * zwork(jp)
 ! Conserve sea ice volume
@@ -378,7 +381,7 @@ SUBROUTINE glt_constrain_r(tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d,&
 !
         IF ( TRIM(cfsidmp)=='DAMP' ) THEN
           zfsi(1,jp) = dtt / ( xfsidmpeft*xday2sec ) *  &
-            ( MIN(tpsit_d(1,jp)%fsi,xfsimax) - zfsit_i(jp) )
+            & ( MIN(tpsit_d(1,jp)%fsi,xfsimax) - zfsit_i(jp) ) 
         ELSE IF ( TRIM(cfsidmp)=='PRESCRIBE' ) THEN
           zfsi(1,jp) = MIN(tpsit_d(1,jp)%fsi,xfsimax)
         ENDIF
@@ -405,7 +408,7 @@ SUBROUTINE glt_constrain_r(tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d,&
 ! Add rate of change of sea ice mass due to ice concentration constraint
 !
     tpdia(:)%dci = tpdia(:)%dci +  &
-      rhoice * ( glt_avhicem_r(tpsit,np,nt) - zhsit_i(:) ) / dtt
+      & rhoice * ( glt_avhicem_r(tpsit,np,nt) - zhsit_i(:) ) / dtt 
 !
 ! Diagnose constraint
 !
@@ -423,6 +426,7 @@ SUBROUTINE glt_constrain_r(tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d,&
 !
   CALL glt_aventh( tpsit,tpsil,zenti_f,zents_f,nilay,nslay,nl,np,nt,sf3tinv )
   tpdia(:)%dmp = ( zenti_f+zents_f-zenti_i-zents_i ) / dtt
+IF (LHOOK) CALL DR_HOOK('GLT_CONSTRAIN_R',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE glt_constrain_r
 !

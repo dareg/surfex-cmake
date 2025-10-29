@@ -52,6 +52,9 @@ USE MODI_WRITE_SURF
 USE MODI_WRITESURF_OCEAN_n
 USE MODI_WRITESURF_SEAICE_N
 !
+USE MODN_PREP_SEAFLUX ,ONLY : LCMO_FROM_SFX
+USE MODD_OCEAN_GRID, ONLY : NOCKMIN,NOCKMAX
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
@@ -77,6 +80,7 @@ INTEGER           :: JMTH, INMTH
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
  CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
  CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=6):: CNIV
 REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -132,6 +136,28 @@ YRECFM='Z0SEA'
 YCOMMENT='Z0SEA (m)'
  CALL WRITE_SURF(HSELECT, HPROGRAM,YRECFM,S%XZ0(:),IRESP,HCOMMENT=YCOMMENT)
 !
+! Add temperature and salinity fields on ocean levels for PREP from surfex
+! surface file
+!
+IF (LCMO_FROM_SFX) THEN
+! add CMO fields
+ DO JMTH=NOCKMIN+1,NOCKMAX
+  WRITE(CNIV,'(I6)')JMTH
+  YRECFM='TEMP_OC'//trim(adjustl(CNIV))
+  YCOMMENT=YRECFM//' (K)'
+  CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,O%XSEAT(:,JMTH),IRESP,HCOMMENT=YCOMMENT)
+ END DO
+!
+! add salinity fields
+ DO JMTH=NOCKMIN+1,NOCKMAX
+  WRITE(CNIV,'(I6)')JMTH
+  YRECFM='SALT_OC'//trim(adjustl(CNIV))
+  YCOMMENT=YRECFM//' (K)'
+  CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,O%XSEAS(:,JMTH),IRESP,HCOMMENT=YCOMMENT)
+ END DO
+
+ENDIF
+
 !
 !* sea surface salinity
 !

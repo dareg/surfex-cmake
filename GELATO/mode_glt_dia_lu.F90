@@ -37,6 +37,7 @@
 !GLT_LIC  may lead to prosecution. 
 !GLT_LIC 
 MODULE mode_glt_dia_lu 
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
 !INTERFACE
 !
 !SUBROUTINE opndia
@@ -57,8 +58,8 @@ CONTAINS
 !
 
 SUBROUTINE OPNDIA(n0valu,n0vilu,n2valu,n2vilu,navedia,ndiap1,ndiap2,ndiap3,ndiapx,ninsdia,noutlu,nxvalu,nxvilu,&
-lp1,lwg,&
-cdiafmt)
+& lp1,lwg,&
+& cdiafmt) 
 !
   USE modd_types_glt
   IMPLICIT NONE
@@ -67,11 +68,13 @@ cdiafmt)
   LOGICAL,INTENT(IN) ::  lwg,lp1
   CHARACTER(*),INTENT(IN) ::  cdiafmt
   CHARACTER(80) ::  &
-        yfname
+        & yfname 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 ! .. Welcome message
 !
+IF (LHOOK) CALL DR_HOOK('MODE_GLT_DIA_LU:OPNDIA',0,ZHOOK_HANDLE)
   IF (lwg) THEN
     WRITE(noutlu,*) ' '
     WRITE(noutlu,*) ' *** LEVEL 3 - SUBROUTINE OPNDIA'
@@ -138,6 +141,7 @@ cdiafmt)
     WRITE(noutlu,*) ' *** LEVEL 3 - END SUBROUTINE OPNDIA'
     WRITE(noutlu,*) ' '
   ENDIF
+IF (LHOOK) CALL DR_HOOK('MODE_GLT_DIA_LU:OPNDIA',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE OPNDIA
 !
@@ -149,16 +153,18 @@ END SUBROUTINE OPNDIA
 ! -------------------------- SUBROUTINE CLSDIA --------------------------
 !
 SUBROUTINE CLSDIA(n0valu,n0vilu,n2valu,n2vilu,navedia,ndiap1,ndiap2,ndiap3,ndiapx,ninsdia,noutlu,nxvalu,nxvilu,&
-lp1,lwg,cdiafmt)
+& lp1,lwg,cdiafmt) 
 !
   IMPLICIT NONE
   INTEGER,INTENT(IN) ::  noutlu,ndiap1,ndiap2,ndiap3,ndiapx,ninsdia,n0valu,n2valu,nxvalu,n0vilu,n2vilu,nxvilu,navedia
   LOGICAL,INTENT(IN) ::  lp1,lwg
   CHARACTER(*),INTENT(IN) ::  cdiafmt
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 ! .. Welcome message
 !
+IF (LHOOK) CALL DR_HOOK('MODE_GLT_DIA_LU:CLSDIA',0,ZHOOK_HANDLE)
   if (lp1) WRITE(noutlu,*) ' '
   if (lp1) WRITE(noutlu,*) ' *** LEVEL 3 - SUBROUTINE CLSDIA'
   if (lp1) WRITE(noutlu,*) ' '
@@ -190,6 +196,7 @@ lp1,lwg,cdiafmt)
   if (lp1) WRITE(noutlu,*) ' '
   if (lp1) WRITE(noutlu,*) ' *** LEVEL 3 - END SUBROUTINE CLSDIA'
   if (lp1) WRITE(noutlu,*) ' '
+IF (LHOOK) CALL DR_HOOK('MODE_GLT_DIA_LU:CLSDIA',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE CLSDIA
 !

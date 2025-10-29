@@ -32,7 +32,7 @@ USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_NP_t, ISBA_NPE_t, ISBA_P_t, ISBA_PE_t
 USE MODD_CANOPY_n, ONLY : CANOPY_t
 !
-USE MODD_TYPE_SNOW, ONLY: SURF_SNOW
+USE MODD_TYPE_SNOW, ONLY : SURF_SNOW
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
@@ -375,10 +375,13 @@ IF (LNOSOF) ZP_SLOPE_COS(:) = 1.0
            ZFFVNOS, ZLEG_DELTA, ZLEGI_DELTA, ZWR, PRHOA, ZLVTT            )  
 !
 !Initialisation of T, Q, Wind and TKE on all canopy levels
+!Since this is for first time step only we approximate the calculation to only
+!include the standard CLS_TQ call, i.e. we exclude any other setting of N2M not
+!equal 2 and any other setting of LHU2M_QSAT not equal False.
 DO JL=1,SB%NLVL
   !
   CALL CLS_TQ(PTA, ZQA, PPA, PPS, PZREF, ZCD, ZCH, ZRI, ZTS, ZHU, ZQS, ZZ0H, &
-              SB%XZ(:,JL), ZTNM, ZQNM, ZHUNM           ) 
+              SB%XZ(:,JL), .FALSE., ZTNM, ZQNM, ZHUNM      ) 
   ! 
   SB%XT(:,JL)=ZTNM
   SB%XQ(:,JL)=ZQNM

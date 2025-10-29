@@ -75,19 +75,23 @@
 ! 
 FUNCTION gltools_isdigit( hchar ) 
 !
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   IMPLICIT NONE
 !
   CHARACTER(1), INTENT(in) ::  &
-    hchar
+    & hchar 
   LOGICAL ::  &
-    gltools_isdigit
+    & gltools_isdigit 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_ISDIGIT',0,ZHOOK_HANDLE)
   IF ( ichar(hchar)>=48 .AND. ichar(hchar)<=57 ) THEN
       gltools_isdigit = .TRUE.
     ELSE
       gltools_isdigit = .FALSE.
   ENDIF
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_ISDIGIT',1,ZHOOK_HANDLE)
 !
 END FUNCTION gltools_isdigit 
 !

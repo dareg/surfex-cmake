@@ -72,6 +72,7 @@
 SUBROUTINE gltools_readnam(hmandatory,kluout,YGLTPARAM)
 !
 USE modd_glt_param, only: t_glt_param
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
 USE modd_glt_const_thm
 USE modi_gltools_nextval
 USE modi_gltools_nwords
@@ -80,27 +81,28 @@ USE modi_gltools_strsplit
 IMPLICIT NONE
 !
 LOGICAL, INTENT(IN),OPTIONAL           :: &
-  hmandatory         ! Is a gltpar file mandatory ?
+  & hmandatory         ! Is a gltpar file mandatory ? 
 INTEGER, INTENT(IN),OPTIONAL           :: &
- kluout              ! imposed output logical unit ?
+ & kluout              ! imposed output logical unit ? 
 TYPE(t_glt_param),INTENT(INOUT)    :: YGLTPARAM
 CHARACTER(1) ::  &
-  ytag
+  & ytag 
 CHARACTER(6), PARAMETER ::  &
-  ypinpfile='gltpar'
+  & ypinpfile='gltpar' 
 CHARACTER(80) ::  &
-  ypar,yval,yinsfld
+  & ypar,yval,yinsfld 
 CHARACTER(80), DIMENSION(:), ALLOCATABLE ::  &
-  ylistfld 
+  & ylistfld  
 CHARACTER(1000) ::  &
-  yfldin
+  & yfldin 
 INTEGER ::  &
-  iparlu,iok,infld,jl,icount, ierr
+  & iparlu,iok,infld,jl,icount, ierr 
 LOGICAL :: &
-  gmandatory,gread
+  & gmandatory,gread 
 INTEGER, DIMENSION(:), ALLOCATABLE ::  &
-  ilistfound 
+  & ilistfound  
 REAL :: zjl
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -109,6 +111,7 @@ REAL :: zjl
 !
 !  Init default values
 !
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_READNAM',0,ZHOOK_HANDLE)
 YGLTPARAM%dttave= 365. ! days 
 gread=.TRUE.
 !
@@ -124,7 +127,7 @@ ELSE
 ENDIF
 !
 OPEN( UNIT=iparlu, FILE=TRIM(ADJUSTL(ypinpfile)), STATUS='OLD', &
-  FORM='FORMATTED' , ERR= 230, IOSTAT=ierr)
+  & FORM='FORMATTED' , ERR= 230, IOSTAT=ierr) 
 230 CONTINUE
 IF (ierr /= 0 ) THEN  ! File not found , or any other issue
   IF ( gmandatory ) THEN
@@ -151,33 +154,33 @@ IF (gread) THEN
 ! (for definitions of these parameters, see dmod_param)
 !
   yfldin=  &
-    'nmkinit nrstout nrstgl4 nthermo ndynami  &
-&  nadvect ntimers ndyncor ncdlssh niceage  &
-&  nicesal nmponds nsnwrad nleviti nsalflx  &
-&  nextqoc nicesub cnflxin' 
+    & 'nmkinit nrstout nrstgl4 nthermo ndynami  &
+  & nadvect ntimers ndyncor ncdlssh niceage  &
+  & nicesal nmponds nsnwrad nleviti nsalflx  &
+  & nextqoc nicesub cnflxin'  
   yfldin=TRIM(yfldin) // ' ' //  &
-    'cfsidmp chsidmp ccsvdmp &
-&  xfsidmpeft xhsidmpeft'
+    & 'cfsidmp chsidmp ccsvdmp &
+  & xfsidmpeft xhsidmpeft' 
   yfldin=TRIM(yfldin) // ' ' //  &
-    'cdiafmt cdialev navedia ninsdia ndiamax  &
-&  cinsfld nsavinp nsavout nupdbud nprinto nprlast'
+    & 'cdiafmt cdialev navedia ninsdia ndiamax  &
+  & cinsfld nsavinp nsavout nupdbud nprinto nprlast' 
   yfldin=TRIM(yfldin) // ' ' //  &
-    'nidate niter dtt'
+    & 'nidate niter dtt' 
   yfldin=TRIM(yfldin) // ' ' //  &
-    'nt thick'
+    & 'nt thick' 
   yfldin=TRIM(yfldin) // ' ' //  &
-    'nilay nslay xh0 xh1 xh2 xh3 xh4'
+    & 'nilay nslay xh0 xh1 xh2 xh3 xh4' 
   yfldin=TRIM(yfldin) // ' ' //  &
-    'ntstp ndte'
+    & 'ntstp ndte' 
   yfldin=TRIM(yfldin) // ' ' //  &
-    'xfsimax xicethcr xhsimin'
+    & 'xfsimax xicethcr xhsimin' 
   yfldin=TRIM(yfldin) // ' ' //  &
-    'alblc xlmelt xswhdfr albyngi albimlt albsmlt albsdry'
+    & 'alblc xlmelt xswhdfr albyngi albimlt albsmlt albsdry' 
   yfldin=TRIM(yfldin) // ' ' //  &
-    'ngrdlu nsavlu nrstlu n0vilu n0valu n2vilu n2valu nxvilu nxvalu  &
-&  nibglu nspalu noutlu ntimlu'
+    & 'ngrdlu nsavlu nrstlu n0vilu n0valu n2vilu n2valu nxvilu nxvalu  &
+  & nibglu nspalu noutlu ntimlu' 
   yfldin=TRIM(yfldin) // ' ' //  &
-    'ciopath'
+    & 'ciopath' 
 !
 ! .. Initialize control arrays
 !
@@ -531,13 +534,14 @@ ELSE IF ( TRIM(YGLTPARAM%cfsidmp)/='NONE' ) THEN
 ENDIF
 !
 IF ( TRIM(YGLTPARAM%chsidmp)=='DAMP_ADD' .OR. TRIM(YGLTPARAM%chsidmp)=='DAMP_FAC' .OR.  &
-     TRIM(YGLTPARAM%chsidmp)=='PRESCRIBE' ) THEN
+     & TRIM(YGLTPARAM%chsidmp)=='PRESCRIBE' ) THEN 
   YGLTPARAM%ntd=1
 ELSE IF ( TRIM(YGLTPARAM%chsidmp)/='NONE' ) THEN
   WRITE(*,*) "chsidmp must be 'DAMP_ADD', 'DAMP_FAC'' or 'PRESCRIBE'" 
   WRITE(*,*) " - You specified chsidmp=" // TRIM(YGLTPARAM%chsidmp)
   STOP
 ENDIF
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_READNAM',1,ZHOOK_HANDLE)
 RETURN
 !
 !
@@ -553,8 +557,8 @@ IF (YGLTPARAM%lp1) WRITE(*,*) '        -----------------------------------------
 !
 IF (YGLTPARAM%lwg) THEN
   WRITE(*,*) "*** GELATO/readnam : &
-& dimension of 'thick' not consistent with nt, &
-& or you declared 'thick' before 'nt' in gltpar"
+ & dimension of 'thick' not consistent with nt, &
+ & or you declared 'thick' before 'nt' in gltpar" 
   WRITE(*,*) 'We stop.'
 ENDIF
 STOP
@@ -563,11 +567,12 @@ STOP
 ! 
 IF (YGLTPARAM%lwg) THEN
   WRITE(*,*) "*** GELATO/readnam : &
-& dimension of 'cinsfld' not consistent with nt, &
-& or you declared 'cinsfld' before 'ndiamax' in gltpar"
+ & dimension of 'cinsfld' not consistent with nt, &
+ & or you declared 'cinsfld' before 'ndiamax' in gltpar" 
   WRITE(*,*) 'We stop.'
 ENDIF
 STOP
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_READNAM',1,ZHOOK_HANDLE)
 !
 110 FORMAT("* GELATO/readnam : parameter '",A,"' ignored.")
 !

@@ -78,6 +78,7 @@
 SUBROUTINE gltools_alloc(tpglt,ndiamax,ndynami,nl,nnflxin,noutlu,nt,ntd,nx,ny,lp1)
 !
 USE modd_types_glt, only: t_glt
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
 #if ! defined in_surfex
 USE modd_CB_DynVariables
 USE modd_CB_DynDim
@@ -92,12 +93,14 @@ IMPLICIT NONE
 INTEGER,INTENT(in)         :: noutlu,nnflxin,ntd,nx,ny,nt,nl,ndynami,ndiamax
 LOGICAL,INTENT(in)         :: lp1
 TYPE(t_glt), INTENT(inout) ::  &
-    tpglt
+    & tpglt 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 ! 1. Initialisations 
 ! ===================
 !
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_ALLOC',0,ZHOOK_HANDLE)
 IF (lp1) THEN
   WRITE(noutlu,*) ' '
   WRITE(noutlu,*) '  ** LEVEL 3 - SUBROUTINE ALLOC'
@@ -259,6 +262,7 @@ IF (lp1) THEN
   WRITE(noutlu,*) '  ** LEVEL 3 - END SUBROUTINE ALLOC'
   WRITE(noutlu,*) ' '
 ENDIF
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_ALLOC',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE gltools_alloc
 !

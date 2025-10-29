@@ -78,9 +78,10 @@
 ! -------------------------- SUBROUTINE gltools_timers --------------------------
 !
 SUBROUTINE gltools_timers( ntimers,ntimlu,ntimnum,&
-  xtime,clabel,lwg,hlabel)
+  & xtime,clabel,lwg,hlabel) 
 !
 !
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   IMPLICIT NONE
   INTEGER,INTENT(IN) :: ntimers,ntimlu
   LOGICAL,INTENT(IN) :: lwg
@@ -89,16 +90,18 @@ SUBROUTINE gltools_timers( ntimers,ntimlu,ntimnum,&
 !
   CHARACTER(LEN=*),  INTENT(inout) ::  clabel
   CHARACTER(LEN=*), OPTIONAL, INTENT(in) ::  &
-    hlabel 
+    & hlabel  
 !
 ! .. Local variables
 !
   REAL ::  &
-    ztime
+    & ztime 
   CHARACTER(LEN=80) ::   &
-    ylabel
+    & ylabel 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_TIMERS',0,ZHOOK_HANDLE)
   IF ( ntimers==1 ) THEN
 ! 
 ! .. CALL number
@@ -120,18 +123,19 @@ SUBROUTINE gltools_timers( ntimers,ntimlu,ntimnum,&
 !
 ! .. Print message
       IF(lwg) WRITE(ntimlu,'("BETWEEN ",A," (CALL # ",I6,") AND ",A, &
-   &    " (CALL # ",I6,")")')  &
-   &    TRIM(ADJUSTL(clabel)),ntimnum-1,TRIM(ADJUSTL(ylabel)),  &
-   &    ntimnum
+       & " (CALL # ",I6,")")')  &
+       & TRIM(ADJUSTL(clabel)),ntimnum-1,TRIM(ADJUSTL(ylabel)),  &
+       & ntimnum 
       IF(lwg) WRITE(ntimlu,'(" --> exec time = ",F9.3," s", &
-   &    " / total time = ",F9.3," s")')  &
-   &    ztime-xtime,ztime
+       & " / total time = ",F9.3," s")')  &
+       & ztime-xtime,ztime 
 !      CALL flush(ntimlu)
 !
 ! .. Save current label and time, for next CALL
       clabel = ylabel
       xtime = ztime
   ENDIF
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_TIMERS',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE gltools_timers
 !

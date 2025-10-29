@@ -70,27 +70,30 @@
 SUBROUTINE gltools_nextline( klun,kend,hpar,hval,lwg,hcomment) 
 !
 !
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
 IMPLICIT NONE
 !
 LOGICAL, INTENT(IN) :: lwg
 INTEGER, INTENT(in) ::  &
-  klun
+  & klun 
 INTEGER, INTENT(out) ::  &
-  kend
+  & kend 
 CHARACTER(80), INTENT(out) ::  &
-  hpar,hval
+  & hpar,hval 
 CHARACTER(1), OPTIONAL, INTENT(in) ::  &
-  hcomment
+  & hcomment 
 !
 INTEGER :: ji,iostat
 CHARACTER(1) :: ychar,ycomment
 CHARACTER(80) :: yline
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
 ! 1. Define which character represents a commented line
 ! ======================================================
 !
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_NEXTLINE',0,ZHOOK_HANDLE)
 IF (PRESENT(hcomment)) THEN
   ycomment = hcomment
 ELSE
@@ -130,5 +133,6 @@ IF ( kend==0 ) THEN
     kend=1
 !
 ENDIF
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_NEXTLINE',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE gltools_nextline

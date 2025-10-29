@@ -79,11 +79,12 @@
 ! -------------------------- SUBROUTINE gltools_avevai --------------------------
 !
 SUBROUTINE gltools_avevai  &
-        (tpind,tpnam,pfield,pcumdia,&
-gelato_leadproc,gelato_myrank,n0valu,n2valu,noutlu,nx,nxglo,ny,nyglo,&
-dtt,dttave,lwg,pwgt)
+        & (tpind,tpnam,pfield,pcumdia,&
+& gelato_leadproc,gelato_myrank,n0valu,n2valu,noutlu,nx,nxglo,ny,nyglo,&
+& dtt,dttave,lwg,pwgt) 
 !
   USE modd_types_glt, only: t_ind, t_def
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_thm
   USE modi_gltools_strlower
 #if ! defined in_surfex
@@ -102,32 +103,33 @@ dtt,dttave,lwg,pwgt)
   LOGICAL,INTENT(in) :: lwg 
   REAL   ,INTENT(in) :: dtt,dttave
   TYPE(t_ind), INTENT(inout) ::  &
-        tpind
+        & tpind 
   TYPE(t_def), INTENT(in) ::  &
-        tpnam
-  REAL, DIMENSION(:,:), INTENT(in) ::  & 
-        pfield 
+        & tpnam 
+  REAL, DIMENSION(:,:), INTENT(in) ::   &
+        & pfield  
   REAL, DIMENSION(:,:,:), INTENT(inout) ::  &
-        pcumdia
+        & pcumdia 
   REAL, DIMENSION(:,:), OPTIONAL, INTENT(inout) ::  &
-        pwgt
+        & pwgt 
 !
 !* Local variables
 !
   LOGICAL ::  &
-        yis0d,yis2d
+        & yis0d,yis2d 
   CHARACTER(1) ::  &
-        ypos
+        & ypos 
   CHARACTER(6) ::  &
-        ytype
+        & ytype 
   INTEGER ::  &
-        ix,iy,ixc,iyc,ilu,ifld
+        & ix,iy,ixc,iyc,ilu,ifld 
   REAL, DIMENSION(:,:), ALLOCATABLE ::  &
-        zwork2
+        & zwork2 
   REAL, DIMENSION(:,:), ALLOCATABLE ::  &
-        zwork2_g
+        & zwork2_g 
   REAL(KIND=4), DIMENSION(:,:), ALLOCATABLE ::  &
-        zwork2_gr4
+        & zwork2_gr4 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -136,6 +138,7 @@ dtt,dttave,lwg,pwgt)
 !
 ! .. Get sizes of input data field
 !
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_AVEVAI',0,ZHOOK_HANDLE)
   ix = SIZE( pfield,1 )
   iy = SIZE( pfield,2 )
   yis0d = ( ix==1 .AND. iy==1 )
@@ -153,7 +156,7 @@ dtt,dttave,lwg,pwgt)
       IF (lwg) THEN
         WRITE(noutlu,*) '==> Input field size=',ix,iy
         WRITE(noutlu,*) '==> Routine gltools_avevai can only be used to write &
-        &  fields with dimensions',nxglo,nyglo,' or 1,1.'
+          & fields with dimensions',nxglo,nyglo,' or 1,1.' 
         WRITE(noutlu,*) 'We stop.'
       ENDIF
       STOP
@@ -171,8 +174,8 @@ dtt,dttave,lwg,pwgt)
 ! ========================================
 !
   IF ( (tpind%cur==tpind%end) .OR. &
-     ( MODULO(tpind%cur * dtt, dttave * xday2sec) .LE. epsil1) &
-     ) THEN 
+     & ( MODULO(tpind%cur * dtt, dttave * xday2sec) .LE. epsil1) &
+     & ) THEN  
 !
 ! .. Average
 !
@@ -269,6 +272,7 @@ dtt,dttave,lwg,pwgt)
       DEALLOCATE( zwork2_gr4 )
 !
   ENDIF
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_AVEVAI',1,ZHOOK_HANDLE)
 !
     END SUBROUTINE gltools_avevai
 !

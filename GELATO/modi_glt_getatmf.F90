@@ -77,6 +77,7 @@
 
 SUBROUTINE glt_getatmf( tpglt,nnflxin,noutlu,nt,nx,ny,lp1,lwg )
   USE modd_types_glt, only: t_glt, t_sit
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_thm
 #if ! defined in_surfex
   USE mode_gltools_bound
@@ -89,21 +90,22 @@ SUBROUTINE glt_getatmf( tpglt,nnflxin,noutlu,nt,nx,ny,lp1,lwg )
   LOGICAL,INTENT(IN) :: lp1,lwg
 
   TYPE(t_glt), INTENT(inout) ::  &
-    tpglt
+    & tpglt 
 !
   INTEGER, PARAMETER :: jkmax=3   ! Order of the mask
   INTEGER ::  &
-        ji,jj,jk 
+        & ji,jj,jk  
   INTEGER, DIMENSION(jkmax,SIZE(tpglt%dom,1),SIZE(tpglt%dom,2)) ::  &
-        itmk
+        & itmk 
   INTEGER, DIMENSION(nt,SIZE(tpglt%dom,1),SIZE(tpglt%dom,2)) ::  &
-        itmk0
+        & itmk0 
   REAL, DIMENSION(SIZE(tpglt%dom,1),SIZE(tpglt%dom,2)) ::  &
-        zfsit,ztsfm,zalbm,  &
-        zfsite,ztmke,ztmke0,zwork2
+        & zfsit,ztsfm,zalbm,  &
+        & zfsite,ztmke,ztmke0,zwork2 
   TYPE(t_sit),  &
-    DIMENSION(SIZE(tpglt%sit,1),SIZE(tpglt%sit,2),SIZE(tpglt%sit,3)) ::  &
-        tzsit
+    & DIMENSION(SIZE(tpglt%sit,1),SIZE(tpglt%sit,2),SIZE(tpglt%sit,3)) ::  &
+        & tzsit 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 ! TO BE INCORPORATED PROPERLY LATER ON (WITH AN OPTION)
@@ -147,6 +149,7 @@ SUBROUTINE glt_getatmf( tpglt,nnflxin,noutlu,nt,nx,ny,lp1,lwg )
 !
 ! Get ice state (just for better code readibility...)
 !
+IF (LHOOK) CALL DR_HOOK('GLT_GETATMF',0,ZHOOK_HANDLE)
   tzsit = tpglt%sit
 !
 ! Compute total sea ice concentration 
@@ -200,9 +203,9 @@ SUBROUTINE glt_getatmf( tpglt,nnflxin,noutlu,nt,nx,ny,lp1,lwg )
 ! Ice average temperature and albedo
       WHERE( zfsit(:,:)>epsil1 )
         ztsfm(:,:) = SUM( tzsit(:,:,:)%fsi*tzsit(:,:,:)%tsf,DIM=1 ) /  &
-          zfsit(:,:)
+          & zfsit(:,:) 
         zalbm(:,:) = SUM( tzsit(:,:,:)%fsi*tzsit(:,:,:)%asn,DIM=1 ) /  &
-          zfsit(:,:)
+          & zfsit(:,:) 
       ENDWHERE
       WHERE( zfsit(:,:)<=epsil1 )
         ztsfm(:,:) = tpglt%tml(:,:)%mlf
@@ -222,11 +225,11 @@ SUBROUTINE glt_getatmf( tpglt,nnflxin,noutlu,nt,nx,ny,lp1,lwg )
 !
 ! Non-solar heat flux
             tpglt%blki(jk,:,:)%nsf = tpglt%atm_ice(1,:,:)%nsf +  &
-              tpglt%atm_ice(1,:,:)%dfl *  &
-              ( tzsit(jk,:,:)%tsf-ztsfm(:,:) )
+              & tpglt%atm_ice(1,:,:)%dfl *  &
+              & ( tzsit(jk,:,:)%tsf-ztsfm(:,:) ) 
 ! Solar heat flux
             tpglt%blki(jk,:,:)%swa = tpglt%atm_ice(1,:,:)%swa *        &
-              ( 1.-tzsit(jk,:,:)%asn ) / ( 1.-zalbm(:,:) )
+              & ( 1.-tzsit(jk,:,:)%asn ) / ( 1.-zalbm(:,:) ) 
 !
 ! Derivative of non solar heat flux
             tpglt%blki(jk,:,:)%dfl = tpglt%atm_ice(1,:,:)%dfl
@@ -295,9 +298,9 @@ SUBROUTINE glt_getatmf( tpglt,nnflxin,noutlu,nt,nx,ny,lp1,lwg )
 !
 ! Surface average temperature and albedo
       ztsfm(:,:) = SUM( tzsit(:,:,:)%fsi*tzsit(:,:,:)%tsf,DIM=1 ) +  &
-        ( 1.-zfsit(:,:) )*tpglt%tml(:,:)%tml
+        & ( 1.-zfsit(:,:) )*tpglt%tml(:,:)%tml 
       zalbm(:,:) = SUM( tzsit(:,:,:)%fsi*tzsit(:,:,:)%asn,DIM=1 ) +  &
-        ( 1.-zfsit(:,:) )*albw
+        & ( 1.-zfsit(:,:) )*albw 
 !
 !
 ! 2.2. Fluxes on sea ice
@@ -313,12 +316,12 @@ SUBROUTINE glt_getatmf( tpglt,nnflxin,noutlu,nt,nx,ny,lp1,lwg )
 !
 ! Non-solar heat flux
         tpglt%blki(jk,:,:)%nsf = tpglt%atm_mix(1,:,:)%nsf +  &
-          tpglt%atm_mix(1,:,:)%dfl *  &
-          ( tzsit(jk,:,:)%tsf-ztsfm(:,:) )
+          & tpglt%atm_mix(1,:,:)%dfl *  &
+          & ( tzsit(jk,:,:)%tsf-ztsfm(:,:) ) 
 !
 ! Solar heat flux
         tpglt%blki(jk,:,:)%swa = tpglt%atm_mix(1,:,:)%swa *  &
-          ( 1.-tzsit(jk,:,:)%asn ) / ( 1.-zalbm(:,:) )
+          & ( 1.-tzsit(jk,:,:)%asn ) / ( 1.-zalbm(:,:) ) 
 !
 !
 ! Derivative of non solar heat flux
@@ -353,8 +356,8 @@ SUBROUTINE glt_getatmf( tpglt,nnflxin,noutlu,nt,nx,ny,lp1,lwg )
         DO jj=2,ny-1
           DO ji=2,nx-1
             IF( ANY( ( zfsite(ji-1:ji+1,jj-1:jj+1)<0.5 .OR.  &
-                     itmk(jk-1,ji-1:ji+1,jj-1:jj+1)==0 ).AND.  &
-                     ztmke0(ji-1:ji+1,jj-1:jj+1)>0.5 ) ) THEN
+                     & itmk(jk-1,ji-1:ji+1,jj-1:jj+1)==0 ).AND.  &
+                     & ztmke0(ji-1:ji+1,jj-1:jj+1)>0.5 ) ) THEN 
                 ztmke(ji,jj)=0.
             ENDIF
           END DO
@@ -373,10 +376,10 @@ SUBROUTINE glt_getatmf( tpglt,nnflxin,noutlu,nt,nx,ny,lp1,lwg )
 !
 ! * Correct unrealistic non-solar heat flux
       WHERE( tzsit(:,:,:)%tsf<245.-t0deg .AND. tzsit(:,:,:)%fsi>epsil1 .AND.  &
-      itmk0==0 ) 
+      & itmk0==0 )  
         tpglt%blki(:,:,:)%nsf = AMAX1(  &
-          tpglt%blki(:,:,:)%nsf,  &
-          tpglt%blki(:,:,:)%dfl*AMAX1( tzsit(:,:,:)%tsf-(233.-t0deg),0. ) ) 
+          & tpglt%blki(:,:,:)%nsf,  &
+          & tpglt%blki(:,:,:)%dfl*AMAX1( tzsit(:,:,:)%tsf-(233.-t0deg),0. ) )  
       ENDWHERE
 !
 ! 
@@ -385,11 +388,11 @@ SUBROUTINE glt_getatmf( tpglt,nnflxin,noutlu,nt,nx,ny,lp1,lwg )
 !
 ! Non solar heat flux
       tpglt%blkw(:,:)%nsf = tpglt%atm_mix(1,:,:)%nsf +   &
-        tpglt%atm_mix(1,:,:)%dfl * ( tpglt%tml(:,:)%tml-ztsfm(:,:) )
+        & tpglt%atm_mix(1,:,:)%dfl * ( tpglt%tml(:,:)%tml-ztsfm(:,:) ) 
 !
 ! Solar heat flux
       tpglt%blkw(:,:)%swa = tpglt%atm_mix(1,:,:)%swa *  &
-        ( 1.-albw ) / ( 1.-zalbm(:,:) )
+        & ( 1.-albw ) / ( 1.-zalbm(:,:) ) 
 !
 ! Derivative of non solar heat flux
       tpglt%blkw(:,:)%dfl = tpglt%atm_mix(1,:,:)%dfl
@@ -406,14 +409,15 @@ SUBROUTINE glt_getatmf( tpglt,nnflxin,noutlu,nt,nx,ny,lp1,lwg )
 ! 
 ! Diagnose the total Input Fresh Water flux
   tpglt%dia(:,:)%ifw = tpglt%atm_all(:,:)%sop + tpglt%atm_all(:,:)%lip +  &
-    ( 1.-zfsit(:,:) )*tpglt%blkw(:,:)%eva +  &
-    SUM( tzsit(:,:,:)%fsi*tpglt%blki(:,:,:)%eva, DIM=1 )
+    & ( 1.-zfsit(:,:) )*tpglt%blkw(:,:)%eva +  &
+    & SUM( tzsit(:,:,:)%fsi*tpglt%blki(:,:,:)%eva, DIM=1 ) 
 !
 ! Diagnose the Input Solar Flux to Sea Ice
   tpglt%dia(:,:)%swi = SUM( tzsit(:,:,:)%fsi*tpglt%blki(:,:,:)%swa, DIM=1 )
 !
 ! Diagnose the Input Solar Flux to Leads
   tpglt%dia(:,:)%sww = ( 1.-zfsit(:,:) )*tpglt%blkw(:,:)%swa
+IF (LHOOK) CALL DR_HOOK('GLT_GETATMF',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE glt_getatmf
 !

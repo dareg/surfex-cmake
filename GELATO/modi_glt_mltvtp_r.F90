@@ -83,9 +83,10 @@
 ! to sea ice melting.
 !
 SUBROUTINE glt_mltvtp_r( pdhi,phsi,tpsil,&
-       nilay,nl,np,nt,lp3,height,sf3tinv)
+       & nilay,nl,np,nt,lp3,height,sf3tinv) 
 !
   USE modd_glt_const_thm
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_types_glt, only: t_vtp
   USE mode_glt_stats_r
   USE mode_gltools_interp
@@ -96,21 +97,22 @@ SUBROUTINE glt_mltvtp_r( pdhi,phsi,tpsil,&
   REAL,DIMENSION(:),INTENT(IN) :: height,sf3tinv
   LOGICAL,INTENT(IN) :: lp3
   REAL, DIMENSION(nilay,nt,np), INTENT(in) ::  &
-        pdhi
+        & pdhi 
   REAL, DIMENSION(nt,np), INTENT(inout) ::  &
-        phsi
+        & phsi 
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(inout) ::   &
-        tpsil
+        & tpsil 
 !
   INTEGER ::  &
-        jp,jk,jl
+        & jp,jk,jl 
   REAL :: zavti,zavtf,zdavt
   REAL, DIMENSION(nilay) ::  &
-        zentn,zsf3tinvo
+        & zentn,zsf3tinvo 
   REAL, DIMENSION(nilay+1) ::  &
-        zlevo
+        & zlevo 
   REAL, DIMENSION(nt,np) ::  &
-        zhsi
+        & zhsi 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -118,6 +120,7 @@ SUBROUTINE glt_mltvtp_r( pdhi,phsi,tpsil,&
 ! =======================================
 !
 ! Compute new sea ice thickness
+IF (LHOOK) CALL DR_HOOK('GLT_MLTVTP_R',0,ZHOOK_HANDLE)
   zhsi(:,:) = SUM( pdhi(:,:,:),DIM=1 )
 !
   DO jp=1,np
@@ -152,7 +155,11 @@ SUBROUTINE glt_mltvtp_r( pdhi,phsi,tpsil,&
 ! .. Update phsi
 !
   phsi(:,:) = zhsi(:,:)
+IF (LHOOK) CALL DR_HOOK('GLT_MLTVTP_R',1,ZHOOK_HANDLE)
 !
+CONTAINS
+#include "glt_interpz.func.h"
+#include "glt_vtpint.func.h"
 END SUBROUTINE glt_mltvtp_r
 !
 ! ---------------------- END SUBROUTINE glt_mltvtp_r ------------------------

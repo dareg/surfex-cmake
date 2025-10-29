@@ -82,27 +82,30 @@
 !
 FUNCTION gltools_adjflx(tpdom,ocrit,pfield,nx,ny,dtt)
 !
-  USE modd_glt_const_thm
   USE modd_types_glt, only: t_dom
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
+  USE modd_types_glt
 !
   IMPLICIT NONE
 !
   INTEGER,INTENT(IN) :: nx,ny
   REAL,INTENT(IN) :: dtt
   TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &
-        tpdom
+        & tpdom 
   LOGICAL, DIMENSION(nx,ny), INTENT(in) ::  &
-        ocrit
+        & ocrit 
   REAL, DIMENSION(nx,ny), INTENT(in) ::   &
-        pfield
+        & pfield 
   REAL, DIMENSION(nx,ny) ::  &
-        gltools_adjflx 
+        & gltools_adjflx  
 !
   REAL ::  &
-        zint,zsrf
+        & zint,zsrf 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 ! * Compute field integral
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_ADJFLX',0,ZHOOK_HANDLE)
   zint = SUM( tpdom(:,:)%srf*pfield(:,:), MASK=ocrit(:,:) )
 !
 ! * Compute surface of the domain
@@ -115,6 +118,7 @@ FUNCTION gltools_adjflx(tpdom,ocrit,pfield,nx,ny,dtt)
         gltools_adjflx(:,:) = dtt*zint/zsrf
       ENDWHERE
   ENDIF
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_ADJFLX',1,ZHOOK_HANDLE)
 !
 END FUNCTION gltools_adjflx
 !

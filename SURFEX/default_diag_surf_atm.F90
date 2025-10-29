@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE DEFAULT_DIAG_SURF_ATM(K2M,OT2MMW,OSURF_BUDGET,O2M_MIN_ZS,ORAD_BUDGET, &
+      SUBROUTINE DEFAULT_DIAG_SURF_ATM(K2M,OT2MMW,OSURF_BUDGET,O2M_MIN_ZS,OHU2M_QSAT,ORAD_BUDGET, &
                                        OCOEF, OSURF_VARS, OSURF_BUDGETC, ORESET_BUDGETC, &
                                        OSELECT, OPROVAR_TO_DIAG, ODIAG_GRID, OFRAC, &
                                        PDIAG_TSTEP, OSNOWDIMNC, ORESETCUMUL, ORESETMINMAX, &
@@ -59,6 +59,7 @@ INTEGER,  INTENT(OUT) :: K2M           ! flag for operational 2m quantities
 LOGICAL,  INTENT(OUT) :: OT2MMW        ! flag for modified weighting of 2m temperature
 LOGICAL,  INTENT(OUT) :: OSURF_BUDGET  ! flag for surface budget
 LOGICAL,  INTENT(OUT) :: O2M_MIN_ZS    ! flag for 2m quantities on min.  orography
+LOGICAL,  INTENT(OUT) :: OHU2M_QSAT    ! flag to use QSAT, instead of QSATW, for HU2M calculation
 LOGICAL,  INTENT(OUT) :: ORAD_BUDGET   ! flag for radiative budget
 LOGICAL,  INTENT(OUT) :: OCOEF         ! flag for transfer coefficients
 LOGICAL,  INTENT(OUT) :: OSURF_VARS    ! flag for surface variables
@@ -87,6 +88,7 @@ OT2MMW       = .FALSE.
 OSURF_BUDGET = .FALSE.
 !
 O2M_MIN_ZS   = .FALSE.
+OHU2M_QSAT   = .FALSE.
 !
 ORAD_BUDGET  = .FALSE.
 !

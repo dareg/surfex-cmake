@@ -32,8 +32,9 @@ REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------
 !ideal: reprend essentiellement la namelist NAM_DIAG_SURF
 IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_IDEAL_N',0,ZHOOK_HANDLE)
- CALL DEFAULT_DIAG_IDEAL(N2M,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET,LCOEF,LSURF_VARS,&
-                         LSURF_BUDGETC,LRESET_BUDGETC,XDIAG_TSTEP           )
+ CALL DEFAULT_DIAG_IDEAL(N2M,LSURF_BUDGET,L2M_MIN_ZS,LHU2M_QSAT,   &
+                         LRAD_BUDGET,LCOEF,LSURF_VARS,             &
+                         LSURF_BUDGETC,LRESET_BUDGETC,XDIAG_TSTEP  )
 !                        
  CALL READ_DEFAULT_IDEAL_n(DGO, HPROGRAM)
 !

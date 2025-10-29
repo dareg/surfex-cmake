@@ -85,10 +85,11 @@
 ! field, plus field values at one specified grid point.
 !
 SUBROUTINE gltools_chkinp(kdate,tpglt,&
-        n0vilu,n2vilu,nnflxin,noutlu,nprinto,nsavinp,nsavlu,&
-        nt,ntd,nx,nxglo,ny,nyglo,xdomsrf_g,lwg,ciopath )
+        & n0vilu,n2vilu,nnflxin,noutlu,nprinto,nsavinp,nsavlu,&
+        & nt,ntd,nx,nxglo,ny,nyglo,xdomsrf_g,lwg,ciopath ) 
 !
   USE modd_types_glt, only: t_glt, t_def
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modi_gltools_nwords
   USE modi_gltools_strsplit
   USE mode_gltools_wrivais
@@ -98,44 +99,46 @@ SUBROUTINE gltools_chkinp(kdate,tpglt,&
 ! .. Dummy arguments
 !
   INTEGER, INTENT(in) ::  &
-    kdate,nprinto,nnflxin,ntd,noutlu,nsavlu,nsavinp,nt,nx,ny,n2vilu,n0vilu,nxglo,nyglo
+    & kdate,nprinto,nnflxin,ntd,noutlu,nsavlu,nsavinp,nt,nx,ny,n2vilu,n0vilu,nxglo,nyglo 
   REAL, INTENT(in) ::  xdomsrf_g
   LOGICAL, INTENT(in) ::  lwg
   CHARACTER(*), INTENT(in) ::  ciopath
   TYPE(t_glt), INTENT(in) ::  &
-    tpglt
+    & tpglt 
 !
 ! .. Local variables
 !
   LOGICAL ::  &
-        y3d,y3dd,ydo
+        & y3d,y3dd,ydo 
   CHARACTER(2) ::  &
-        ynum
+        & ynum 
   CHARACTER(80) ::  &
-        ystep,yfile
+        & ystep,yfile 
   CHARACTER(200) ::  &
-        yfld
+        & yfld 
   CHARACTER(80), DIMENSION(:), ALLOCATABLE ::  &
-        ylistfld
+        & ylistfld 
   INTEGER ::  &
-        infld,imonth,jf,jk
+        & infld,imonth,jf,jk 
   REAL ::  &
-        zofac,zmin,zmax,zsum
+        & zofac,zmin,zmax,zsum 
   REAL, DIMENSION(SIZE(tpglt%dom,1),SIZE(tpglt%dom,2)) ::  &
-        zwork2
+        & zwork2 
   REAL, DIMENSION(SIZE(tpglt%atm_ice,1),SIZE(tpglt%dom,1),SIZE(tpglt%dom,2)) ::  &
-        zwork3
+        & zwork3 
   REAL, DIMENSION(SIZE(tpglt%sit_d,1),SIZE(tpglt%dom,1),SIZE(tpglt%dom,2)) ::  &
-        zwork3d
+        & zwork3d 
   REAL, DIMENSION(nxglo,nyglo) ::  &
-        zbathy
+        & zbathy 
   TYPE(t_def) ::  &
-        tznam
+        & tznam 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !  
 !
 ! 1. Initialisations
 ! ===================
 !
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_CHKINP',0,ZHOOK_HANDLE)
   IF ( nprinto>=2 ) THEN
 !
 ! .. List of all fields to be analysed (in a single string variable)
@@ -147,12 +150,12 @@ SUBROUTINE gltools_chkinp(kdate,tpglt,&
 !
       IF ( nnflxin==0 ) THEN
           yfld='pbat pqml pqoc ptml psml pssh puml pvml  &
-&           plip psop pztx pmty   &
-&           pnsfm pdflm pswam pevam'
+           & plip psop pztx pmty   &
+           & pnsfm pdflm pswam pevam' 
         ELSE
           yfld='pbat pqml pqoc ptml psml pssh puml pvml  &
-&           plip psop pztx pmty   &
-&           pnsfi pdfli pswai pevai pnsfw pdflw pswaw pevaw'
+           & plip psop pztx pmty   &
+           & pnsfi pdfli pswai pevai pnsfw pdflw pswaw pevaw' 
       ENDIF
 !
       IF ( ntd/=0 ) THEN
@@ -181,8 +184,8 @@ SUBROUTINE gltools_chkinp(kdate,tpglt,&
       IF ( lwg ) THEN
         WRITE(noutlu,*) 
         WRITE(noutlu,*)  &
-        '===================== Control Gelato input data ' //  &
-        '====================='
+        & '===================== Control Gelato input data ' //  &
+        & '=====================' 
 !
         WRITE(noutlu,*) 'First Time-Step  :',tpglt%ind%beg
         WRITE(noutlu,*) 'Current Time-Step:',tpglt%ind%cur
@@ -190,9 +193,9 @@ SUBROUTINE gltools_chkinp(kdate,tpglt,&
 !
         WRITE(noutlu,*)
         WRITE(noutlu,*)  &
-          '  minimum         maximum         average'
+          & '  minimum         maximum         average' 
         WRITE(noutlu,*)  &
-          '  ============    ============    ============'
+          & '  ============    ============    ============' 
       ENDIF
 !
 !
@@ -290,7 +293,7 @@ SUBROUTINE gltools_chkinp(kdate,tpglt,&
               WRITE(noutlu,*) '**** WARNING ****'
               WRITE(noutlu,*) '   In routine imod_tools_chkinp'
               WRITE(noutlu,*) '     ==> field ' // TRIM(ylistfld(jf)) //  &
-                ' is unknown.'
+                & ' is unknown.' 
             ENDIF
         ENDIF
 !
@@ -334,7 +337,7 @@ SUBROUTINE gltools_chkinp(kdate,tpglt,&
       IF ( lwg ) THEN
         WRITE(noutlu,*) 
         WRITE(noutlu,*)  &
-          '===================================================================='
+          & '====================================================================' 
         WRITE(noutlu,*) 
       ENDIF
       DEALLOCATE( ylistfld )
@@ -358,7 +361,7 @@ SUBROUTINE gltools_chkinp(kdate,tpglt,&
     imonth = ( kdate - 10000*( kdate/10000 ) ) / 100
     WRITE( ystep,FMT='(I7)' ) tpglt%ind%cur
     WRITE( yfile,FMT='("/inpfld_",I2.2,"_",A)' )  &
-      imonth,TRIM( ADJUSTL(ystep) )
+      & imonth,TRIM( ADJUSTL(ystep) ) 
     yfile = TRIM(ciopath) // TRIM( ADJUSTL(yfile) )
 !
 ! .. Open and write file
@@ -454,6 +457,7 @@ SUBROUTINE gltools_chkinp(kdate,tpglt,&
   ENDIF
 !
   IF ( ydo ) CLOSE(nsavlu)
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_CHKINP',1,ZHOOK_HANDLE)
 !
 !
 !

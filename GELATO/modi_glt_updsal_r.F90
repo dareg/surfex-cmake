@@ -84,9 +84,10 @@
 ! ------------------------- SUBROUTINE glt_updsal_r -------------------------
 !
 SUBROUTINE glt_updsal_r( gsmelt,tpmxl,tpsit,tptfl,&
-       ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc )
+       & ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc ) 
 !
   USE modd_glt_const_thm
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_types_glt, only: t_mxl, t_sit, t_tfl
   USE modi_glt_salflx_r
   USE mode_glt_stats_r
@@ -96,26 +97,28 @@ SUBROUTINE glt_updsal_r( gsmelt,tpmxl,tpsit,tptfl,&
   INTEGER, INTENT(IN) ::nleviti,ncdlssh,nsalflx,nt,np
   REAL, INTENT(IN) ::dtt,rn_htopoc
   LOGICAL, DIMENSION(nt,np), INTENT(in) ::  &
-        gsmelt
+        & gsmelt 
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
-        tpmxl
+        & tpmxl 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
-        tpsit   
+        & tpsit    
   TYPE(t_tfl), DIMENSION(np), INTENT(inout) ::  &
-        tptfl
+        & tptfl 
 !
 ! .. Local variables
 !
   REAL, DIMENSION(np) ::  &
-    zqsalt
+    & zqsalt 
   REAL, DIMENSION(nt,np) ::  &
-    zdssi,zssieq,zqsalt2,zssi
+    & zdssi,zssieq,zqsalt2,zssi 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
 ! 1. Initialization
 ! ==================
 !
+IF (LHOOK) CALL DR_HOOK('GLT_UPDSAL_R',0,ZHOOK_HANDLE)
   zdssi(:,:) = 0.
   zssi(:,:) = tpsit(:,:)%ssi
 !
@@ -133,7 +136,7 @@ SUBROUTINE glt_updsal_r( gsmelt,tpmxl,tpsit,tptfl,&
   zssieq(:,:) = ssisummer0/ssw0 * SPREAD( tpmxl(:)%sml,1,nt )
   WHERE( tpsit(:,:)%ssi > zssieq(:,:) .AND. gsmelt(:,:) )
     zdssi(:,:) =  &
-      ( zssieq(:,:) - tpsit(:,:)%ssi )*dtt / ( ssisummer_ts * xday2sec )
+      & ( zssieq(:,:) - tpsit(:,:)%ssi )*dtt / ( ssisummer_ts * xday2sec ) 
     tpsit(:,:)%ssi = MAX( tpsit(:,:)%ssi + zdssi(:,:), zssieq(:,:) )
   ENDWHERE
 !
@@ -142,9 +145,9 @@ SUBROUTINE glt_updsal_r( gsmelt,tpmxl,tpsit,tptfl,&
 !
   zssieq(:,:) = ssiwinter0/ssw0 * SPREAD( tpmxl(:)%sml,1,nt )
   WHERE( tpsit(:,:)%ssi > zssieq(:,:) .AND.  &
-  tpsit(:,:)%tsf < SPREAD( tpmxl(:)%mlf,1,nt ) )
+  & tpsit(:,:)%tsf < SPREAD( tpmxl(:)%mlf,1,nt ) ) 
     zdssi(:,:) =  &
-      ( zssieq(:,:) - tpsit(:,:)%ssi )*dtt / ( ssiwinter_ts * xday2sec )
+      & ( zssieq(:,:) - tpsit(:,:)%ssi )*dtt / ( ssiwinter_ts * xday2sec ) 
     tpsit(:,:)%ssi = MAX( tpsit(:,:)%ssi + zdssi(:,:), zssieq(:,:) )
   ENDWHERE
   zdssi(:,:) = tpsit(:,:)%ssi - zssi(:,:)
@@ -172,6 +175,7 @@ SUBROUTINE glt_updsal_r( gsmelt,tpmxl,tpsit,tptfl,&
 ! .. Salt flux in kg.m-2.s-1
 !
   tptfl(:)%sio = tptfl(:)%sio + 1.e-3 * zqsalt(:)
+IF (LHOOK) CALL DR_HOOK('GLT_UPDSAL_R',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE glt_updsal_r
 !

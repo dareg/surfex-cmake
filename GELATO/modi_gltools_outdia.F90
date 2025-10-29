@@ -82,16 +82,17 @@
 ! -------------------------- SUBROUTINE gltools_outdia --------------------------
 !
 SUBROUTINE gltools_outdia  &
-        ( tpind,tpnam,tpdom,pfield,pcumdia,&
-          gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld,                                          &
-          pwgt)
+        & ( tpind,tpnam,tpdom,pfield,pcumdia,&
+          & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld,                                          &
+          & pwgt) 
 !  
   USE modd_types_glt, only: t_ind, t_def, t_dom
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_thm
   USE modi_gltools_strlower
   USE modi_gltools_wriios
@@ -102,51 +103,53 @@ SUBROUTINE gltools_outdia  &
 !* Arguments
 !
   INTEGER, INTENT(IN) :: noutlu,nt,n2vilu,n0vilu,ninsdia,navedia,nx,ny,nxglo,nyglo,&
-                         gelato_myrank,gelato_leadproc,n2valu,n0valu
+                         & gelato_myrank,gelato_leadproc,n2valu,n0valu 
   REAL, INTENT(IN) :: dtt,dttave
   LOGICAL, INTENT(IN) :: lp1,lwg
   CHARACTER(*),INTENT(IN) :: cdiafmt
   CHARACTER(80),DIMENSION(:),INTENT(IN) :: cinsfld
   TYPE(t_ind), INTENT(inout) ::  &
-        tpind
+        & tpind 
   TYPE(t_def), INTENT(in) ::  &
-        tpnam
+        & tpnam 
   TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &
-        tpdom
-  REAL, DIMENSION(:,:), INTENT(inout) ::  & 
-        pfield 
+        & tpdom 
+  REAL, DIMENSION(:,:), INTENT(inout) ::   &
+        & pfield  
   REAL, DIMENSION(:,:,:), INTENT(inout) ::  &
-        pcumdia
+        & pcumdia 
   REAL, DIMENSION(:,:), OPTIONAL, INTENT(inout) ::  &
-        pwgt
+        & pwgt 
 !
 !* Local variables
 !
   LOGICAL ::  &
-        yis0d,yis2d
+        & yis0d,yis2d 
   CHARACTER(80), PARAMETER ::  &
-        yall='all'
+        & yall='all' 
   INTEGER ::  &
-        ix,iy,ixc,iyc,ixw,iyw
+        & ix,iy,ixc,iyc,ixw,iyw 
   INTEGER, DIMENSION(nx,ny) ::  &
-        imsk
+        & imsk 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !* Get sizes of input data field
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_OUTDIA',0,ZHOOK_HANDLE)
   ix = SIZE(pfield,1)
   iy = SIZE(pfield,2)
   yis0d = ( ix==1 .AND. iy==1 )
   yis2d = ( ix==nx .AND. iy==ny )
 !
   IF ( TRIM(cdiafmt)=='GELATO' .OR. TRIM(cdiafmt)=='VMAR5' .OR. &
-       TRIM(cdiafmt)=='XIOS' ) THEN
+       & TRIM(cdiafmt)=='XIOS' ) THEN 
 !
       IF ( tpind%cur==tpind%beg ) THEN
          IF ( TRIM(cdiafmt)=='GELATO' .OR. TRIM(cdiafmt)=='VMAR5' ) THEN
 !
 !* Print field information to gltout (for subsequent use in post-processing)
           IF(lp1) WRITE(noutlu,1000) tpnam%sna,TRIM(tpnam%lna),  &
-            gltools_strlower(TRIM(tpnam%loc)),TRIM(tpnam%def),TRIM(tpnam%uni) 
+            & gltools_strlower(TRIM(tpnam%loc)),TRIM(tpnam%def),TRIM(tpnam%uni)  
 !
 !* Check that input field and cumulative array are conformable 
             ixc = SIZE( pcumdia,2 )
@@ -156,7 +159,7 @@ SUBROUTINE gltools_outdia  &
                   WRITE(noutlu,*) '==> Writing field '//TRIM(tpnam%sna)//':'
                   WRITE(noutlu,*) '==> Input field size=',ix,iy
                   WRITE(noutlu,*)  &
-                    '==> not conformable with ndiamax space size=',ixc,iyc
+                    & '==> not conformable with ndiamax space size=',ixc,iyc 
                   WRITE(noutlu,*) '==> We stop.'
                ENDIF
                STOP
@@ -173,7 +176,7 @@ SUBROUTINE gltools_outdia  &
                WRITE(noutlu,*) '==> Writing field '//TRIM(tpnam%sna)//':'
                WRITE(noutlu,*) '==> Input field size=',ix,iy
                WRITE(noutlu,*)  &
-                    '==> not conformable with weights size=',ixw,iyw
+                    & '==> not conformable with weights size=',ixw,iyw 
                WRITE(noutlu,*) '==> We stop.'
             ENDIF
             STOP
@@ -196,19 +199,20 @@ SUBROUTINE gltools_outdia  &
       IF ( TRIM(cdiafmt)=='GELATO' .OR. TRIM(cdiafmt)=='VMAR5' ) THEN
          IF ( ninsdia==1 ) THEN
             IF ( ANY( cinsfld(:)==yall ) .OR.  &
-                 ANY( cinsfld(:)==tpnam%sna ) .OR.  &
-                 yis0d )  &
-                 CALL gltools_wrivai(tpnam,pfield,n0vilu,n2vilu,noutlu,nt,nx,nxglo,ny,nyglo,lwg,&
-                 pwgt=pwgt )
+                 & ANY( cinsfld(:)==tpnam%sna ) .OR.  &
+                 & yis0d )  &
+                 & CALL gltools_wrivai(tpnam,pfield,n0vilu,n2vilu,noutlu,nt,nx,nxglo,ny,nyglo,lwg,&
+                 & pwgt=pwgt ) 
          ENDIF
          IF ( navedia==1 )  &
-              CALL gltools_avevai(tpind,tpnam,pfield,pcumdia,&
-              gelato_leadproc,gelato_myrank,&
-              n0valu,n2valu,noutlu,nx,nxglo,ny,nyglo,dtt,dttave,lwg,pwgt=pwgt )
+              & CALL gltools_avevai(tpind,tpnam,pfield,pcumdia,&
+              & gelato_leadproc,gelato_myrank,&
+              & n0valu,n2valu,noutlu,nx,nxglo,ny,nyglo,dtt,dttave,lwg,pwgt=pwgt ) 
       ELSE
          CALL gltools_wriios (tpnam%sna,pfield,nx,ny,pwgt=pwgt )
       ENDIF
   ENDIF
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_OUTDIA',1,ZHOOK_HANDLE)
 !
 1000 FORMAT(3X,A20," ; ",A," ; ",A1," ; ",A," ; ",A)
 !

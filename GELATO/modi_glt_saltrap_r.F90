@@ -100,9 +100,10 @@
 ! ----------------------- SUBROUTINE glt_saltrap_r --------------------------
 !
 SUBROUTINE glt_saltrap_r  &
-  ( gfreeze,phef,ptem,tpmxl,psalt,pent,phsi,np,dtt )
+  & ( gfreeze,phef,ptem,tpmxl,psalt,pent,phsi,np,dtt ) 
 !
   USE modd_types_glt, only: t_mxl
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_thm
   USE mode_gltools_enthalpy
   USE mode_gltools_sigma
@@ -112,29 +113,30 @@ SUBROUTINE glt_saltrap_r  &
   INTEGER,INTENT(in) :: np
   REAL   ,INTENT(in) :: dtt
   LOGICAL, DIMENSION(np), INTENT(in) ::  &
-    gfreeze
+    & gfreeze 
   REAL, DIMENSION(np), INTENT(in) ::  &
-    phef,ptem
+    & phef,ptem 
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
-    tpmxl
+    & tpmxl 
   REAL, DIMENSION(np), INTENT(inout) ::  &
-    psalt,pent,phsi
+    & psalt,pent,phsi 
 !
   INTEGER, PARAMETER ::  &
-    nit=100               ! Maximum number of iterations
+    & nit=100               ! Maximum number of iterations 
   REAL, PARAMETER ::  &
-    ppssinew=10.          ! First guess for new sea ice salinity
+    & ppssinew=10.          ! First guess for new sea ice salinity 
   REAL, PARAMETER ::  &
-    ppsmax=16.            ! Maximum sea ice salinity
+    & ppsmax=16.            ! Maximum sea ice salinity 
   REAL, PARAMETER ::  &
-    ppdssi=0.1            ! Tolerance on sea ice salinity convergence
+    & ppdssi=0.1            ! Tolerance on sea ice salinity convergence 
   INTEGER ::  &
-    jit,jp
+    & jit,jp 
 real:: x
   LOGICAL, DIMENSION(np) ::  &
-    ycont 
+    & ycont  
   REAL, DIMENSION(np) ::  &
-    psaltb 
+    & psaltb  
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -143,6 +145,7 @@ real:: x
 !
 ! .. Points where at least one more iteration is needed
 !
+IF (LHOOK) CALL DR_HOOK('GLT_SALTRAP_R',0,ZHOOK_HANDLE)
   ycont(:) = ( gfreeze(:) .AND. phef(:)<0. )
 !
 ! .. Initial salinity guess 
@@ -163,15 +166,15 @@ do jp=1,np
   jit = 1
   do while( ycont(jp) .AND. jit<=nit )
     pent(jp) =  &
-      glt_enthalpy0d( ptem(jp),psaltb(jp) ) +  &
-      cpsw*mu*tpmxl(jp)%sml
+      & glt_enthalpy0d( ptem(jp),psaltb(jp) ) +  &
+      & cpsw*mu*tpmxl(jp)%sml 
 !
 ! Rate of formation of new ice in m.s-1
     IF( ycont(jp) ) phsi(jp) = phef(jp)/( pent(jp)*rhoice )
 !
 ! Compute new ice salinity
     IF ( ycont(jp) )  &
-      psalt(jp) = tpmxl(jp)%sml * AMIN1( ppsmax/ssw0,glt_salfrac( phsi(jp) ) ) 
+      & psalt(jp) = tpmxl(jp)%sml * AMIN1( ppsmax/ssw0,glt_salfrac( phsi(jp) ) )  
 !
 ! Stop convergence where convergence criterion is met
     IF( ycont(jp) ) THEN
@@ -207,6 +210,11 @@ end do
   ELSEWHERE 
     phsi(:) = 0.
   ENDWHERE
+IF (LHOOK) CALL DR_HOOK('GLT_SALTRAP_R',1,ZHOOK_HANDLE)
 !
+CONTAINS
+#include "glt_salfrac.func.h"
+#include "glt_enthalpy0d.func.h"
+
 END SUBROUTINE glt_saltrap_r
 

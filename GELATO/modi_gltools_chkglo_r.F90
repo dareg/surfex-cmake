@@ -83,9 +83,10 @@
 ! both hemispheres.
 
 SUBROUTINE gltools_chkglo_r(omsg,tpdom,tpsit,&
-        noutlu,np,nprinto,nt,lwg)
+        & noutlu,np,nprinto,nt,lwg) 
 !
   USE modd_glt_const_thm
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_types_glt, only: t_sit, t_dom
 #if ! defined in_arpege
   USE lib_mpp
@@ -95,24 +96,26 @@ SUBROUTINE gltools_chkglo_r(omsg,tpdom,tpsit,&
   INTEGER, INTENT(in) ::  nprinto,noutlu,nt,np
   LOGICAL, INTENT(in) ::  lwg
   CHARACTER(*), INTENT(in) ::  &
-        omsg
+        & omsg 
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
-        tpdom
+        & tpdom 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::  &
-        tpsit
+        & tpsit 
 !
   LOGICAL, DIMENSION(np) ::  &
-        ghnorth,ghsouth
+        & ghnorth,ghsouth 
   REAL ::  &
-        zlatn0,zlats0,zehn,zehs,zshn,zshs,zvhn,zvhs 
+        & zlatn0,zlats0,zehn,zehs,zshn,zshs,zvhn,zvhs  
   REAL, DIMENSION(np) ::  &
-        zfsit,zhsiw
+        & zfsit,zhsiw 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
 ! 1. Initializations
 ! ==================
 !
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_CHKGLO_R',0,ZHOOK_HANDLE)
   IF ( nprinto>=2 ) THEN
 !
 ! .. Print message
@@ -195,6 +198,7 @@ SUBROUTINE gltools_chkglo_r(omsg,tpdom,tpsit,&
 #endif
 !
   ENDIF 
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_CHKGLO_R',1,ZHOOK_HANDLE)
 !
 !
 !

@@ -106,6 +106,7 @@
 SUBROUTINE glt_oceflx_r( tpdom,pustar,tpmxl,np )
 !
   USE modd_glt_const_thm
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_evp     ! omega
   USE modd_types_glt, only: t_dom, t_mxl
   USE modi_glt_salflx_r
@@ -116,11 +117,11 @@ SUBROUTINE glt_oceflx_r( tpdom,pustar,tpmxl,np )
 !
  INTEGER,INTENT(IN) :: np
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
-        tpdom
+        & tpdom 
   REAL, DIMENSION(np), INTENT(in) ::  &
-        pustar
+        & pustar 
   TYPE(t_mxl), DIMENSION(np), INTENT(inout) ::  &
-        tpmxl
+        & tpmxl 
 !
 ! .. Local variables
 !
@@ -128,15 +129,16 @@ SUBROUTINE glt_oceflx_r( tpdom,pustar,tpmxl,np )
 !   G_mole_T = 12.5 * 13.8d0**(2d0/3d0) - 6. = 65.9d0
 !   G_mole_S = 12.5 * 2432d0**(2d0/3d0) - 6. = 2255d0
   REAL, PARAMETER ::  &
-        ppg_mole_T = 65.9d0 , ppg_mole_S = 2255d0
+        & ppg_mole_T = 65.9d0 , ppg_mole_S = 2255d0 
 !
 ! g_T,g_S turbulent exchange velocities (m/s)
 !   G_turb turbulent diffusion term
   REAL, DIMENSION(np) ::  &
-        zg_turb,zg_T,zg_S
+        & zg_turb,zg_T,zg_S 
 !
   REAL, DIMENSION(np) ::  &
-        zfcor,zustar
+        & zfcor,zustar 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -145,6 +147,7 @@ SUBROUTINE glt_oceflx_r( tpdom,pustar,tpmxl,np )
 !
 ! Coriolis parameter
 !
+IF (LHOOK) CALL DR_HOOK('GLT_OCEFLX_R',0,ZHOOK_HANDLE)
 zfcor(:) = 2. * omega * ABS( sin ( tpdom(:)%lat ) )
 !
 ! Bound ustar
@@ -170,7 +173,8 @@ zg_S(:) = zustar(:) / ( zg_turb(:) + ppg_mole_S )
 ! ============================
 !
 tpmxl(:)%qoc = rhosw * cpsw * zg_T(:) *  &
-  MAX( tpmxl(:)%tml-tpmxl(:)%mlf, 0. )
+  & MAX( tpmxl(:)%tml-tpmxl(:)%mlf, 0. ) 
+IF (LHOOK) CALL DR_HOOK('GLT_OCEFLX_R',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE glt_oceflx_r
 !

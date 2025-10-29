@@ -57,12 +57,13 @@ LOGICAL           :: LTS_REL          ! If T, relax on T, S
 LOGICAL           :: LZERO_FLUX       ! If T, relax on T, S
 LOGICAL           :: LCORR_FLUX       ! If T, fluxes correction is made
 REAL              :: XCORFLX          ! correction coefficient ( W.m-2.K-1)
-LOGICAL           :: LDIAPYC          ! If T, fluxes correction is made                                      
+LOGICAL           :: LDIAPYC          ! If T, fluxes correction is made 
+LOGICAL           :: LCMO_FROM_SFX    ! If T, activate PREP (from forecast file) for salinity and temperature                                    
 !
 NAMELIST/NAM_PREP_SEAFLUX/CFILE_SEAFLX, CTYPE_SEAFLX, CFILEPGD_SEAFLX, CTYPEPGD, XSST_UNIF,  &
                           XSSS_UNIF, XSIC_UNIF, NYEAR, NMONTH, NDAY, XTIME, LSEA_SBL, &
                           CSEAICE_SCHEME, LOCEAN_MERCATOR, LOCEAN_CURRENT,              & 
                           XTIME_REL,LCUR_REL,LTS_REL,                                  &
-                          LZERO_FLUX,XCORFLX,LCORR_FLUX, LDIAPYC  
+                          LZERO_FLUX,XCORFLX,LCORR_FLUX, LDIAPYC, LCMO_FROM_SFX
 !
 END MODULE MODN_PREP_SEAFLUX

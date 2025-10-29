@@ -119,13 +119,16 @@ DO J=1,5
 ENDDO
 !
 !Initialisation of T, Q, Wind and TKE on all canopy levels
+!Since this is for first time step only we approximate the calculation to only
+!include the standard CLS_TQ call, i.e. we exclude any other setting of N2M not
+!equal 2 and any other setting of LHU2M_QSAT not equal False.
 ZHU(:)=1.
 ZQS(:) = QSAT(PTS(:),PPS(:))
 !
 DO JLAYER=1,SB%NLVL
   !
   CALL CLS_TQ(PTA, ZQA, PPA, PPS, PZREF, ZCD, ZCH, ZRI, PTS, ZHU, ZQS, ZZ0H, &
-              SB%XZ(:,JLAYER), ZTNM, ZQNM, ZHUNM                        )
+              SB%XZ(:,JLAYER), .FALSE., ZTNM, ZQNM, ZHUNM                    )
   !
   SB%XT(:,JLAYER)=ZTNM
   SB%XQ(:,JLAYER)=ZQNM

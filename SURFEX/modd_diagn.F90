@@ -37,7 +37,7 @@ MODULE MODD_DIAG_n
 !*       0.   DECLARATIONS
 !             ------------
 !
-USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME
+USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
@@ -51,6 +51,7 @@ TYPE DIAG_OPTIONS_t
   LOGICAL :: LT2MMW       ! flag to perform modified weighting of 2m temperature  
   LOGICAL :: L2M_MIN_ZS   ! flag for 2 meters quantities evaluated on
 !                         ! the minimum orographyy of the grid      
+  LOGICAL :: LHU2M_QSAT   ! flag to use QSAT, instead of QSATW, for HU2M calculation
   LOGICAL :: LSURF_BUDGET   ! flag for surface energy budget
   LOGICAL :: LRAD_BUDGET    ! flag for radiative energy budget
 !
@@ -183,6 +184,7 @@ DGO%XDIAG_TSTEP=0.
 DGO%N2M=0
 DGO%LT2MMW=.FALSE.
 DGO%L2M_MIN_ZS=.FALSE.
+DGO%LHU2M_QSAT=.FALSE.
 DGO%LSURF_BUDGET=.FALSE.
 DGO%LRAD_BUDGET=.FALSE.
 DGO%LCOEF=.FALSE.

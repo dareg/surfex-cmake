@@ -116,6 +116,7 @@
 SUBROUTINE glt_updtfl_r( hflag,tpmxl,tptfl,pdmass,ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc ,pent,psalt )
 !
   USE modd_glt_const_thm
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_types_glt, only: t_mxl, t_tfl
   USE modi_glt_salflx_r
 !
@@ -126,22 +127,23 @@ SUBROUTINE glt_updtfl_r( hflag,tpmxl,tptfl,pdmass,ncdlssh,nleviti,np,nsalflx,nt,
   INTEGER,INTENT(in) :: ncdlssh,nsalflx,nleviti,nt,np
   REAL   ,INTENT(in) :: dtt,rn_htopoc
   CHARACTER(*), INTENT(in) ::  &
-        hflag  
+        & hflag   
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
-        tpmxl
+        & tpmxl 
   TYPE(t_tfl), DIMENSION(np), INTENT(inout) ::  &
-        tptfl
+        & tptfl 
   REAL, DIMENSION(nt,np), INTENT(in) ::  &
-        pdmass
+        & pdmass 
   REAL, DIMENSION(nt,np), INTENT(in), OPTIONAL ::  &
-        psalt,pent
+        & psalt,pent 
 !
 ! .. Local variables
 !
   REAL, DIMENSION(np) ::  &
-        zqm,zqsalt,zqent
+        & zqm,zqsalt,zqent 
   REAL, DIMENSION(nt,np) ::  &
-        zsalt,zaux,zsml,zqsalt2,zent
+        & zsalt,zaux,zsml,zqsalt2,zent 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -153,6 +155,7 @@ SUBROUTINE glt_updtfl_r( hflag,tpmxl,tptfl,pdmass,ncdlssh,nleviti,np,nsalflx,nt,
 !
 ! .. zqm is in kg.m-2.s-1
 !
+IF (LHOOK) CALL DR_HOOK('GLT_UPDTFL_R',0,ZHOOK_HANDLE)
   zqm(:) = SUM( pdmass(:,:),DIM=1 ) / dtt
 !
 ! .. Salinity of considered medium (in g.kg-1)
@@ -228,6 +231,7 @@ SUBROUTINE glt_updtfl_r( hflag,tpmxl,tptfl,pdmass,ncdlssh,nleviti,np,nsalflx,nt,
 ! .. Heat flux in W.m-2
 ! 
   tptfl(:)%tio = tptfl(:)%tio - zqent(:)
+IF (LHOOK) CALL DR_HOOK('GLT_UPDTFL_R',1,ZHOOK_HANDLE)
 !
 !
 END SUBROUTINE glt_updtfl_r

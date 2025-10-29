@@ -34,7 +34,7 @@
 !             ------------
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME
+USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
 !
 USE ABSTRACT_ICE, ONLY : SEA_ICE_t
 !
@@ -74,6 +74,8 @@ TYPE SEAFLUX_t
   REAL                          :: XSEAICE_TSTEP ! Sea ice model time step
   REAL                          :: XCD_ICE_CST   ! Turbulent exchange coefficient for seaice
   REAL                          :: XSI_FLX_DRV   ! Derivative of fluxes on seaice w.r.t to the temperature (W m-2 K-1)
+  LOGICAL                       :: LALLOC_XSEAT ! Flag for alloc of XSEAT (ocean temperature)
+  LOGICAL                       :: LALLOC_XSEAS ! Flag for alloc of XSEAS (ocean salinity)
   
 !
 ! Type of formulation for the fluxes
@@ -213,6 +215,8 @@ YSEAFLUX%LINTERPOL_SIC=.FALSE.
 YSEAFLUX%CINTERPOL_SIC=' '
 YSEAFLUX%LINTERPOL_SIT=.FALSE.
 YSEAFLUX%LSIC_CST=.FALSE.
+YSEAFLUX%LALLOC_XSEAT=.FALSE.
+YSEAFLUX%LALLOC_XSEAS=.FALSE.
 YSEAFLUX%CINTERPOL_SIT=' '
 YSEAFLUX%CONSTRAIN_CSV=' '
 YSEAFLUX%XFREEZING_SST=-1.8

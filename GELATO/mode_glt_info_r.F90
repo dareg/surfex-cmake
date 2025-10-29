@@ -74,27 +74,30 @@ CONTAINS
 SUBROUTINE glt_info_si_r(omess,niceage,nicesal,nl,nmponds,noutlu,np,nt,lp2,lp3,tpsit,tpsil)
 !
   USE modd_types_glt
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_thm
 !
   IMPLICIT NONE
   LOGICAL,INTENT(in) :: lp2,lp3
   INTEGER,INTENT(in) :: nl,nt,np,noutlu,nicesal,niceage,nmponds
   CHARACTER(*) ::                                                              &
-        omess
+        & omess 
   TYPE(t_sit), DIMENSION(nt,np), OPTIONAL, INTENT(in) ::           &
-        tpsit
+        & tpsit 
   TYPE(t_vtp), DIMENSION(nl,nt,np), OPTIONAL, INTENT(in) ::          &
-        tpsil
+        & tpsil 
   INTEGER ::                                                            &
-        jk,jl
+        & jk,jl 
   INTEGER, DIMENSION(1) ::                                              &
-        imin,imax
+        & imin,imax 
   REAL ::                                                               &
-        zfav,zmin,zmax
+        & zfav,zmin,zmax 
   REAL, DIMENSION(np) ::                                             &
-        zfsit,zftot
+        & zfsit,zftot 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 
+IF (LHOOK) CALL DR_HOOK('MODE_GLT_INFO_R:GLT_INFO_SI_R',0,ZHOOK_HANDLE)
   IF (lp2) THEN
 !
 ! *** Define glt_output logical unit.
@@ -116,7 +119,7 @@ SUBROUTINE glt_info_si_r(omess,niceage,nicesal,nl,nmponds,noutlu,np,nt,lp2,lp3,t
           imin = MINLOC( zfsit(:) )
           imax = MAXLOC( zfsit(:) )
           WRITE(noutlu,1300)  &
-            'fsit :',zmin,imin(1),zmax,imax(1)
+            & 'fsit :',zmin,imin(1),zmax,imax(1) 
           WRITE(noutlu,*) ' ' 
       ENDIF
 !
@@ -132,7 +135,7 @@ SUBROUTINE glt_info_si_r(omess,niceage,nicesal,nl,nmponds,noutlu,np,nt,lp2,lp3,t
             imax = MAXLOC( tpsit(jk,:)%asn )
 !        
             WRITE(noutlu,1400) jk,'asn :',zmin,imin(1),  &
-              zmax,imax(1),zfav
+              & zmax,imax(1),zfav 
 ! 
 ! * Sea ice fraction.
 !
@@ -143,7 +146,7 @@ SUBROUTINE glt_info_si_r(omess,niceage,nicesal,nl,nmponds,noutlu,np,nt,lp2,lp3,t
             imax = MAXLOC( tpsit(jk,:)%fsi )
 !        
             WRITE(noutlu,1400) jk,'fsi :',zmin,imin(1),  &
-              zmax,imax(1),zfav
+              & zmax,imax(1),zfav 
 !        
 ! * Sea ice thickness.
 !
@@ -154,7 +157,7 @@ SUBROUTINE glt_info_si_r(omess,niceage,nicesal,nl,nmponds,noutlu,np,nt,lp2,lp3,t
             imax = MAXLOC( tpsit(jk,:)%hsi )
 !        
             WRITE(noutlu,1500) jk,'hsi :',zmin,imin(1),  &
-              zmax,imax(1),zfav
+              & zmax,imax(1),zfav 
 !        
 ! * Snow thickness.
 !
@@ -165,7 +168,7 @@ SUBROUTINE glt_info_si_r(omess,niceage,nicesal,nl,nmponds,noutlu,np,nt,lp2,lp3,t
             imax = MAXLOC( tpsit(jk,:)%hsn )
 !        
             WRITE(noutlu,1500) jk,'hsn :',zmin,imin(1),  &
-              zmax,imax(1),zfav
+              & zmax,imax(1),zfav 
 !        
 ! * Snow density.
 !
@@ -176,7 +179,7 @@ SUBROUTINE glt_info_si_r(omess,niceage,nicesal,nl,nmponds,noutlu,np,nt,lp2,lp3,t
             imax = MAXLOC( tpsit(jk,:)%rsn )
 !        
             WRITE(noutlu,1500) jk,'rsn :',zmin,imin(1),  &
-              zmax,imax(1),zfav
+              & zmax,imax(1),zfav 
 !
 ! * Surface temperature.
 !
@@ -187,7 +190,7 @@ SUBROUTINE glt_info_si_r(omess,niceage,nicesal,nl,nmponds,noutlu,np,nt,lp2,lp3,t
             imax = MAXLOC( tpsit(jk,:)%tsf )
 !        
             WRITE(noutlu,1800) jk,'tsf :',zmin,imin(1),  &
-              zmax,imax(1),zfav
+              & zmax,imax(1),zfav 
 !
 ! * Ice salinity (psu).
 !
@@ -199,7 +202,7 @@ SUBROUTINE glt_info_si_r(omess,niceage,nicesal,nl,nmponds,noutlu,np,nt,lp2,lp3,t
               imax = MAXLOC( tpsit(jk,:)%ssi )
 !        
               WRITE(noutlu,1500) jk,'ssi :',zmin,imin(1),  &
-                zmax,imax(1),zfav
+                & zmax,imax(1),zfav 
             ENDIF
 !
 ! * Ice age (in days).
@@ -212,7 +215,7 @@ SUBROUTINE glt_info_si_r(omess,niceage,nicesal,nl,nmponds,noutlu,np,nt,lp2,lp3,t
               imax = MAXLOC( tpsit(jk,:)%age )
 !        
               WRITE(noutlu,1600) jk,'age :',zmin,imin(1),  &
-                zmax,imax(1),zfav
+                & zmax,imax(1),zfav 
             ENDIF
 !
 ! * Melt pond volume.
@@ -225,7 +228,7 @@ SUBROUTINE glt_info_si_r(omess,niceage,nicesal,nl,nmponds,noutlu,np,nt,lp2,lp3,t
               imax = MAXLOC( tpsit(jk,:)%vmp )
 !        
               WRITE(noutlu,1500) jk,'vmp :',zmin,imin(1),  &
-                zmax,imax(1),zfav
+                & zmax,imax(1),zfav 
             ENDIF
             WRITE(noutlu,*) ' '
           END DO
@@ -249,33 +252,34 @@ SUBROUTINE glt_info_si_r(omess,niceage,nicesal,nl,nmponds,noutlu,np,nt,lp2,lp3,t
               imax = MAXLOC(tpsil(jl,jk,:)%ent) 
 !        
               WRITE(noutlu,1700) jk,jl,'ent :',zmin,imin(1),  &
-                zmax,imax(1),zfav
+                & zmax,imax(1),zfav 
             END DO
             WRITE(noutlu,*) ' '
           END DO
       ENDIF
   ENDIF
+IF (LHOOK) CALL DR_HOOK('MODE_GLT_INFO_R:GLT_INFO_SI_R',1,ZHOOK_HANDLE)
 !
 ! *** Formats
 !
 1300 FORMAT( A6,  &
-  ' min=',F7.4,1X,'at (',I5,') max=',  &
-  F7.4,1X,'at (',I5,')' )
+  & ' min=',F7.4,1X,'at (',I5,') max=',  &
+  & F7.4,1X,'at (',I5,')' ) 
 1400 FORMAT( 'th',I2.2,1X,A5,  &
-  ' min=',F7.4,1X,'at (',I5,') max=',  &
-  F7.4,1X,'at (',I5,') ave=',F7.4 )
+  & ' min=',F7.4,1X,'at (',I5,') max=',  &
+  & F7.4,1X,'at (',I5,') ave=',F7.4 ) 
 1500 FORMAT( 'th',I2.2,1X,A5,  &
-  ' min=',F8.4,1X,'at (',I5,') max=',  &
-  F8.4,1X,'at (',I5,') ave=',F8.4 )
+  & ' min=',F8.4,1X,'at (',I5,') max=',  &
+  & F8.4,1X,'at (',I5,') ave=',F8.4 ) 
 1600 FORMAT( 'th',I2.2,1X,A5,  &
-  ' min=',F8.2,1X,'at (',I5,') max=',  &
-  F8.2,1X,'at (',I5,') ave=',F8.2 )
+  & ' min=',F8.2,1X,'at (',I5,') max=',  &
+  & F8.2,1X,'at (',I5,') ave=',F8.2 ) 
 1700 FORMAT( 'th',I2.2,1X,'lev',I2.2,1X,A5,  &
-  ' min=',E12.5,1X,'at (',I5,') max=',  &
-  E12.5,1X,'at (',I5,') ave=',E12.5 )
+  & ' min=',E12.5,1X,'at (',I5,') max=',  &
+  & E12.5,1X,'at (',I5,') ave=',E12.5 ) 
 1800 FORMAT( 'th',I2.2,1X,A5,  &
-  ' min=',F8.3,1X,'at (',I5,') max=',  &
-  F8.3,1X,'at (',I5,') ave=',F8.3 )
+  & ' min=',F8.3,1X,'at (',I5,') max=',  &
+  & F8.3,1X,'at (',I5,') ave=',F8.3 ) 
 !
 ! *** End of routine
 !
