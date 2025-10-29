@@ -92,7 +92,7 @@ if(${HAVE_DOUBLE_PRECISION})
 endif()
 
 if(${HAVE_SINGLE_PRECISION})
-  target_compile_options(surfex_dp PUBLIC $<$<COMPILE_LANGUAGE:Fortran>:${ECBUILD_Fortran_COMPILE_OPTIONS_REAL4}>)
+  target_compile_options(surfex_sp PUBLIC $<$<COMPILE_LANGUAGE:Fortran>:${ECBUILD_Fortran_COMPILE_OPTIONS_REAL4}>)
   target_compile_definitions(surfex_sp PUBLIC PARKIND1_SINGLE)
 endif()
 
