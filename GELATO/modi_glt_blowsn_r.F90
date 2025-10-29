@@ -97,7 +97,7 @@ SUBROUTINE glt_blowsn_r(tpmxl,tpsil,tptfl,tpsit,&
 !
   USE modd_glt_const_thm
   USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
-  USE modd_types_glt, only: t_dom, t_mxl, t_sit, t_vtp, t_dia, t_sit
+  USE modd_types_glt, only: t_dom, t_mxl, t_sit, t_vtp, t_dia, t_sit, t_tfl
   USE modi_glt_updtfl_r
 !
   IMPLICIT NONE

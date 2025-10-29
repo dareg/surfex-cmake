@@ -38,6 +38,7 @@ ecbuild_find_package(eccodes REQUIRED)
 ecbuild_find_package(MPI REQUIRED)
 ecbuild_find_package(falfilfa REQUIRED)
 ecbuild_find_package(pinuts REQUIRED)
+find_package(LAPACK REQUIRED)
 
 foreach(PRECISION ${PRECISIONS})
 	set(LIBNAME surfex_${PRECISION})
@@ -49,6 +50,7 @@ foreach(PRECISION ${PRECISIONS})
 		PUBLIC_LIBS fiat
 		MPI::MPI_Fortran
 		NetCDF::NetCDF_Fortran
+		LAPACK::LAPACK
 		eccodes
 		parkind_${PRECISION}
 		fa_${PRECISION}
@@ -107,6 +109,7 @@ foreach(FILEPATH ${SRC_PROGRAMS})
 			MPI::MPI_Fortran
 			eccodes
 			NetCDF::NetCDF_Fortran
+			LAPACK::LAPACK
 			surfex_${PRECISION}
 			parkind_${PRECISION}
 			fa_${PRECISION}
