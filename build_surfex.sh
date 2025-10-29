@@ -30,43 +30,50 @@ fi
 cd eccodes || exit 1
 mkdir -p build
 cd build || exit 1
-cmake .. -DCMAKE_INSTALL_PREFIX=$ROOT/install -DENABLE_AEC=OFF
+export INSTALL_DIR_ECCODES=$ROOT/install/eccodes
+cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR_ECCODES -DENABLE_AEC=OFF
 make install -j 16 || exit 1
 cd $ROOT || exit 1
+export eccodes_ROOT=$INSTALL_DIR_ECCODES
 
 cd fiat
 mkdir -p build
 cd build || exit 1
-cmake .. -DCMAKE_INSTALL_PREFIX=$ROOT/install
+export INSTALL_DIR_FIAT=$ROOT/install/fiat
+cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR_FIAT
 make install -j || exit 1
 cd $ROOT || exit 1
+export fiat_ROOT=$INSTALL_DIR_FIAT
 
 cd FALFILFA
 mkdir -p build
 cd build || exit 1
-cmake .. -DCMAKE_INSTALL_PREFIX=$ROOT/install -Deccodes_ROOT=$ROOT/install \
-	-DENABLE_SINGLE_PRECISION=ON \
+export INSTALL_DIR_FALFILFA=$ROOT/install/falfilfa
+cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR_FALFILFA \
+	-DENABLE_SINGLE_PRECISION=OFF \
 	-DENABLE_DOUBLE_PRECISION=ON
 make install -j 16 || exit 1
 cd $ROOT || exit 1
+export falfilfa_ROOT=$INSTALL_DIR_FALFILFA
 
-#cd pinuts
-#mkdir -p build
-#cd build || exit 1
-#cmake .. -DCMAKE_INSTALL_PREFIX=$ROOT/install \
-#	-DENABLE_SINGLE_PRECISION=ON \
-#	-DENABLE_DOUBLE_PRECISION=ON
-#make install -j 16 || exit 1
-#cd $ROOT || exit 1
+cd pinuts
+mkdir -p build
+cd build || exit 1
+export INSTALL_DIR_PINUTS=$ROOT/install/pinuts
+cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR_PINUTS \
+	-DENABLE_SINGLE_PRECISION=OFF \
+	-DENABLE_DOUBLE_PRECISION=ON
+make install || exit 1 #Oct. 2025 - pinuts doesnt compile in parallel
+cd $ROOT || exit 1
+export pinuts_ROOT=$INSTALL_DIR_PINUTS
 
 cd surfex-cmake
 mkdir -p build
 cd build || exit 1
-cmake .. -DCMAKE_INSTALL_PREFIX=$ROOT/install \
-	-Dfalfilfa_ROOT=$ROOT/install \
+export INSTALL_DIR_SURFEX=$ROOT/install/surfex
+cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR_SURFEX \
 	-DNetCDF_DIR=/home/gmap/mrpm/khatib/opt/i-2018.5.274/netcdf-4.7.1/ \
-	-Deccodes_ROOT=/home/gmap/mrpm/khatib/opt/i-2018.5.274/eccodes-2.27.0/ \
-	-DENABLE_SINGLE_PRECISION=ON \
+	-DENABLE_SINGLE_PRECISION=OFF \
 	-DENABLE_DOUBLE_PRECISION=ON
 make install -j 16 || exit 1
 cd $ROOT || exit 1
