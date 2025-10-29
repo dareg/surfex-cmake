@@ -37,7 +37,6 @@ USE MODI_CH_OPEN_INPUTB
 !!    ------------------
 USE MODD_SURFEX_OMP, ONLY : NBLOCK
 USE MODD_TYPE_EFUTIL, ONLY : JPNBCOEFFMAX, PRONOSVAR_T
-
 !------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
