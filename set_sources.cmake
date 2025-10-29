@@ -30,7 +30,6 @@ set (SRC
 	"ASSIM/oi_bc_soil_moisture.F90"
 	"ASSIM/oi_cacsts.F90"
 	"ASSIM/oi_cavegi.F90"
-	"ASSIM/oi_control.F90"
 	"ASSIM/oi_fctveg.F90"
 	"ASSIM/oi_jacobians.F90"
 	"ASSIM/oi_kalman_gain.F90"
