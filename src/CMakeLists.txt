@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 find_package( ecbuild 3.11 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild )
-project(surfex VERSION 1 LANGUAGES Fortran)
+project(surfex VERSION 8.1.502 LANGUAGES Fortran)
 
 set(MODI_PATH ${CMAKE_BINARY_DIR}/modi)
 file(MAKE_DIRECTORY ${MODI_PATH})
