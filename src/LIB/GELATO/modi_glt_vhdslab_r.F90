@@ -52,7 +52,6 @@
 !THXS_SFX!  USE modd_glt_const_thm
 !THXS_SFX!  USE modd_glt_param
 !THXS_SFX!  USE modd_glt_vhd
-!THXS_SFX!  USE modi_glt_invert
 !THXS_SFX!  INTEGER, INTENT(in) ::  &
 !THXS_SFX!    kit
 !THXS_SFX!  REAL, INTENT(in) ::  &
@@ -83,45 +82,47 @@
 ! ----------------------- SUBROUTINE glt_vhdslab_r --------------------------
 !
 SUBROUTINE glt_vhdslab_r  &
-        ( kit,pnsftop,pswtra,pderiv,  &
-          pcondb,ptsfa,pqtopmelt,pdh,ptsia,osmelt,  &
-          pcondt_m,pg1,pg2,pmlf,pnsftop0,ptsf0,ptsfb,llredo,&
-          petai,petaik,petaikp1,pinvetai,pkodzi,prhocpsi,ptsi_m0,ptsi0, &
-          nilay,nl,noutlu,lp3,lp4,lp5,lwg,xswhdfr,&
-          osnow)
+        & ( kit,pnsftop,pswtra,pderiv,  &
+          & pcondb,ptsfa,pqtopmelt,pdh,ptsia,osmelt,  &
+          & pcondt_m,pg1,pg2,pmlf,pnsftop0,ptsf0,ptsfb,llredo,&
+          & petai,petaik,petaikp1,pinvetai,pkodzi,prhocpsi,ptsi_m0,ptsi0, &
+          & nilay,nl,noutlu,lp3,lp4,lp5,lwg,xswhdfr,&
+          & osnow) 
 !
   USE modd_glt_const_thm
-  USE modi_glt_invert
+  USE MODI_ABOR1_SFX
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
+  USE PARKIND1  ,ONLY : JPRD, JPRB
 !
   IMPLICIT NONE
 !
   INTEGER, INTENT(in) ::  &
-    kit,nl,nilay,noutlu
+    & kit,nl,nilay,noutlu 
   LOGICAL, INTENT(in) ::  &
-    lwg,lp3,lp4,lp5,llredo
+    & lwg,lp3,lp4,lp5,llredo 
   REAL, INTENT(in) ::  &
-    pnsftop,xswhdfr,pg1,pg2,pmlf,pnsftop0,ptsf0,ptsfb
+    & pnsftop,xswhdfr,pg1,pg2,pmlf,pnsftop0,ptsf0,ptsfb 
   REAL, DIMENSION(nl), INTENT(in) ::  &
-    pswtra
+    & pswtra 
   REAL, INTENT(inout) ::  &
-    pderiv,pcondt_m
+    & pderiv,pcondt_m 
   REAL, INTENT(out) ::  &
-    pcondb,ptsfa,pqtopmelt
+    & pcondb,ptsfa,pqtopmelt 
   REAL, DIMENSION(nilay+1), INTENT(out) ::  &
-    pdh
+    & pdh 
   REAL, DIMENSION(0:nilay), INTENT(out) ::  &
-    ptsia
+    & ptsia 
   LOGICAL, INTENT(out) ::  &
-    osmelt
+    & osmelt 
   LOGICAL, OPTIONAL, INTENT(in) ::  &
-    osnow
+    & osnow 
 
 REAL, DIMENSION(0:nilay), INTENT(in) ::  &
-          petai,pinvetai,petaik,petaikp1,ptsi_m0,ptsi0
+          & petai,pinvetai,petaik,petaikp1,ptsi_m0,ptsi0 
 REAL, DIMENSION(0:nilay+1), INTENT(in) ::  &
-          pkodzi
+          & pkodzi 
 REAL, DIMENSION(nilay), INTENT(in) ::  &
-          prhocpsi
+          & prhocpsi 
 
 !
 !
@@ -129,29 +130,36 @@ REAL, DIMENSION(nilay), INTENT(in) ::  &
 ! --------------------
 !
   REAL, PARAMETER ::  &
-       pptsfmin=-50.
+       & pptsfmin=-50. 
   LOGICAL ::  &
-       llmeltop,gsnow
+       & llmeltop,gsnow 
   LOGICAL, DIMENSION(0:nilay) ::  &
-       llmelt
+       & llmelt 
   INTEGER ::  &
-       jl,itop
+       & jl,itop,jk 
   REAL ::  &
-       zderiv,ztsm,zmelt,zdht,zdqdt,zbl
+       & zderiv,ztsm,zmelt,zdht,zdqdt,zbl 
   REAL, DIMENSION(0:nilay+1) ::  &
-        zx,zy
-  REAL, DIMENSION(0:nilay+1,0:nilay+1) ::  &
-        zmat,zmatinv
+        & zx,zy 
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
+
+  INTEGER          :: IMAT, INFO_LAPACK
+  INTEGER          :: IPIV(0:nilay+1)
+  REAL             :: DIA(0:nilay+1)
+  REAL             :: DIAU(0:nilay)
+  REAL             :: DIAL(0:nilay)
+  REAL             :: DIAU2(0:nilay-1)
 !
 !
 !
 ! 1. Initializations 
 ! ===================
 !
-! 1.1. Build the M matrix of the system (M*x = y) and glt_invert it
+! 1.1. Build the M matrix of the system (M*x = y) and invert it
 ! ------------------------------------------------------------- 
 !
 ! Snow layer boolean
+IF (LHOOK) CALL DR_HOOK('GLT_VHDSLAB_R',0,ZHOOK_HANDLE)
   IF ( PRESENT(osnow) ) THEN
       gsnow = osnow
     ELSE
@@ -179,13 +187,11 @@ REAL, DIMENSION(nilay), INTENT(in) ::  &
 !  IF ( kit>2 ) THEN
 !      llmelt = ( ztsib>=ptsi_m0 )
 !    ELSE
+!NEC$ shortloop
       llmelt(:) = .FALSE.
 !  ENDIF
 !
-! Define the matrix
-  zmat(:,:) = 0.
-!
-  IF ( .NOT. gsnow ) zmat(0,0) = 1.
+  IF ( .NOT. gsnow ) DIA(0) = 1.
 !
   IF ( llmeltop ) THEN 
       IF (lp4) THEN
@@ -193,9 +199,9 @@ REAL, DIMENSION(nilay), INTENT(in) ::  &
           WRITE(noutlu,*) '   Temp. condition: ztsfb=',ptsfb
           WRITE(noutlu,*) '=================================='
       ENDIF
-      zmat(itop,itop)   = 1.
-      zmat(itop,itop+1) = 0.
-      zmat(itop+1,itop) = 0.
+      DIA (itop) = 1.
+      DIAU(itop) = 0.
+      DIAL(itop) = 0.
     ELSE
       IF (lp4) THEN
           WRITE(noutlu,*) '=================================='
@@ -203,51 +209,61 @@ REAL, DIMENSION(nilay), INTENT(in) ::  &
           WRITE(noutlu,*) '                    zcondt_m=',pcondt_m
           WRITE(noutlu,*) '=================================='
       ENDIF
-      zmat(itop,itop)   = pderiv - pkodzi(itop)
-      zmat(itop,itop+1) = pkodzi(itop)
-      IF ( .NOT.llmelt(itop) ) zmat(itop+1,itop) = -petaik(itop)
+      DIA (itop)   = pderiv - pkodzi(itop)
+      DIAU(itop) = pkodzi(itop)
+      IF ( .NOT.llmelt(itop) ) DIAL(itop) = -petaik(itop)
   ENDIF
 !
   IF ( llmelt(itop) ) THEN
-      zmat(itop+1,itop+1) = 1.
+      DIA (itop+1) = 1.
     ELSE
-      zmat(itop+1,itop+1) = 1. + petaik(itop) + petaikp1(itop)
-      zmat(itop+1,itop+2) = -petaikp1(itop)
+      DIA (itop+1) = 1. + petaik(itop) + petaikp1(itop)
+      DIAU(itop+1) = -petaikp1(itop)
   ENDIF
 !
-  DO jl=itop+2,nilay
-    IF ( llmelt(jl-1) ) THEN
-        zmat(jl,jl) = 1.
+!NEC$ shortloop
+  DO jl=itop+1,nilay-1
+    IF ( llmelt(jl) ) THEN
+        DIA(jl+1) = 1.
       ELSE
-        zmat(jl,jl-1) = -petaik(jl-1)
-        zmat(jl,jl)   = 1. + petaik(jl-1) + petaikp1(jl-1)
-        zmat(jl,jl+1) = -petaikp1(jl-1)
+        DIAL(jl) = -petaik(jl)
+        DIA(jl+1)   = 1. + petaik(jl) + petaikp1(jl)
+        DIAU(jl+1) = -petaikp1(jl)
     ENDIF
   END DO
 !
   IF ( llmelt(nilay) ) THEN
-      zmat(nilay+1,nilay+1) = 1.
+      DIA(nilay+1) = 1.
     ELSE
-      zmat(nilay+1,nilay) = -petaik(nilay) + pg2*petaikp1(nilay)
-      zmat(nilay+1,nilay+1) = 1. + petaik(nilay) + pg1*petaikp1(nilay)
+      DIAL(nilay) = -petaik(nilay) + pg2*petaikp1(nilay)
+      DIA(nilay+1) = 1. + petaik(nilay) + pg1*petaikp1(nilay)
   ENDIF
-!
+
 ! .. Print the matrix on request
-!
+
   IF ( lp5 .OR. llredo ) THEN
       WRITE(noutlu,*) &
-        '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+        & '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~' 
       WRITE(noutlu,*)
       WRITE(noutlu,*) 'Initial matrix M'
-      DO jl=itop,nilay+1
-        WRITE(noutlu,*) zmat(jl,:)
-      END DO
+      WRITE(noutlu,*) 'Upper diagonal ',DIAU(:)
+      WRITE(noutlu,*) 'Main diagonal  ',DIA (:)
+      WRITE(noutlu,*) 'Lower diagonal ',DIAL(:)
   ENDIF
 !
 ! .. Invert the matrix 
 !
-  zmatinv = zmat
-  CALL glt_invert( 1,zmatinv,noutlu,lwg )
+  IMAT = nilay+1-itop+1
+  IF (JPRB==JPRD) THEN
+    CALL DGTTRF(IMAT, DIAL(itop:), DIA(itop:), DIAU(itop:), DIAU2(itop:), IPIV(itop:), INFO_LAPACK)
+  ELSE
+    CALL SGTTRF(IMAT, DIAL(itop:), DIA(itop:), DIAU(itop:), DIAU2(itop:), IPIV(itop:), INFO_LAPACK)
+  ENDIF
+  IF (INFO_LAPACK /= 0) CALL ABOR1_SFX('INFO_LAPACK /= 0 AFTER DGTTRF/SGTTRF')
+
+  IF ( lp4 .OR. llredo ) THEN
+    WRITE(noutlu,*) 'INFO_LAPACK FOR SGTTRF/DGTTRF : ', INFO_LAPACK
+  ENDIF
 !
 !
 ! 1.2. Build the y vector of the system to solve (M*x = y)
@@ -261,7 +277,7 @@ REAL, DIMENSION(nilay), INTENT(in) ::  &
           zy(itop+1) = ptsi_m0(itop)
         ELSE
           zy(itop+1) = ptsi0(itop) + petaik(itop)*ztsm +  &
-            xswhdfr*pswtra(nilay+1-itop)*petai(itop)
+            & xswhdfr*pswtra(nilay+1-itop)*petai(itop) 
       ENDIF
     ELSE
       zy(itop)   = -pnsftop0 + pderiv*ptsf0
@@ -269,9 +285,10 @@ REAL, DIMENSION(nilay), INTENT(in) ::  &
           zy(itop+1) = ptsi_m0(itop)
         ELSE
           zy(itop+1) = ptsi0(itop) +  &
-            xswhdfr*pswtra(nilay+1-itop)*petai(itop)
+            & xswhdfr*pswtra(nilay+1-itop)*petai(itop) 
       ENDIF
   ENDIF
+!NEC$ shortloop
   DO jl=itop+2,nilay
     IF ( llmelt(jl-1) ) THEN
         zy(jl) = ptsi_m0(jl-1)
@@ -283,7 +300,7 @@ REAL, DIMENSION(nilay), INTENT(in) ::  &
       zy(nilay+1) = ptsi_m0(nilay)
     ELSE
       zy(nilay+1) = (pg1+pg2)*petaikp1(nilay)*pmlf + ptsi0(nilay) +  &
-        xswhdfr*pswtra(1)*petai(nilay)
+        & xswhdfr*pswtra(1)*petai(nilay) 
   ENDIF 
 !
 !
@@ -292,6 +309,7 @@ REAL, DIMENSION(nilay), INTENT(in) ::  &
 ! 
 ! .. Now we update the vertical temperature profile
 !
+
   IF ( lp4 .OR. llredo ) THEN
       WRITE(noutlu,*)
       WRITE(noutlu,*) 'Initial vector'
@@ -299,20 +317,18 @@ REAL, DIMENSION(nilay), INTENT(in) ::  &
       WRITE(noutlu,*) 'Initial vtp'
       WRITE(noutlu,*) ptsi0(:)
   ENDIF
-!
-  DO jl=0,nilay+1
-    zx(jl) = SUM( zmatinv(jl,:)*zy(:) )
-  END DO
-!
-  IF ( lp4 .OR. llredo ) THEN
-      WRITE(noutlu,*)
-      WRITE(noutlu,*) 'Initial matrix by found vector:'
-      DO jl=0,nilay+1
-        WRITE(noutlu,*) SUM( zmat(jl,:)*zx(:) )
-      END DO
-      WRITE(noutlu,*)
-  ENDIF
-!
+
+!NEC$ shortloop
+zx(itop:) = zy(itop:)
+IF (JPRB==JPRD) THEN
+  CALL DGTTRS('N', IMAT, 1, DIAL(itop:), DIA(itop:), DIAU(itop:), DIAU2(itop:), IPIV(itop:), zx(itop:), IMAT, INFO_LAPACK)
+ELSE
+  CALL SGTTRS('N', IMAT, 1, DIAL(itop:), DIA(itop:), DIAU(itop:), DIAU2(itop:), IPIV(itop:), zx(itop:), IMAT, INFO_LAPACK)
+ENDIF
+IF (INFO_LAPACK /= 0) CALL ABOR1_SFX('INFO_LAPACK /= 0 AFTER DGTTRS/SGTTRS')
+IF ( lp4 .OR. llredo ) THEN
+   WRITE(noutlu,*) 'INFO_LAPACK FOR SGTTRS/DGTTRS : ', INFO_LAPACK
+ENDIF
 !
 ! 1.4. Update variables
 ! ---------------------
@@ -321,14 +337,15 @@ REAL, DIMENSION(nilay), INTENT(in) ::  &
   ptsfa = MAX( zx(itop),pptsfmin )
 !
 ! .. Sea ice (and snow) vertical temperature profile
+!NEC$ shortloop
   DO jl=0,nilay
     ptsia(jl) = zx(jl+1)
   END DO
 !
 ! .. Flux at the bottom of the slab
   pcondb =  &
-    pkodzi(nilay+1)*( pg1*( pmlf-ptsia(nilay) )+  &
-    pg2*( pmlf-ptsia(nilay-1) ) )
+    & pkodzi(nilay+1)*( pg1*( pmlf-ptsia(nilay) )+  &
+    & pg2*( pmlf-ptsia(nilay-1) ) ) 
 !
 ! .. (melting case): derive top conductive heat flux
   llmeltop = ( ptsfa>=ztsm )
@@ -356,9 +373,11 @@ REAL, DIMENSION(nilay), INTENT(in) ::  &
 ! .. Collect all the energy corresponding to temperatures higher than
 ! melting point
 !  - in sea ice
+!NEC$ shortloop
   zmelt = SUM( pinvetai(:)*MAX(ptsia(:)-ptsi_m0(:),0.) )
 !!  write(noutlu,*) 'zmelt =',zmelt
 !!  write(noutlu,*) 'ptsia =',ptsia
+!NEC$ shortloop
   ptsia(:) = MIN( ptsia(:),ptsi_m0(:) )
 !!  write(noutlu,*) 'ptsia =',ptsia
 !    
@@ -394,14 +413,14 @@ REAL, DIMENSION(nilay), INTENT(in) ::  &
       WRITE(noutlu,*) 'Left hand-side (vhdslab):'
       WRITE(noutlu,*) '--------------------------'
       WRITE(noutlu,*) ' Non-solar heat flux at the top:',  &
-        pnsftop
+        & pnsftop 
       WRITE(noutlu,*) ' Absorbed solar heat flux:',  &
-        xswhdfr * SUM(pswtra(1:nilay+1-itop))
+        & xswhdfr * SUM(pswtra(1:nilay+1-itop)) 
       WRITE(noutlu,*) ' Cond. heat flux at the bottom:',  &
-        pcondb
+        & pcondb 
       WRITE(noutlu,*) &
-        ' Additional heat flux at the top dQ/dT*(Tnew-Told):',  &
-        zderiv*( ptsfa-ptsf0 )
+        & ' Additional heat flux at the top dQ/dT*(Tnew-Told):',  &
+        & zderiv*( ptsfa-ptsf0 ) 
 !!      WRITE(noutlu,*) ' Cond. heat flux at the top:',  &
 !!        zcondt_m
       WRITE(noutlu,*)
@@ -409,9 +428,9 @@ REAL, DIMENSION(nilay), INTENT(in) ::  &
       WRITE(noutlu,*) '-----------------'
       zdht = SUM( ( ptsia(:)-ptsi0(:) ) * pinvetai(:) )
       WRITE(noutlu,*) '  Enthalpy change per time unit:',  &
-        zdht
+        & zdht 
       WRITE(noutlu,*) '  Top melting flux:',  &
-        pqtopmelt
+        & pqtopmelt 
 ! 
 !!      WRITE(noutlu,*) 'Enthalpy change per time unit (layers):'
 !!      WRITE(noutlu,*) '----------------------------------------'
@@ -419,12 +438,12 @@ REAL, DIMENSION(nilay), INTENT(in) ::  &
 !!      WRITE(noutlu,*)
       WRITE(noutlu,*)
       WRITE(noutlu,*)  &
-        'Left hand-side minus right-hand side'
+        & 'Left hand-side minus right-hand side' 
       WRITE(noutlu,*)  &
-        '-------------------------------------'
+        & '-------------------------------------' 
       zbl = zdht + pqtopmelt -  &
-        ( pcondb + xswhdfr*SUM(pswtra(1:nilay+1-itop)) +  &
-          pnsftop + zderiv*( ptsfa-ptsf0 ) )
+        & ( pcondb + xswhdfr*SUM(pswtra(1:nilay+1-itop)) +  &
+          & pnsftop + zderiv*( ptsfa-ptsf0 ) ) 
       WRITE(noutlu,*) zbl 
       IF ( ABS(zbl)>0.1 ) THEN
         IF (lwg) THEN
@@ -445,21 +464,21 @@ REAL, DIMENSION(nilay), INTENT(in) ::  &
       WRITE(noutlu,*)
       WRITE(noutlu,*)  'Check the equations'
       WRITE(noutlu,*)   &
-        '  (',itop,') ',  &
+        & '  (',itop,') ',  &
 !!        ( pderiv-pkodzi(itop) )*ptsfa + pkodzi(itop)*ptsia(itop),  &
 !!        pderiv*ztsf0 - pnsftop + pqtopmelt
-        zmat(itop,itop)*ptsfa + zmat(itop,itop+1)*ptsia(itop),  &
+        & DIA(itop)*ptsfa + DIAU(itop)*ptsia(itop),  &
 !!        pderiv*ztsf0 - pnsftop + pqtopmelt
-         zy(itop)
+         & zy(itop) 
       WRITE(noutlu,*)   &
-        '  (',itop+1,') ',  &
+        & '  (',itop+1,') ',  &
 !!        - petaik(itop)*ptsfa +  &
 !!        ( 1.+petaik(itop)+petaikp1(itop) )*ptsia(itop)  &
 !!        - petaikp1(itop)*ptsia(itop+1),  &
-        - zmat(itop+1,itop)*ptsfa +  &
-        zmat(itop+1,itop+1)*ptsia(itop)  &
-        - zmat(itop+1,itop+2)*ptsia(itop+1),  &
-        ptsi0(itop)
+        & - DIAL(itop)*ptsfa +  &
+        & DIA(itop+1)*ptsia(itop)  &
+        & - DIAU(itop+1)*ptsia(itop+1),  &
+        & ptsi0(itop) 
 !!        write(noutlu,*) '- petaik(itop)*ptsfa',- petaik(itop)*ptsfa
 !!        write(noutlu,*) 'ptsfa =',ptsfa
 !!        write(noutlu,*) '( 1.+petaik(itop)+petaikp1(itop) )*ptsia(itop)',  &
@@ -470,18 +489,18 @@ REAL, DIMENSION(nilay), INTENT(in) ::  &
 !
       DO jl=itop+2,nilay
         WRITE(noutlu,*)   &
-          '  (',jl,') ',  &
-          - petaik(jl-1)*ptsia(jl-2) +  &
-          ( 1.+petaik(jl-1)+petaikp1(jl-1) )*ptsia(jl-1)  &
-          - petaikp1(jl-1)*ptsia(jl),  &
-          ptsi0(jl-1)
+          & '  (',jl,') ',  &
+          & - petaik(jl-1)*ptsia(jl-2) +  &
+          & ( 1.+petaik(jl-1)+petaikp1(jl-1) )*ptsia(jl-1)  &
+          & - petaikp1(jl-1)*ptsia(jl),  &
+          & ptsi0(jl-1) 
       END DO
 !
       WRITE(noutlu,*)   &
-        '  (',nilay+1,') ',  &
-        ( -petaik(nilay)+pg2*petaikp1(nilay) )*ptsia(nilay-1) +  &
-        ( 1.+petaik(nilay)+pg1*petaikp1(nilay) )*ptsia(nilay),  &
-        (pg1+pg2)*petaikp1(nilay)*pmlf + ptsi0(nilay)
+        & '  (',nilay+1,') ',  &
+        & ( -petaik(nilay)+pg2*petaikp1(nilay) )*ptsia(nilay-1) +  &
+        & ( 1.+petaik(nilay)+pg1*petaikp1(nilay) )*ptsia(nilay),  &
+        & (pg1+pg2)*petaikp1(nilay)*pmlf + ptsi0(nilay) 
 !
   ENDIF
 !
@@ -491,14 +510,17 @@ REAL, DIMENSION(nilay), INTENT(in) ::  &
 !
 ! .. Convert gltools_enthalpy change to J.kg-1 of ice
 !
+!NEC$ shortloop
   DO jl=1,nilay
     pdh(jl) = prhocpsi(nilay+1-jl)/rhoice *  &
-      ( ptsia(nilay+1-jl)-ptsi0(nilay+1-jl) )
+      & ( ptsia(nilay+1-jl)-ptsi0(nilay+1-jl) ) 
   END DO
   IF ( gsnow ) THEN
       pdh(nilay+1) = cpice0 * ( ptsia(0)-ptsi0(0) )
     ELSE
       pdh(nilay+1) = 0.
   ENDIF
+IF (LHOOK) CALL DR_HOOK('GLT_VHDSLAB_R',1,ZHOOK_HANDLE)
 !
   END SUBROUTINE glt_vhdslab_r
+

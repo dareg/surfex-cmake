@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-    SUBROUTINE MIXTL_n (O, OR, PLAT, PFSOL,PFNSOL,PSFTEAU,PSFU,PSFV,PSEATEMP)
+    SUBROUTINE MIXTL_n (O, OR, PLAT, PFSOL,PFNSOL,PSFTEAU,PSFU,PSFV,PSEATEMP,PSEASALI)
 !     #######################################################################
 !
 !!****  *MIXTLN (1D MODEL)*  
@@ -85,6 +85,7 @@ REAL, DIMENSION(:)  ,INTENT(IN)       :: PSFU    ! zonal stress (Pa)
 REAL, DIMENSION(:)  ,INTENT(IN)       :: PSFV    ! meridian stress (Pa)
 !
 REAL, DIMENSION(:)  ,INTENT(OUT)    :: PSEATEMP! sea surface temperature (K)
+REAL, DIMENSION(:)  ,INTENT(OUT)    :: PSEASALI! sea surface salinity
 !*      0.2    declarations of local variables
 !
  COMPLEX, DIMENSION(NOCKMIN:NOCKMAX,2) :: ZUC           ! vecteur vent en ecriture complexe
@@ -589,6 +590,7 @@ DO JPT=1,SIZE(PFSOL)
 !SST diagnosticed with 1D oceanic model
   ZSEATEMP = ZSEAT(IUP) + XTT
   PSEATEMP(JPT) = ZSEATEMP
+  PSEASALI(JPT) = MAX(0.,MIN(ZSEAS(IUP),50.))
 !
   DO J=IUP,IBOT
     O%XLE   (JPT,J) = ZLE   (J)

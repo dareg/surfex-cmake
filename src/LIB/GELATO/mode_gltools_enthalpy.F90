@@ -62,6 +62,7 @@
 ! ----------------- BEGIN MODULE mode_gltools_enthalpy -------------------- 
 !
 MODULE mode_gltools_enthalpy
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
 !
 CONTAINS
 ! ------------------ END MODULE mode_gltools_enthalpy ---------------------
@@ -80,107 +81,38 @@ SUBROUTINE glt_aventh(tpsit,tpsil,pentsi,pentsn,nilay,nslay,nl,np,nt,sf3tinv)
   INTEGER, INTENT(IN) :: nl,nt,np,nilay,nslay
   REAL,DIMENSION(:), INTENT(IN) :: sf3tinv
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::  &
-    tpsit
+    & tpsit 
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(in) ::  &
-    tpsil
+    & tpsil 
   REAL, DIMENSION(np), INTENT(out) ::  &
-    pentsi,pentsn
+    & pentsi,pentsn 
 !
   INTEGER ::  &
-    jl
+    & jl 
   REAL, DIMENSION(nt,np) ::  &
-    zmsi,zmsn
+    & zmsi,zmsn 
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 ! Enthalpy in the ice part of the slab
+  IF (LHOOK) CALL DR_HOOK('MODE_GLTOOLS_ENTHALPY:GLT_AVENTH',0,ZHOOK_HANDLE)
   zmsi(:,:) = rhoice * tpsit(:,:)%fsi * tpsit(:,:)%hsi
   pentsi(:) = 0.
   DO jl=1,nilay
     pentsi(:) = pentsi(:) +  &
-      SUM( sf3tinv(jl) * zmsi(:,:) * tpsil(jl,:,:)%ent, DIM=1 )
+      & SUM( sf3tinv(jl) * zmsi(:,:) * tpsil(jl,:,:)%ent, DIM=1 ) 
   END DO
 !
 ! Enthalpy in the snow part of the slab
   zmsn(:,:) = tpsit(:,:)%rsn * tpsit(:,:)%fsi * tpsit(:,:)%hsn
   pentsn(:) =  &
-    SUM( zmsn(:,:)*SUM( tpsil(nilay+1:nl,:,:)%ent,DIM=1 ), DIM=1 ) /  &
-     FLOAT(nslay)
+    & SUM( zmsn(:,:)*SUM( tpsil(nilay+1:nl,:,:)%ent,DIM=1 ), DIM=1 ) /  &
+     & FLOAT(nslay) 
+  IF (LHOOK) CALL DR_HOOK('MODE_GLTOOLS_ENTHALPY:GLT_AVENTH',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE glt_aventh
 !
 ! ------------------------- END SUBROUTINE glt_aventh -----------------------
 ! -----------------------------------------------------------------------
-!
-!
-! -----------------------------------------------------------------------
-! ------------------------ FUNCTION glt_enthalpy0d --------------------------
-!
-!   The input arguments are temperature profile, in Celsius
-! and salinity (g.kg-1). Note that both arguments are compulsory.
-!
-FUNCTION glt_enthalpy0d(pt,ps)
-!
-  USE modd_glt_const_thm
-!
-  IMPLICIT NONE
-!
-  REAL, INTENT(in) ::  &
-    pt
-  REAL, INTENT(in) ::  &
-    ps
-  REAL ::  &
-    glt_enthalpy0d
-!
-  REAL ::  &
-    ztice_m
-!
-!
-! 1. Initializations
-! ===================
-!
-! ..  Compute sea ice melting point as a function of salinity
-!
-  ztice_m = -mu * ps
-!
-! 
-! 2. If the slab is salty ice
-! ============================
-!
-!* Compute the amount of energy needed to raise sea ice temperature to
-! melting point and melt sea ice completely
-!
-  IF ( ps>0. ) THEN
-! If temperature is lower than melting point
-    IF ( pt<ztice_m ) THEN
-        glt_enthalpy0d = cpice0*( pt-ztice_m ) - xmhofusn0*( 1.-ztice_m/pt )
-      ELSE
-! If temperature is melting point
-        glt_enthalpy0d = 0.
-    ENDIF
-!
-!* Add a term for the energy needed to increase the meltwater temperature to 0
-! Celsius
-!
-    glt_enthalpy0d = glt_enthalpy0d + cpsw*ztice_m
-!
-  ELSE
-!
-! 
-! 3. If the slab is pure ice
-! ===========================
-!
-    IF ( pt<0. ) THEN
-      glt_enthalpy0d = cpice0*pt - xmhofusn0
-    ELSE
-      glt_enthalpy0d = 0.
-    ENDIF
-!
-  ENDIF   
-!
-END FUNCTION glt_enthalpy0d
-!
-! ------------------------ FUNCTION glt_enthalpy0d --------------------------
-! -----------------------------------------------------------------------
-!
 !
 ! -----------------------------------------------------------------------
 ! ------------------------ FUNCTION glt_enthalpy1d --------------------------
@@ -196,18 +128,19 @@ FUNCTION glt_enthalpy1d(gmsk,pt,ps,np)
 !
   INTEGER, INTENT(IN) :: np
   LOGICAL, DIMENSION(np), INTENT(in) ::  &
-    gmsk
+    & gmsk 
   REAL, DIMENSION(np), INTENT(in) ::  &
-    pt
+    & pt 
   REAL, DIMENSION(np), INTENT(in) ::  &
-    ps
+    & ps 
   REAL, DIMENSION(np) ::  &
-    glt_enthalpy1d
+    & glt_enthalpy1d 
 !
   integer ::  &
-    jp
+    & jp 
   REAL, DIMENSION(np) ::  &
-    ztice_m
+    & ztice_m 
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 ! THE CASE OF PURE ICE SHOULD BE ADDRESSED AS WELL
@@ -215,6 +148,7 @@ FUNCTION glt_enthalpy1d(gmsk,pt,ps,np)
 ! 1. Initializations
 ! ===================
 !
+  IF (LHOOK) CALL DR_HOOK('MODE_GLTOOLS_ENTHALPY:GLT_ENTHALPY1D',0,ZHOOK_HANDLE)
 do jp=1,np
   IF( gmsk(jp) ) then
 !
@@ -232,8 +166,8 @@ do jp=1,np
 ! If temperature is lower than melting point
 IF ( pt(jp)<ztice_m (jp) ) then
         glt_enthalpy1d(jp) =  &
-          cpice0*( pt(jp)-ztice_m(jp) ) -  &
-          xmhofusn0*( 1.-ztice_m(jp)/pt(jp) )
+          & cpice0*( pt(jp)-ztice_m(jp) ) -  &
+          & xmhofusn0*( 1.-ztice_m(jp)/pt(jp) ) 
   ELSE
 ! If temperature is melting point
         glt_enthalpy1d(jp) = cpice0*( pt(jp)-ztice_m(jp) )
@@ -254,6 +188,7 @@ ENDIF
 !
   ENDIF
   end do
+  IF (LHOOK) CALL DR_HOOK('MODE_GLTOOLS_ENTHALPY:GLT_ENTHALPY1D',1,ZHOOK_HANDLE)
 !
 END FUNCTION glt_enthalpy1d
 !
@@ -275,14 +210,15 @@ FUNCTION glt_enthalpy2d(pt,ps,np,nt)
 !
   INTEGER, INTENT(IN) :: nt, np
   REAL, DIMENSION(nt,np), INTENT(in) ::  &
-    pt
+    & pt 
   REAL, DIMENSION(nt,np), INTENT(in) ::  &
-    ps
+    & ps 
   REAL, DIMENSION(nt,np) ::  &
-    glt_enthalpy2d
+    & glt_enthalpy2d 
 !
   REAL, DIMENSION(nt,np) ::  &
-    ztice_m
+    & ztice_m 
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 ! THE CASE OF PURE ICE SHOULD BE ADDRESSED AS WELL
@@ -292,6 +228,7 @@ FUNCTION glt_enthalpy2d(pt,ps,np,nt)
 !
 ! ..  Compute sea ice melting point as a function of salinity
 !
+  IF (LHOOK) CALL DR_HOOK('MODE_GLTOOLS_ENTHALPY:GLT_ENTHALPY2D',0,ZHOOK_HANDLE)
   ztice_m(:,:) = -mu * ps(:,:)
 !
 ! 
@@ -304,8 +241,8 @@ FUNCTION glt_enthalpy2d(pt,ps,np,nt)
 ! If temperature is lower than melting point
   WHERE ( pt(:,:)<ztice_m (:,:) )
       glt_enthalpy2d(:,:) =  &
-        cpice0*( pt(:,:)-ztice_m(:,:) ) -  &
-        xmhofusn0*( 1.-ztice_m(:,:)/pt(:,:) )
+        & cpice0*( pt(:,:)-ztice_m(:,:) ) -  &
+        & xmhofusn0*( 1.-ztice_m(:,:)/pt(:,:) ) 
     ELSEWHERE
 ! If temperature is melting point
       glt_enthalpy2d(:,:) = cpice0*( pt(:,:)-ztice_m(:,:) )
@@ -315,6 +252,7 @@ FUNCTION glt_enthalpy2d(pt,ps,np,nt)
 ! Celsius
 !
     glt_enthalpy2d(:,:) = glt_enthalpy2d(:,:) + cpsw*ztice_m(:,:)
+  IF (LHOOK) CALL DR_HOOK('MODE_GLTOOLS_ENTHALPY:GLT_ENTHALPY2D',1,ZHOOK_HANDLE)
 !
 END FUNCTION glt_enthalpy2d
 !
@@ -336,22 +274,24 @@ FUNCTION glt_enthalpy3d(pvtp,pvsp,nilay,nl,np,nt)
 !
   INTEGER,INTENT(IN) :: nl,nt,np,nilay
   REAL, DIMENSION(nl,nt,np), INTENT(in) ::  &
-    pvtp
+    & pvtp 
   REAL, DIMENSION(nl,nt,np), OPTIONAL, INTENT(in) ::  &
-    pvsp
+    & pvsp 
   REAL, DIMENSION(nl,nt,np) ::  &
-    glt_enthalpy3d
+    & glt_enthalpy3d 
 !
   INTEGER ::  &
-    jl
+    & jl 
   REAL, DIMENSION(nl,nt,np) ::  &
-    ztice_m
+    & ztice_m 
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 ! 1. Initializations
 ! ===================
 !
 ! ..  Compute sea ice melting point as a function of salinity
+  IF (LHOOK) CALL DR_HOOK('MODE_GLTOOLS_ENTHALPY:GLT_ENTHALPY3D',0,ZHOOK_HANDLE)
   IF ( PRESENT(pvsp) ) THEN
       ztice_m(:,:,:) = -mu * pvsp(:,:,:)
     ELSE
@@ -371,8 +311,8 @@ FUNCTION glt_enthalpy3d(pvtp,pvsp,nilay,nl,np,nt)
 ! If temperature is lower than melting point
     WHERE ( pvtp(jl,:,:)<ztice_m(jl,:,:) )
         glt_enthalpy3d(jl,:,:) =  &
-          cpice0*( pvtp(jl,:,:)-ztice_m(jl,:,:) ) -  &
-          xmhofusn0*( 1.-ztice_m(jl,:,:)/pvtp(jl,:,:) )
+          & cpice0*( pvtp(jl,:,:)-ztice_m(jl,:,:) ) -  &
+          & xmhofusn0*( 1.-ztice_m(jl,:,:)/pvtp(jl,:,:) ) 
       ELSEWHERE    
 ! If temperature is melting point
         glt_enthalpy3d(jl,:,:) = 0.
@@ -391,9 +331,10 @@ FUNCTION glt_enthalpy3d(pvtp,pvsp,nilay,nl,np,nt)
   DO jl=nilay+1,nl
     glt_enthalpy3d(jl,:,:) = cpice0*pvtp(jl,:,:)-xmhofusn0
   END DO 
+  IF (LHOOK) CALL DR_HOOK('MODE_GLTOOLS_ENTHALPY:GLT_ENTHALPY3D',1,ZHOOK_HANDLE)
 !
 END FUNCTION glt_enthalpy3d
 !
-END MODULE mode_gltools_enthalpy
 ! ----------------------- END FUNCTION glt_enthalpy3d ----------------------- 
 ! -----------------------------------------------------------------------
+END MODULE mode_gltools_enthalpy

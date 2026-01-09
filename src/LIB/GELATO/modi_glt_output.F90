@@ -75,18 +75,21 @@
 SUBROUTINE opnout(gelato_myrank,noutlu,ntimlu,lwg)
 !
 !
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   IMPLICIT NONE
 !
   INTEGER,INTENT(IN) :: noutlu,gelato_myrank,ntimlu
   LOGICAL,INTENT(IN) :: lwg
   CHARACTER(20) :: &
-       yfile
+       & yfile 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 ! 
 !
 ! 1. Initialize Gelato glt_output file
 ! =====================================
 !
+IF (LHOOK) CALL DR_HOOK('OPNOUT',0,ZHOOK_HANDLE)
   IF (lwg) THEN
     WRITE(*,*) 'Opening logical unit = ',noutlu,' for output'
     IF ( noutlu/=6 ) THEN
@@ -95,15 +98,8 @@ SUBROUTINE opnout(gelato_myrank,noutlu,ntimlu,lwg)
     ENDIF
 !
     WRITE(noutlu,*)  &
-      '*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*'
-    WRITE(noutlu,*)  &
-      '          MERCI D''UTILISER LE MODELE DE GLACE DE MER GELATO !'
-    WRITE(noutlu,*)  &
-      '       ! GRACIAS POR UTILIZAR EL MODELO DE HIELO DE MAR GELATO !'
-    WRITE(noutlu,*)  &
-      '             THANK YOU FOR USING GELATO SEA ICE MODEL !'
-    WRITE(noutlu,*)  &
-      '            TAKK FOR AT DU BRUKER GELATO SJ0 IS MODELL !'
+      & '*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*' 
+    WRITE(noutlu,*) '             THANK YOU FOR USING GELATO SEA ICE MODEL $2 '
     WRITE(noutlu,*) ' '
     WRITE(noutlu,*) '                            . ,             '
     WRITE(noutlu,*) '                             *    ,         '
@@ -120,7 +116,7 @@ SUBROUTINE opnout(gelato_myrank,noutlu,ntimlu,lwg)
     WRITE(noutlu,*) '                              ''------`      '
     WRITE(noutlu,*) ' '
     WRITE(noutlu,*)  &
-      '*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*'
+      & '*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*' 
 !
 !
 !
@@ -133,6 +129,7 @@ SUBROUTINE opnout(gelato_myrank,noutlu,ntimlu,lwg)
     ENDIF
 !
   ENDIF
+IF (LHOOK) CALL DR_HOOK('OPNOUT',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE opnout
 !
@@ -148,11 +145,14 @@ END SUBROUTINE opnout
 SUBROUTINE clsout(noutlu,ntimlu,lwg)
 !
 !
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   IMPLICIT NONE
   INTEGER,INTENT(IN) :: noutlu,ntimlu
   LOGICAL,INTENT(IN) :: lwg
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
+IF (LHOOK) CALL DR_HOOK('CLSOUT',0,ZHOOK_HANDLE)
   IF (lwg) THEN
     WRITE(noutlu,*) ' '
     WRITE(noutlu,*) '                     * *******************'
@@ -163,6 +163,7 @@ SUBROUTINE clsout(noutlu,ntimlu,lwg)
     IF ( noutlu/=6 ) CLOSE(noutlu)
     IF ( ntimlu/=6 ) CLOSE(ntimlu)
   ENDIF
+IF (LHOOK) CALL DR_HOOK('CLSOUT',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE clsout
 !

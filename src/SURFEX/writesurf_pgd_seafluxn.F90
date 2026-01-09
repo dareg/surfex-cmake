@@ -33,7 +33,8 @@
 !!    -------------
 !!      Original    01/2003 
 !!      B. Decharme 07/2011 : delete argument HWRITE
- !!      M. Moge     02/2015 parallelization using WRITE_LCOVER
+!!      M. Moge     02/2015 parallelization using WRITE_LCOVER
+!!      A.Napoly    08/2024 : impose 10 meters minimum bathymetrie
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -99,6 +100,7 @@ YCOMMENT='ZS'
 !
 YRECFM='BATHY'
 YCOMMENT='BATHY'
+ S%XSEABATHY(:)=MIN(S%XSEABATHY(:),-10.)
  CALL WRITE_SURF(HSELECT, HPROGRAM,YRECFM,S%XSEABATHY(:),IRESP,HCOMMENT=YCOMMENT)
 !
 !* latitude, longitude

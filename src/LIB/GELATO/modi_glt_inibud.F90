@@ -81,16 +81,19 @@
 SUBROUTINE glt_inibud(tpbud)
 !
   USE modd_types_glt
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
 !
   IMPLICIT NONE 
 !
   TYPE(t_bud), DIMENSION(:,:), INTENT(inout) ::                         &
-        tpbud
+        & tpbud 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !  
 !  
 ! * Set all the components of the budget to zero (see definitions in 
 ! dmod_types.f90 module).
 !
+IF (LHOOK) CALL DR_HOOK('GLT_INIBUD',0,ZHOOK_HANDLE)
   tpbud(:,:)%eni = 0.
   tpbud(:,:)%enn = 0.
   tpbud(:,:)%bii = 0.
@@ -106,6 +109,7 @@ SUBROUTINE glt_inibud(tpbud)
   tpbud(:,:)%fwn = 0.
   tpbud(:,:)%isi = 0.
   tpbud(:,:)%isn = 0.
+IF (LHOOK) CALL DR_HOOK('GLT_INIBUD',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE glt_inibud
 ! 

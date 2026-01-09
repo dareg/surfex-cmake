@@ -53,6 +53,7 @@
 ! -------------------- BEGIN MODULE mode_gltools_wrivais -------------------
 !
 MODULE mode_gltools_wrivais 
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
 !
 INTERFACE gltools_wrivai
   MODULE PROCEDURE gltools_wrivai_2d
@@ -65,9 +66,9 @@ CONTAINS
 ! ------------------- SUBROUTINE gltools_wrivai_2d ----------------------
 !
 SUBROUTINE gltools_wrivai_2d  &
-        ( tpnam,pfield,&
-        n0vilu,n2vilu,noutlu,nt,nx,nxglo,ny,nyglo,lwg,&
-    kunit,kdbl,pwgt  )
+        & ( tpnam,pfield,&
+        & n0vilu,n2vilu,noutlu,nt,nx,nxglo,ny,nyglo,lwg,&
+    & kunit,kdbl,pwgt  ) 
 !
   USE modd_types_glt
   USE modd_glt_const_thm
@@ -88,30 +89,31 @@ SUBROUTINE gltools_wrivai_2d  &
 !* Arguments
 !
   TYPE(t_def), INTENT(in) ::  &
-        tpnam
-  REAL, DIMENSION(:,:), INTENT(in) ::  & 
-        pfield 
+        & tpnam 
+  REAL, DIMENSION(:,:), INTENT(in) ::   &
+        & pfield  
   INTEGER, OPTIONAL, INTENT(in) ::  &
-        kunit,kdbl
+        & kunit,kdbl 
   REAL, DIMENSION(:,:), OPTIONAL, INTENT(in) ::  &
-        pwgt
+        & pwgt 
 !
 !* Local variables
 !
   LOGICAL ::  &
-        yis0d,yis2d
+        & yis0d,yis2d 
   CHARACTER(1) ::  &
-        ypos
+        & ypos 
   CHARACTER(6) ::  &
-        ytype
+        & ytype 
   INTEGER ::  &
-        idbl,ix,iy,ixc,iyc,ilu
+        & idbl,ix,iy,ixc,iyc,ilu 
   REAL, DIMENSION(:,:), ALLOCATABLE ::  &
-        zwork
+        & zwork 
   REAL, DIMENSION(:,:), ALLOCATABLE ::  &
-        zwork_g
+        & zwork_g 
   REAL(KIND=4), DIMENSION(:,:), ALLOCATABLE ::  &
-        zwork_gr4
+        & zwork_gr4 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -121,6 +123,7 @@ SUBROUTINE gltools_wrivai_2d  &
 !
 ! .. Define field metadata
 !
+IF (LHOOK) CALL DR_HOOK('MODE_GLTOOLS_WRIVAIS:GLTOOLS_WRIVAI_2D',0,ZHOOK_HANDLE)
   ypos = tpnam%loc
   ytype = gltools_strlower( TRIM(tpnam%typ) )
 !
@@ -220,7 +223,7 @@ SUBROUTINE gltools_wrivai_2d  &
               IF (lwg) THEN
                 WRITE(noutlu,*) '==> Input field size=',ix,iy
                 WRITE(noutlu,*) '==> Routine gltools_wrivai can only be used to write &
-              &  fields with dimensions',nxglo,nyglo,' or 1,1.'
+                & fields with dimensions',nxglo,nyglo,' or 1,1.' 
                 WRITE(noutlu,*) 'We stop.'
               ENDIF
               STOP
@@ -242,6 +245,7 @@ SUBROUTINE gltools_wrivai_2d  &
 !
       IF ( idbl==0 ) DEALLOCATE( zwork_gr4 )
       DEALLOCATE( zwork_g )
+IF (LHOOK) CALL DR_HOOK('MODE_GLTOOLS_WRIVAIS:GLTOOLS_WRIVAI_2D',1,ZHOOK_HANDLE)
 !
 !
 END SUBROUTINE gltools_wrivai_2d
@@ -254,9 +258,9 @@ END SUBROUTINE gltools_wrivai_2d
 ! ------------------- SUBROUTINE gltools_wrivai_3d ----------------------
 !
 SUBROUTINE gltools_wrivai_3d  &
-        (tpnam,pfield,&
-        gelato_leadproc,gelato_myrank,&
-        n0vilu,n2vilu,noutlu,nt,nx,nxglo,ny,nyglo,lwg,kunit,kdbl,pwgt )
+        & (tpnam,pfield,&
+        & gelato_leadproc,gelato_myrank,&
+        & n0vilu,n2vilu,noutlu,nt,nx,nxglo,ny,nyglo,lwg,kunit,kdbl,pwgt ) 
 !
   USE modd_types_glt
   USE modd_glt_const_thm
@@ -274,30 +278,31 @@ SUBROUTINE gltools_wrivai_3d  &
   INTEGER, INTENT(IN) ::  nt,nx,ny,nxglo,nyglo,gelato_myrank,gelato_leadproc,noutlu,n0vilu,n2vilu
   LOGICAL, INTENT(IN) ::  lwg
   TYPE(t_def), INTENT(in) ::  &
-        tpnam
-  REAL, DIMENSION(:,:,:), INTENT(in) ::  & 
-        pfield 
+        & tpnam 
+  REAL, DIMENSION(:,:,:), INTENT(in) ::   &
+        & pfield  
   INTEGER, OPTIONAL, INTENT(in) ::  &
-        kunit,kdbl
+        & kunit,kdbl 
   REAL, DIMENSION(:,:,:), OPTIONAL, INTENT(in) ::  &
-        pwgt
+        & pwgt 
 !
 !* Local variables
 !
   LOGICAL ::  &
-        yis0d,yis2d
+        & yis0d,yis2d 
   CHARACTER(1) ::  &
-        ypos
+        & ypos 
   CHARACTER(6) ::  &
-        ytype
+        & ytype 
   INTEGER ::  &
-        idbl,it,ix,iy,ixc,iyc,ilu
+        & idbl,it,ix,iy,ixc,iyc,ilu 
   REAL, DIMENSION(:,:,:), ALLOCATABLE ::  &
-        zwork
+        & zwork 
   REAL, DIMENSION(:,:,:), ALLOCATABLE ::  &
-        zwork_g
+        & zwork_g 
   REAL(KIND=4), DIMENSION(:,:,:), ALLOCATABLE ::  &
-        zwork_gr4
+        & zwork_gr4 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -307,6 +312,7 @@ SUBROUTINE gltools_wrivai_3d  &
 !
 ! .. Define field metadata
 !
+IF (LHOOK) CALL DR_HOOK('MODE_GLTOOLS_WRIVAIS:GLTOOLS_WRIVAI_3D',0,ZHOOK_HANDLE)
   ypos = tpnam%loc
   ytype = gltools_strlower( TRIM(tpnam%typ) )
 !
@@ -408,7 +414,7 @@ SUBROUTINE gltools_wrivai_3d  &
               IF (lwg) THEN
                 WRITE(noutlu,*) '==> Input field size=',ix,iy
                 WRITE(noutlu,*) '==> Routine gltools_wrivai can only be used to write &
-              &  fields with dimensions',nxglo,nyglo,' or 1,1.'
+                & fields with dimensions',nxglo,nyglo,' or 1,1.' 
                 WRITE(noutlu,*) 'We stop.'
               ENDIF
               STOP
@@ -430,6 +436,7 @@ SUBROUTINE gltools_wrivai_3d  &
 !
       IF ( idbl==0 ) DEALLOCATE( zwork_gr4 )
       DEALLOCATE( zwork_g )
+IF (LHOOK) CALL DR_HOOK('MODE_GLTOOLS_WRIVAIS:GLTOOLS_WRIVAI_3D',1,ZHOOK_HANDLE)
 !
 !
 END SUBROUTINE gltools_wrivai_3d

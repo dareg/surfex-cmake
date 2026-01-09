@@ -82,9 +82,10 @@
 ! both hemispheres.
 
 SUBROUTINE gltools_chkglo(omsg,tpdom,tpsit,&
- noutlu,nprinto,nt,nx,ny,lwg)
+ & noutlu,nprinto,nt,nx,ny,lwg) 
 !
   USE modd_glt_const_thm
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_types_glt
 #if ! defined in_arpege
   USE lib_mpp
@@ -94,24 +95,26 @@ SUBROUTINE gltools_chkglo(omsg,tpdom,tpsit,&
   INTEGER, INTENT(in) ::  nprinto,noutlu,nt,nx,ny
   LOGICAL, INTENT(in) ::  lwg
   CHARACTER(*), INTENT(in) ::  &
-        omsg
+        & omsg 
   TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &
-        tpdom
+        & tpdom 
   TYPE(t_sit), DIMENSION(nt,nx,ny), INTENT(in) ::  &
-        tpsit
+        & tpsit 
 !
   LOGICAL, DIMENSION(nx,ny) ::  &
-        ghnorth,ghsouth
+        & ghnorth,ghsouth 
   REAL ::  &
-        zlatn0,zlats0,zehn,zehs,zshn,zshs,zvhn,zvhs
+        & zlatn0,zlats0,zehn,zehs,zshn,zshs,zvhn,zvhs 
   REAL, DIMENSION(nx,ny) ::  &
-        zfsit,zhsiw,zsrf
+        & zfsit,zhsiw,zsrf 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
 ! 1. Initializations
 ! ==================
 !
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_CHKGLO',0,ZHOOK_HANDLE)
   IF ( nprinto>=2 ) THEN
 !
 ! .. Print message
@@ -137,7 +140,7 @@ SUBROUTINE gltools_chkglo(omsg,tpdom,tpsit,&
       zfsit(:,:) = SUM( tpsit(:,:,:)%fsi, DIM=1 )*FLOAT( tpdom(:,:)%tmk )
 !
       zhsiw(:,:) = SUM( tpsit(:,:,:)%fsi*tpsit(:,:,:)%hsi, DIM=1 )*  &
-        FLOAT( tpdom(:,:)%tmk )
+        & FLOAT( tpdom(:,:)%tmk ) 
 !
 ! .. Define the northern and southern domains 
 !
@@ -205,6 +208,7 @@ SUBROUTINE gltools_chkglo(omsg,tpdom,tpsit,&
 #endif
 !
   ENDIF 
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_CHKGLO',1,ZHOOK_HANDLE)
 !
 !
 !

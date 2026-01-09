@@ -101,6 +101,7 @@ SUBROUTINE glt_gelato( tpglt,ygltparam,ygltvhd)
 !
 ! * Contains physical constants.
 USE modd_glt_const_thm 
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
 !
 #if ! defined in_surfex
 ! * Contains physical constants for elastic viscous-plastic dynamics 
@@ -140,6 +141,7 @@ IMPLICIT NONE
 TYPE(t_glt), INTENT(inout)       ::  tpglt
 TYPE(t_glt_param), INTENT(inout) ::  ygltparam
 TYPE(t_glt_vhd), INTENT(inout)   ::  ygltvhd
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -149,6 +151,7 @@ TYPE(t_glt_vhd), INTENT(inout)   ::  ygltvhd
 ! 2.1. Local variables
 ! ---------------------
 !
+IF (LHOOK) CALL DR_HOOK('GLT_GELATO',0,ZHOOK_HANDLE)
 IF (ygltparam%lp1) THEN
   WRITE(ygltparam%noutlu,*) ' '
   WRITE(ygltparam%noutlu,*) '  ** LEVEL 2 - SUBROUTINE GELATO'
@@ -167,9 +170,9 @@ CALL initfl( tpglt%tfl,ygltparam%nx,ygltparam%ny )
 ! ----------------------------
 !
 CALL inidia( tpglt%ind,tpglt%dia,tpglt%cdia0,tpglt%cdia,&
-    ygltparam%ndiamax,ygltparam%nx,ygltparam%ny )
+    & ygltparam%ndiamax,ygltparam%nx,ygltparam%ny ) 
 CALL gltools_timers(ygltparam%ntimers,ygltparam%ntimlu,ygltparam%ntimnum,&
-ygltparam%xtime,ygltparam%clabel,ygltparam%lwg,'end inidia') 
+& ygltparam%xtime,ygltparam%clabel,ygltparam%lwg,'end inidia')  
 !
 !
 ! 2.4. Budgets initialization
@@ -179,11 +182,11 @@ CALL glt_inibud( tpglt%bud )
 !
 
 CALL glt_info_si( 'Initial conditions:',tpglt%dom,&
-ygltparam%niceage,ygltparam%nicesal,ygltparam%nl,ygltparam%nmponds,ygltparam%noutlu,ygltparam%nt,ygltparam%nx,ygltparam%ny,&
-ygltparam%lp2,ygltparam%lp3,&
-tpsit=tpglt%sit )
+& ygltparam%niceage,ygltparam%nicesal,ygltparam%nl,ygltparam%nmponds,ygltparam%noutlu,ygltparam%nt,ygltparam%nx,ygltparam%ny,&
+& ygltparam%lp2,ygltparam%lp3,&
+& tpsit=tpglt%sit ) 
 CALL gltools_timers(ygltparam%ntimers,ygltparam%ntimlu,ygltparam%ntimnum,&
-ygltparam%xtime,ygltparam%clabel,ygltparam%lwg,'end inibud')
+& ygltparam%xtime,ygltparam%clabel,ygltparam%lwg,'end inibud') 
 !
 !
 !
@@ -210,7 +213,7 @@ ygltparam%lp5 = (ygltparam%lwg.AND.ygltparam%nprinto>=5)
 !
 
 IF ( tpglt%ind%cur==tpglt%ind%beg ) CALL inisal(tpglt%dom,tpglt%tml,tpglt%sit,&
-    ygltparam%nicesal,ygltparam%nt,ygltparam%nx,ygltparam%ny )
+    & ygltparam%nicesal,ygltparam%nt,ygltparam%nx,ygltparam%ny ) 
 !
 
 !
@@ -222,11 +225,11 @@ IF ( tpglt%ind%cur==tpglt%ind%beg ) CALL inisal(tpglt%dom,tpglt%tml,tpglt%sit,&
 !
 
 CALL glt_updbud( 1,'Initial conditions:',  &
-  tpglt%dom,tpglt%tml,tpglt%tfl,tpglt%atm_all,tpglt%blkw,tpglt%blki,  &
-  tpglt%sit,tpglt%sil,tpglt%bud,&
-  ygltparam%niceage,ygltparam%nicesal,ygltparam%nilay,ygltparam%nmponds,ygltparam%nl,ygltparam%noutlu,ygltparam%nprinto,&
-  ygltparam%nslay,ygltparam%nsnwrad,ygltparam%nt,ygltparam%nx,ygltparam%ny,&
-  ygltparam%dtt,ygltparam%xdomsrf_g,ygltparam%lp1,ygltparam%lp2,ygltparam%lp3,ygltparam%lwg,ygltparam%sf3tinv)
+  & tpglt%dom,tpglt%tml,tpglt%tfl,tpglt%atm_all,tpglt%blkw,tpglt%blki,  &
+  & tpglt%sit,tpglt%sil,tpglt%bud,&
+  & ygltparam%niceage,ygltparam%nicesal,ygltparam%nilay,ygltparam%nmponds,ygltparam%nl,ygltparam%noutlu,ygltparam%nprinto,&
+  & ygltparam%nslay,ygltparam%nsnwrad,ygltparam%nt,ygltparam%nx,ygltparam%ny,&
+  & ygltparam%dtt,ygltparam%xdomsrf_g,ygltparam%lp1,ygltparam%lp2,ygltparam%lp3,ygltparam%lwg,ygltparam%sf3tinv) 
 !
 
 !
@@ -240,23 +243,23 @@ IF ( ygltparam%ntd==0 ) THEN
 !
 
   CALL glt_thermo  &
-      ( ygltparam,ygltvhd,&
-    tpglt%dom,tpglt%ust,tpglt%tml,tpglt%atm_all,tpglt%blkw,tpglt%blki,  &
-    tpglt%bud,tpglt%dia,tpglt%tfl,tpglt%sit,tpglt%sil )
+      & ( ygltparam,ygltvhd,&
+    & tpglt%dom,tpglt%ust,tpglt%tml,tpglt%atm_all,tpglt%blkw,tpglt%blki,  &
+    & tpglt%bud,tpglt%dia,tpglt%tfl,tpglt%sit,tpglt%sil ) 
 
 ELSE
 ! 
 ! .. Thermodynamics with sea ice constraint (no energy conservation)
 !
   CALL glt_thermo  &
-      ( ygltparam,ygltvhd,&
-    tpglt%dom,tpglt%ust,tpglt%tml,tpglt%atm_all,tpglt%blkw,tpglt%blki,  &
-    tpglt%bud,tpglt%dia,tpglt%tfl,tpglt%sit,tpglt%sil,tpsit_d=tpglt%sit_d )
+      & ( ygltparam,ygltvhd,&
+    & tpglt%dom,tpglt%ust,tpglt%tml,tpglt%atm_all,tpglt%blkw,tpglt%blki,  &
+    & tpglt%bud,tpglt%dia,tpglt%tfl,tpglt%sit,tpglt%sil,tpsit_d=tpglt%sit_d ) 
         
 ENDIF
 !
 CALL gltools_timers(ygltparam%ntimers,ygltparam%ntimlu,ygltparam%ntimnum,&
-ygltparam%xtime,ygltparam%clabel,ygltparam%lwg,'end thermo')
+& ygltparam%xtime,ygltparam%clabel,ygltparam%lwg,'end thermo') 
 !
 !
 IF (ygltparam%lp1) THEN
@@ -264,6 +267,7 @@ IF (ygltparam%lp1) THEN
   WRITE(ygltparam%noutlu,*) '  ** LEVEL 2 - END SUBROUTINE GELATO'
   WRITE(ygltparam%noutlu,*) ' '
 ENDIF
+IF (LHOOK) CALL DR_HOOK('GLT_GELATO',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE glt_gelato
 !

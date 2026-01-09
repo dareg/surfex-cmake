@@ -106,11 +106,12 @@
 ! .. Subroutine used to check global heat budget.
 !
 SUBROUTINE glt_updbud_r  &
-  ( kinit,omsg,tpdom,tpmxl,tptfl,tpatm,tpblkw,tpblki,tpsit,tpsil,tpbud, &
-    niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nslay,nsnwrad,nt,  &
-    dtt,xdomsrf_r,lp1,lp2,lp3,lwg,sf3tinv)
+  & ( kinit,omsg,tpdom,tpmxl,tptfl,tpatm,tpblkw,tpblki,tpsit,tpsil,tpbud, &
+    & niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nslay,nsnwrad,nt,  &
+    & dtt,xdomsrf_r,lp1,lp2,lp3,lwg,sf3tinv) 
 !
   USE modd_types_glt
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_thm
   USE mode_glt_stats_r
   USE mode_glt_info_r
@@ -118,51 +119,53 @@ SUBROUTINE glt_updbud_r  &
   IMPLICIT NONE
 !
   INTEGER, INTENT(in) ::  &
-         kinit,noutlu,nl,nt,np,nprinto,nsnwrad,nicesal,niceage,nmponds,nilay,nslay
+         & kinit,noutlu,nl,nt,np,nprinto,nsnwrad,nicesal,niceage,nmponds,nilay,nslay 
   LOGICAL, INTENT(in) ::  &
-         lwg,lp1,lp2,lp3
+         & lwg,lp1,lp2,lp3 
   REAL, INTENT(in) ::  xdomsrf_r,dtt
   REAL,DIMENSION(:), INTENT(in) :: sf3tinv
   CHARACTER(*), INTENT(in) ::  &
-         omsg
+         & omsg 
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
-        tpdom
+        & tpdom 
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
-        tpmxl
+        & tpmxl 
   TYPE(t_tfl), DIMENSION(np), INTENT(in) ::  &
-        tptfl
+        & tptfl 
   TYPE(t_atm), DIMENSION(np), INTENT(in) ::  &
-        tpatm
+        & tpatm 
   TYPE(t_blk), DIMENSION(np), INTENT(in) ::  &
-        tpblkw
+        & tpblkw 
   TYPE(t_blk), DIMENSION(nt,np), INTENT(in) ::  &
-        tpblki
+        & tpblki 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::  &
-        tpsit
+        & tpsit 
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(in) ::  &
-        tpsil
+        & tpsil 
   TYPE(t_bud), DIMENSION(np), INTENT(inout) ::  &
-        tpbud
+        & tpbud 
 !
   INTEGER ::  &
-        jl
+        & jl 
   REAL ::  &
-        zenthalpy0,zhiit0,zbiit0,zhii0,zhio0,   &
-        zhli0,zhlo0,zwio0,zwlo0,zwii0,zwli0,zcio0,zclo0,  &
-        zwater0,zsalt0
+        & zenthalpy0,zhiit0,zbiit0,zhii0,zhio0,   &
+        & zhli0,zhlo0,zwio0,zwlo0,zwii0,zwli0,zcio0,zclo0,  &
+        & zwater0,zsalt0 
   REAL, DIMENSION(np) ::  &
-        zfsit
+        & zfsit 
   REAL, DIMENSION(np) ::  &
-        zenthalpy2,zhiit2,zbiit2,  &
-        znli2,zniit2,zhli2,zhlo2,zwii2,zwli2,zwater2,zsalt2
+        & zenthalpy2,zhiit2,zbiit2,  &
+        & znli2,zniit2,zhli2,zhlo2,zwii2,zwli2,zwater2,zsalt2 
   REAL, DIMENSION(nt,np) ::  &
-        zenthalpys,zenthalpyi,zmsi,zmsn
+        & zenthalpys,zenthalpyi,zmsi,zmsn 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
 ! 1. Initializations
 ! ==================
 !
+IF (LHOOK) CALL DR_HOOK('GLT_UPDBUD_R',0,ZHOOK_HANDLE)
   IF (lp1) THEN
       WRITE(noutlu,*) ' ' 
       WRITE(noutlu,*) ' **** glt_updbud_r ****' 
@@ -202,7 +205,7 @@ SUBROUTINE glt_updbud_r  &
 !
 ! Energy
       zniit2(:) = tpatm(:)%sop *  &
-        SUM( tpsit(:,:)%fsi*tpsil(nl,:,:)%ent, DIM=1 )
+        & SUM( tpsit(:,:)%fsi*tpsil(nl,:,:)%ent, DIM=1 ) 
 !        ( -xmhofusn0*zfsit(:) +  &
 !          SUM( tpsit(:,:)%fsi *  &
 !               ( cpice0*tpsit(:,:)%tsf ),DIM=1 ) )  ! +  &
@@ -210,11 +213,11 @@ SUBROUTINE glt_updbud_r  &
 !        xmhofusn0*zfsit(:)
 ! atm -> ice energy
       zhiit2(:) =  &
-        SUM( tpsit(:,:)%fsi*  &
-        ( tpblki(:,:)%nsf+tpblki(:,:)%swa ), DIM=1 )
+        & SUM( tpsit(:,:)%fsi*  &
+        & ( tpblki(:,:)%nsf+tpblki(:,:)%swa ), DIM=1 ) 
 ! oce -> ice energy ( qoc can only be determined a posteriori, in glt_updhsi_r )
       zbiit2(:) =  &
-        tpmxl(:)%qml*zfsit(:)    ! + tpmxl(:)%qoc
+        & tpmxl(:)%qml*zfsit(:)    ! + tpmxl(:)%qoc 
 !
       tpbud(:)%nii = zniit2(:)
       tpbud(:)%hii = zhiit2(:)+zniit2(:)
@@ -222,7 +225,7 @@ SUBROUTINE glt_updbud_r  &
 !
 ! Water
       zwii2(:) = zfsit(:)*( tpatm(:)%sop + tpatm(:)%lip ) +  &
-        SUM( tpsit(:,:)%fsi*tpblki(:,:)%eva, DIM=1 )
+        & SUM( tpsit(:,:)%fsi*tpblki(:,:)%eva, DIM=1 ) 
       tpbud(:)%wii = zwii2(:)*xday2sec 
   ENDIF
 !
@@ -238,19 +241,19 @@ SUBROUTINE glt_updbud_r  &
 !
       IF (lwg) THEN
         WRITE(noutlu,*)  &
-          '--------------------------------------------------------------------'
+          & '--------------------------------------------------------------------' 
         WRITE(noutlu,*) '    Incoming ENERGY under sea ice      :',  &
-          zbiit0
+          & zbiit0 
         WRITE(noutlu,*) '    Incoming ENERGY top of sea ice     :',  &
-          zhiit0
+          & zhiit0 
         WRITE(noutlu,*) '    Total incoming ENERGY on sea ice   :',  &
-          zhii0
+          & zhii0 
         WRITE(noutlu,*)  &
-          '--------------------------------------------------------------------'
+          & '--------------------------------------------------------------------' 
         WRITE(noutlu,*) '    Total incoming WATER on sea ice    :',  &
-          zwii0
+          & zwii0 
         WRITE(noutlu,*)  &
-          '--------------------------------------------------------------------'
+          & '--------------------------------------------------------------------' 
       ENDIF
   ENDIF
 !
@@ -262,12 +265,12 @@ SUBROUTINE glt_updbud_r  &
 !
 ! Energy
       zhli2(:) =  &
-        ( 1.-zfsit(:) )*   &
-        ( tpmxl(:)%qml+tpblkw(:)%nsf+tpblkw(:)%swa )    
+        & ( 1.-zfsit(:) )*   &
+        & ( tpmxl(:)%qml+tpblkw(:)%nsf+tpblkw(:)%swa )     
       IF ( nsnwrad==1 ) THEN
           znli2(:) = ( 1.-zfsit(:) )*  &
 !            ( cpice0*tpmxl(:)%mlf-xmhofusn0 )*tpatm(:)%sop    ! Not justified
-            ( -xmhofusn0 )*tpatm(:)%sop
+            & ( -xmhofusn0 )*tpatm(:)%sop 
         ELSE
           znli2(:) = 0.
       ENDIF
@@ -276,7 +279,7 @@ SUBROUTINE glt_updbud_r  &
 !
 ! Water
       zwli2(:) = ( 1.-zfsit(:) )*  &
-        ( tpatm(:)%sop + tpatm(:)%lip + tpblkw(:)%eva )*xday2sec
+        & ( tpatm(:)%sop + tpatm(:)%lip + tpblkw(:)%eva )*xday2sec 
       tpbud(:)%wli = zwli2(:) 
   ENDIF
 !
@@ -286,18 +289,18 @@ SUBROUTINE glt_updbud_r  &
       zhli0 = glt_avg_r( tpdom,tpbud(:)%hli,0,np,xdomsrf_r )
       IF (lwg) THEN
         WRITE(noutlu,*) '    Total incoming ENERGY (on leads)   :',  &
-          zhli0
+          & zhli0 
         WRITE(noutlu,*)  &
-          '--------------------------------------------------------------------'
+          & '--------------------------------------------------------------------' 
       ENDIF
 !
 ! Water
       zwli0 = glt_avg_r( tpdom,tpbud(:)%wli,0,np,xdomsrf_r )
       IF (lwg) THEN
         WRITE(noutlu,*) '    Total incoming WATER (on leads)    :',  &
-          zwli0
+          & zwli0 
         WRITE(noutlu,*)  &
-          '--------------------------------------------------------------------'
+          & '--------------------------------------------------------------------' 
       ENDIF 
   ENDIF
 !
@@ -316,9 +319,9 @@ SUBROUTINE glt_updbud_r  &
       zhio0 = glt_avg_r( tpdom,tpbud(:)%hio,0,np,xdomsrf_r )
       IF (lwg) THEN
         WRITE(noutlu,*) '    Total outgoing ENERGY (under sea ice) :',  &
-          zhio0
+          & zhio0 
         WRITE(noutlu,*)  &
-          '--------------------------------------------------------------------'
+          & '--------------------------------------------------------------------' 
       ENDIF 
 !
 ! Water
@@ -327,9 +330,9 @@ SUBROUTINE glt_updbud_r  &
       zwio0 = glt_avg_r( tpdom,tptfl(:)%wio,0,np,xdomsrf_r )*xday2sec
       IF (lwg) THEN
         WRITE(noutlu,*) '    Total outgoing WATER (under sea ice)  :',  &
-          zwio0
+          & zwio0 
         WRITE(noutlu,*)  &
-          '--------------------------------------------------------------------'
+          & '--------------------------------------------------------------------' 
       ENDIF
 !
 ! Salt
@@ -341,9 +344,9 @@ SUBROUTINE glt_updbud_r  &
       zcio0 = glt_avg_r( tpdom,zsalt2,0,np,xdomsrf_r )*xday2sec
       IF (lwg) THEN
         WRITE(noutlu,*) '    Total outgoing SALT (under sea ice)   :',  &
-          zcio0
+          & zcio0 
         WRITE(noutlu,*)  &
-          '--------------------------------------------------------------------'
+          & '--------------------------------------------------------------------' 
       ENDIF
   ENDIF
 !
@@ -360,18 +363,18 @@ SUBROUTINE glt_updbud_r  &
       zhlo0 = glt_avg_r( tpdom,tpbud(:)%hlo,0,np,xdomsrf_r )
       IF (lwg) THEN
         WRITE(noutlu,*) '    Total outgoing ENERGY (under leads)   :',  &
-          zhlo0
+          & zhlo0 
         WRITE(noutlu,*)  &
-          '--------------------------------------------------------------------'
+          & '--------------------------------------------------------------------' 
       ENDIF
 !
 ! Water
       zwlo0 = glt_avg_r( tpdom,tptfl%wlo,0,np,xdomsrf_r )*xday2sec
       IF (lwg) THEN
         WRITE(noutlu,*) '    Total outgoing WATER (under leads)    :',  &
-          zwlo0
+          & zwlo0 
         WRITE(noutlu,*)  &
-          '--------------------------------------------------------------------'
+          & '--------------------------------------------------------------------' 
       ENDIF
 !
 ! Salt
@@ -398,11 +401,11 @@ SUBROUTINE glt_updbud_r  &
   zenthalpyi(:,:) = 0.
   DO jl=1,nilay
     zenthalpyi(:,:) = zenthalpyi(:,:) +  &
-      sf3tinv(jl) * zmsi(:,:) * tpsil(jl,:,:)%ent
+      & sf3tinv(jl) * zmsi(:,:) * tpsil(jl,:,:)%ent 
   END DO
 !
   zenthalpys(:,:) =  &
-    zmsn(:,:) * SUM( tpsil(nilay+1:nl,:,:)%ent,DIM=1 )/FLOAT(nslay)
+    & zmsn(:,:) * SUM( tpsil(nilay+1:nl,:,:)%ent,DIM=1 )/FLOAT(nslay) 
 !
   zenthalpy2(:) = SUM( zenthalpys(:,:)+zenthalpyi(:,:), DIM=1 )
 !
@@ -420,10 +423,10 @@ SUBROUTINE glt_updbud_r  &
       zenthalpy0 = glt_avg_r( tpdom, tpbud(:)%enn-tpbud(:)%eni,0,np,xdomsrf_r ) / dtt
       IF (lwg) THEN
         WRITE(noutlu,*)  &
-          '    D(enthalpy) from beg. of time step :',  &
-          zenthalpy0
+          & '    D(enthalpy) from beg. of time step :',  &
+          & zenthalpy0 
         WRITE(noutlu,*)  &
-          '--------------------------------------------------------------------'
+          & '--------------------------------------------------------------------' 
       ENDIF
   ENDIF
 !
@@ -435,8 +438,8 @@ SUBROUTINE glt_updbud_r  &
 !
 ! Sea ice + snow fresh water content
   zwater2(:) =  xday2sec*( &
-    SUM( zmsi(:,:)*( 1.-1.e-3*tpsit(:,:)%ssi ), DIM=1 ) +  &
-    SUM( zmsn(:,:), DIM=1 ) )
+    & SUM( zmsi(:,:)*( 1.-1.e-3*tpsit(:,:)%ssi ), DIM=1 ) +  &
+    & SUM( zmsn(:,:), DIM=1 ) ) 
 !
 ! .. Initial fresh water content of sea ice + snow cover is initialised if
 ! kinit flag is on.
@@ -450,9 +453,9 @@ SUBROUTINE glt_updbud_r  &
       zwater0 = glt_avg_r( tpdom,tpbud(:)%fwn-tpbud(:)%fwi,0,np,xdomsrf_r ) / dtt
       IF (lwg) THEN
         WRITE(noutlu,*) '    D(water) from beg. of time step   :',  &
-          zwater0
+          & zwater0 
         WRITE(noutlu,*)  &
-          '--------------------------------------------------------------------'
+          & '--------------------------------------------------------------------' 
       ENDIF
   ENDIF
 ! 
@@ -462,7 +465,7 @@ SUBROUTINE glt_updbud_r  &
 !
 ! Sea ice salt content
   zsalt2(:) = xday2sec*  &
-    SUM( zmsi(:,:)*1.e-3*tpsit(:,:)%ssi, DIM=1 )
+    & SUM( zmsi(:,:)*1.e-3*tpsit(:,:)%ssi, DIM=1 ) 
 !
 ! .. Initial salt content of sea ice is initialised if kinit flag is on.
 !
@@ -475,9 +478,9 @@ SUBROUTINE glt_updbud_r  &
       zsalt0 = glt_avg_r( tpdom,tpbud(:)%isn-tpbud(:)%isi,0,np,xdomsrf_r ) / dtt
       IF (lwg) THEN
         WRITE(noutlu,*) '    D(salt) from beg. of time step    :',  &
-          zsalt0
+          & zsalt0 
         WRITE(noutlu,*)  &
-          '--------------------------------------------------------------------'
+          & '--------------------------------------------------------------------' 
       ENDIF
   ENDIF
 !
@@ -492,24 +495,25 @@ SUBROUTINE glt_updbud_r  &
 !
   IF (lp1) THEN
       WRITE(noutlu,*) '    Total incoming energy (leads+ice)  :',  &
-        zhii0+zhli0
+        & zhii0+zhli0 
       WRITE(noutlu,*) '    D(enthalpy) + outg. ENERGY         :',  &
-        zenthalpy0+zhio0+zhlo0
+        & zenthalpy0+zhio0+zhlo0 
       WRITE(noutlu,*) '    ENERGY BALANCE                     :',  &
-        zenthalpy0+zhio0+zhlo0-(zhii0+zhli0)
+        & zenthalpy0+zhio0+zhlo0-(zhii0+zhli0) 
       WRITE(noutlu,*)  &
-        '--------------------------------------------------------------------'
+        & '--------------------------------------------------------------------' 
       WRITE(noutlu,*) '    Total incoming + outgoing water (leads+ice)   :',  &
-        zwii0+zwli0-zwio0-zwlo0
+        & zwii0+zwli0-zwio0-zwlo0 
       WRITE(noutlu,*) '    WATER  BALANCE                                :',  &
-        zwii0+zwli0-zwio0-zwlo0-zwater0
+        & zwii0+zwli0-zwio0-zwlo0-zwater0 
       WRITE(noutlu,*)  &
-        '--------------------------------------------------------------------'
+        & '--------------------------------------------------------------------' 
       WRITE(noutlu,*) '    SALT  BALANCE                                 :',  &
-        -zcio0-zsalt0
+        & -zcio0-zsalt0 
       WRITE(noutlu,*)  &
-        '--------------------------------------------------------------------'
+        & '--------------------------------------------------------------------' 
   ENDIF
+IF (LHOOK) CALL DR_HOOK('GLT_UPDBUD_R',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE glt_updbud_r
 

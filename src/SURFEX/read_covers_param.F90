@@ -37,6 +37,7 @@
 !!    R. Alkama    05/2012 : read 19 vegtypes rather than 12
 !     10/2014 : add status='old' for ecoclimap.bin files E. Martin
 !     10/2016 : Port to single precision, P. Marguinaud 
+!     R. El Khatib 05-Aug-2024 Portability fix for endianess
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -98,6 +99,9 @@ IF (LHOOK) CALL DR_HOOK('READ_COVERS_PARAM',0,ZHOOK_HANDLE)
 !opening of the file
 IF (KFILE==1) THEN
   OPEN(41,FILE='ecoclimapI_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT', &
+#ifdef LITTLE_ENDIAN
+          CONVERT='BIG_ENDIAN',&
+#endif
           recl=20*8,STATUS='OLD',IOSTAT=IERR_OPEN)  
   IF (IERR_OPEN /= 0 ) THEN
           CALL ABOR1_SFX ('ERROR WHILE OPENING ''ecoclimapI_covers_param.bin'' THIS FILE IS NEEDED AND MUST BE'// &
@@ -107,6 +111,9 @@ IF (KFILE==1) THEN
   INB_AN = 1
 ELSEIF (KFILE==2) THEN
   OPEN(41,FILE='ecoclimapII_eu_covers_param.bin',FORM='UNFORMATTED',ACCESS='DIRECT',  &
+#ifdef LITTLE_ENDIAN
+          CONVERT='BIG_ENDIAN',&
+#endif
           recl=20*8,STATUS='OLD',IOSTAT=IERR_OPEN)
   IF (IERR_OPEN /= 0 ) THEN
           CALL ABOR1_SFX ('ERROR WHILE OPENING ''ecoclimapII_eu_covers_param.bin'' THIS FILE IS NEEDED AND MUST BE'// &

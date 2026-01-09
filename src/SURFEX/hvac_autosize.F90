@@ -51,15 +51,7 @@ USE MODI_DIAG_MISC_TEB_INIT_n
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
-#ifdef AIX64 
-USE OMP_LIB
-#endif
-!
 IMPLICIT NONE
-!
-#ifndef AIX64
-  INCLUDE 'omp_lib.h'
-#endif
 !
 !*    0.1    Declaration of arguments
 !            ------------------------

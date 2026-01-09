@@ -233,7 +233,8 @@ IF (LNAM_READ) THEN
  !                  
  CALL DEFAULT_CH_DEP(IM%CHI%CCH_DRY_DEP)
  CALL DEFAULT_CH_BIO_FLUX(IM%CHI%LCH_BIO_FLUX)                  
- CALL DEFAULT_DIAG_ISBA(IM%ID%O%N2M, IM%ID%O%LSURF_BUDGET, IM%ID%O%L2M_MIN_ZS, IM%ID%O%LRAD_BUDGET, &
+ CALL DEFAULT_DIAG_ISBA(IM%ID%O%N2M, IM%ID%O%LSURF_BUDGET, IM%ID%O%L2M_MIN_ZS, IM%ID%O%LHU2M_QSAT,  &
+                        IM%ID%O%LRAD_BUDGET,                                                        &
                         IM%ID%O%LCOEF, IM%ID%O%LSURF_VARS, IM%ID%DE%LSURF_EVAP_BUDGET,              &
                         IM%ID%DM%LSURF_MISC_BUDGET, IM%ID%DM%LSURF_DIAG_ALBEDO,                     &
                         IM%ID%O%LSURF_BUDGETC, IM%ID%DM%LSURF_MISC_DIF, IM%ID%O%LPATCH_BUDGET,      &

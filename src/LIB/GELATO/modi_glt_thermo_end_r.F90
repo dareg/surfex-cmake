@@ -97,7 +97,7 @@
 ! ----------------------- SUBROUTINE glt_thermo_end_r -----------------------
 
 SUBROUTINE glt_thermo_end_r(tpdom,tpml,tpldsit,tpldsil,tpsit,tpsil,&
-niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nt,dtt,lp1,lwg,thick )
+& niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nt,dtt,lp1,lwg,thick ) 
 !
 !
 ! 1. Declarations
@@ -107,6 +107,7 @@ niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nt,dtt,lp1,lwg,thick )
 ! -------------------------
 !
   USE modd_types_glt
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_thm
   USE modi_gltools_mixice_r
   USE modi_gltools_chkglo_r
@@ -124,34 +125,35 @@ niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nt,dtt,lp1,lwg,thick )
 !
 ! --- INTENT(in) arguments.
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
-        tpdom           
+        & tpdom            
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
-        tpml
+        & tpml 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::  &
-        tpldsit
+        & tpldsit 
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(in) ::  &
-        tpldsil
+        & tpldsil 
 !        
 ! --- INTENT(inout) arguments.
   TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
-        tpsit
+        & tpsit 
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(inout) ::  &
-        tpsil
+        & tpsil 
 !
 !
 ! 1.3. Local variables declarations
 ! ----------------------------------
 
   INTEGER ::  &
-        it,jp,jh,jk,intype
+        & it,jp,jh,jk,intype 
   INTEGER, DIMENSION(nt,np) ::  &
-        inbth_in_cl
+        & inbth_in_cl 
   REAL, DIMENSION(np) ::  &
-        z2_scell
+        & z2_scell 
   TYPE(t_sit), DIMENSION(:,:,:), ALLOCATABLE ::  &
-        tzsit
+        & tzsit 
   TYPE(t_vtp), DIMENSION(:,:,:,:), ALLOCATABLE ::  &
-        tzsil
+        & tzsil 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !        
 !
 !
@@ -161,6 +163,7 @@ niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nt,dtt,lp1,lwg,thick )
 ! 2.1. Welcome message
 ! ---------------------
 !
+IF (LHOOK) CALL DR_HOOK('GLT_THERMO_END_R',0,ZHOOK_HANDLE)
   IF (lp1) THEN  
     WRITE(noutlu,*) ' '
     WRITE(noutlu,*) '**** LEVEL 4 - SUBROUTINE THERMO_END_R'
@@ -195,11 +198,11 @@ niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nt,dtt,lp1,lwg,thick )
   DO jk = 1,nt
     DO jh = 1,nt
       WHERE (tpldsit(jk,:)%esi .AND. thick(jh)<tpldsit(jk,:)%hsi    &
-      .AND. tpldsit(jk,:)%hsi<=thick(jh+1))
+      & .AND. tpldsit(jk,:)%hsi<=thick(jh+1)) 
         inbth_in_cl(jh,:) = inbth_in_cl(jh,:) + 1 
       ENDWHERE
       WHERE (tpsit(jk,:)%esi .AND. thick(jh)<tpsit(jk,:)%hsi        &
-      .AND. tpsit(jk,:)%hsi<=thick(jh+1))
+      & .AND. tpsit(jk,:)%hsi<=thick(jh+1)) 
         inbth_in_cl(jh,:) = inbth_in_cl(jh,:) + 1
       ENDWHERE
     END DO
@@ -247,8 +250,8 @@ niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nt,dtt,lp1,lwg,thick )
 ! .. Case of new ice that was formed on leads
 !
         IF (tpldsit(jk,jp)%esi .AND.  &
-        thick(jh)<tpldsit(jk,jp)%hsi .AND.  &
-        tpldsit(jk,jp)%hsi<=thick(jh+1)) THEN
+        & thick(jh)<tpldsit(jk,jp)%hsi .AND.  &
+        & tpldsit(jk,jp)%hsi<=thick(jh+1)) THEN 
 !
           inbth_in_cl(jh,jp) = inbth_in_cl(jh,jp) + 1 
           it = inbth_in_cl(jh,jp)
@@ -269,8 +272,8 @@ niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nt,dtt,lp1,lwg,thick )
 ! .. Case of 'older' ice
 !
         IF (tpsit(jk,jp)%esi .AND.  &
-        thick(jh)<tpsit(jk,jp)%hsi .AND.   &
-        tpsit(jk,jp)%hsi<=thick(jh+1)) THEN
+        & thick(jh)<tpsit(jk,jp)%hsi .AND.   &
+        & tpsit(jk,jp)%hsi<=thick(jh+1)) THEN 
 !
           inbth_in_cl(jh,jp) = inbth_in_cl(jh,jp) + 1
           it = inbth_in_cl(jh,jp)
@@ -294,7 +297,7 @@ niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nt,dtt,lp1,lwg,thick )
 ! .. Mix together all ice types_glt that are gathered in the same class.
 !
   CALL gltools_mixice_r(tpml,tzsit,tzsil,tpsit,tpsil,&
-niceage,nicesal,nilay,nl,nmponds,np,nt)
+& niceage,nicesal,nilay,nl,nmponds,np,nt) 
 !
 ! .. Deallocate auxiliary arrays memory.
 !
@@ -326,6 +329,7 @@ niceage,nicesal,nilay,nl,nmponds,np,nt)
     WRITE(noutlu,*) '**** LEVEL 4 - END SUBROUTINE THERMO_END_R'
     WRITE(noutlu,*) ' '
   ENDIF
+IF (LHOOK) CALL DR_HOOK('GLT_THERMO_END_R',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE glt_thermo_end_r
 !                                                                        

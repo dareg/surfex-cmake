@@ -73,23 +73,26 @@
 !
 FUNCTION gltools_strsplit( hval,knword ) RESULT(hresult)
 !
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
 IMPLICIT NONE
 !
 CHARACTER(*), INTENT(in) ::  &
-  hval
+  & hval 
 INTEGER, INTENT(in) ::  &
-  knword
+  & knword 
 CHARACTER(80), DIMENSION(knword) ::  &
-  hresult
+  & hresult 
 !
 INTEGER ::  &
-  inum,inwords
+  & inum,inwords 
 CHARACTER(1), PARAMETER ::  &
-  ysep=' '
+  & ysep=' ' 
 CHARACTER(LEN=LEN(hval)) ::  &
-  ystr
+  & ystr 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_STRSPLIT',0,ZHOOK_HANDLE)
 ystr=hval
 inum=0
 inwords=0
@@ -115,5 +118,6 @@ DO WHILE ( inum /= -1 )
       inum=-1
   ENDIF
 END DO
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_STRSPLIT',1,ZHOOK_HANDLE)
 !
 END FUNCTION gltools_strsplit

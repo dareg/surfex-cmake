@@ -4,7 +4,8 @@
 !SFX_LIC for details. version 1.
 !     #########
        SUBROUTINE CLS_TQ( PTA, PQA, PPA, PPS, PHT, PCD, PCH, PRI, &
-                          PTS, PHU, PQS, PZ0H, PH, PTNM, PQNM, PHUNM, PLMO  )  
+                          PTS, PHU, PQS, PZ0H, PH, OHU2M_QSAT,    &
+                          PTNM, PQNM, PHUNM, PLMO                 )  
 !     #####################################################################
 !
 !!****  *PARAMCLS*  
@@ -75,6 +76,8 @@ REAL, DIMENSION(:), INTENT(IN)       :: PHU    ! near-surface humidity (%)
 REAL, DIMENSION(:), INTENT(IN)       :: PQS    ! near-surface specific humidity (kg/kg)
 REAL, DIMENSION(:), INTENT(IN)       :: PZ0H   ! roughness length for heat
 REAL, DIMENSION(:), INTENT(IN)       :: PH     ! height of diagnostic
+!
+LOGICAL,            INTENT(IN)       :: OHU2M_QSAT ! flag to use QSAT, instead of QSATW, for HU2M calculation
 !
 REAL, DIMENSION(:), INTENT(OUT)      :: PTNM   ! temperature at n meters
 REAL, DIMENSION(:), INTENT(OUT)      :: PQNM   ! specific humidity at n meters
@@ -161,8 +164,13 @@ PTNM(:)=PTS(:)+ZIV(:)*(PTA(:)-PTS(:))
 YHUMIDITY='Q '
 !
 ZPNM(:) = PPS(:) + PH/PHT(:) * (PPA(:)-PPS(:))
-! Refer to QSATW, i.e. saturation humidity over water
-ZQSATNM(:) = QSATW(PTNM(:),ZPNM(:))
+IF(OHU2M_QSAT)THEN
+  ! Refer to QSAT, i.e. saturation humidity over water/ice
+  ZQSATNM(:) = QSAT(PTNM(:),ZPNM(:))
+ELSE
+  ! Refer to QSATW, i.e. saturation humidity over water only
+  ZQSATNM(:) = QSATW(PTNM(:),ZPNM(:))
+END IF
 !
 IF (YHUMIDITY=='Q ') THEN
 !        

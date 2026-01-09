@@ -76,46 +76,49 @@
 ! .. Subroutine used to check global water budget.
 !
 SUBROUTINE glt_updice_mix_r  &
-  ( kinit,intype, omsg,tpdom,tzsit,psalt_a,pice_a,&
-  noutlu,np,nt,dtt,xdomsrf_r,lwg)
+  & ( kinit,intype, omsg,tpdom,tzsit,psalt_a,pice_a,&
+  & noutlu,np,nt,dtt,xdomsrf_r,lwg) 
 !
   USE modd_types_glt
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_thm
   USE mode_glt_stats_r
   USE mode_glt_info_r
 !
   IMPLICIT NONE
   INTEGER, INTENT(in) ::  &
-         kinit, intype,noutlu,nt,np
+         & kinit, intype,noutlu,nt,np 
   REAL,INTENT(IN) :: dtt,xdomsrf_r
   LOGICAL,INTENT(IN) :: lwg
   CHARACTER(*), INTENT(in) ::  &
-        omsg
+        & omsg 
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
-        tpdom
+        & tpdom 
   TYPE(t_sit), DIMENSION(intype,nt,np), INTENT(in) ::  &
-        tzsit
+        & tzsit 
   REAL, INTENT(inout) :: &
-        psalt_a,pice_a
+        & psalt_a,pice_a 
 !
   REAL, DIMENSION(np) :: &
-        zice, zsalt
+        & zice, zsalt 
   REAL :: &
-       zice_a, zdmice, zdmsalt, zsalt_a
+       & zice_a, zdmice, zdmsalt, zsalt_a 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
+IF (LHOOK) CALL DR_HOOK('GLT_UPDICE_MIX_R',0,ZHOOK_HANDLE)
    zice(:) = rhoice*SUM(SUM(&
-             tzsit(:,:,:)%fsi*tzsit(:,:,:)%hsi, DIM=2 ), DIM=1 )
+             & tzsit(:,:,:)%fsi*tzsit(:,:,:)%hsi, DIM=2 ), DIM=1 ) 
    zice_a = glt_avg_r(tpdom, zice(:), 1,np,xdomsrf_r)
 ! Mass of salt in ice 
    zsalt(:) = rhoice*SUM(SUM( &
-     tzsit(:,:,:)%fsi*tzsit(:,:,:)%hsi*tzsit(:,:,:)%ssi, &
-              DIM=2 ), DIM=1 )*1.e-3
+     & tzsit(:,:,:)%fsi*tzsit(:,:,:)%hsi*tzsit(:,:,:)%ssi, &
+              & DIM=2 ), DIM=1 )*1.e-3 
    zsalt_a = glt_avg_r(tpdom, zsalt(:), 1,np,xdomsrf_r)
    IF ( kinit > 0) THEN
      zdmice = ( zice_a - pice_a) / dtt
      zdmsalt = ( zsalt_a - psalt_a) / dtt
      IF (lwg) THEN
        WRITE(noutlu,*)  &
-       '--------------------------------------------------------------------'
+       & '--------------------------------------------------------------------' 
        WRITE(noutlu,*) omsg,'    Salt Content      :',  zsalt_a
        WRITE(noutlu,*) '    Change in ice mass content  :', zdmice 
        WRITE(noutlu,*) '    Change in Salt content      :', zdmsalt 
@@ -125,6 +128,7 @@ SUBROUTINE glt_updice_mix_r  &
    ENDIF
    psalt_a = zsalt_a
    pice_a = zice_a
+IF (LHOOK) CALL DR_HOOK('GLT_UPDICE_MIX_R',1,ZHOOK_HANDLE)
 
 END SUBROUTINE glt_updice_mix_r
 

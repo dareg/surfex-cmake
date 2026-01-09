@@ -5,7 +5,7 @@
 !     #########
       SUBROUTINE READ_NAM_PGD_SEABATHY(HPROGRAM, HSEABATHY,             &
                                          HSEABATHYFILETYPE, HNCVARNAME,   &
-                                         PUNIF_SEABATHY)  
+                                         PUNIF_SEABATHY, PMIN_BATHY)  
 !     ##############################################################
 !
 !!**** *READ_NAM_PGD_SEABATHY* reads namelist for SEABATHY
@@ -62,6 +62,7 @@ IMPLICIT NONE
  CHARACTER(LEN=28),   INTENT(OUT)   :: HNCVARNAME        ! variable to read in netcdf
                                                         ! file
 REAL,                INTENT(OUT)   :: PUNIF_SEABATHY    ! uniform value of bathymetry
+REAL,                INTENT(OUT)   :: PMIN_BATHY        ! min value of bathymetry
 !
 !
 !*    0.2    Declaration of local variables
@@ -79,9 +80,10 @@ LOGICAL                           :: GFOUND    ! flag when namelist is present
  CHARACTER(LEN=28)        :: YNCVARNAME        ! variable to read in netcdf
                                               ! file
 REAL                     :: XUNIF_SEABATHY    ! uniform value of bathymetry
+REAL                     :: XMIN_BATHY        ! minimum bathymertry
 REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
-NAMELIST/NAM_SEABATHY/ YSEABATHY, YSEABATHYFILETYPE, YNCVARNAME, XUNIF_SEABATHY
+NAMELIST/NAM_SEABATHY/ YSEABATHY, YSEABATHYFILETYPE, YNCVARNAME, XUNIF_SEABATHY, XMIN_BATHY
 !
 !-------------------------------------------------------------------------------
 !
@@ -90,6 +92,7 @@ NAMELIST/NAM_SEABATHY/ YSEABATHY, YSEABATHYFILETYPE, YNCVARNAME, XUNIF_SEABATHY
 !
 IF (LHOOK) CALL DR_HOOK('READ_NAM_PGD_SEABATHY',0,ZHOOK_HANDLE)
 XUNIF_SEABATHY     = -300.
+XMIN_BATHY         = -1.
 YSEABATHY          = '                          '
 YSEABATHYFILETYPE  = '      '
 YNCVARNAME='rose                      '
@@ -114,6 +117,7 @@ HSEABATHY         = YSEABATHY         ! file name for bathymetry
 HSEABATHYFILETYPE = YSEABATHYFILETYPE ! bathymetry data file type
 HNCVARNAME        = YNCVARNAME        ! variable to read in netcdf
 PUNIF_SEABATHY    = XUNIF_SEABATHY    ! uniform value of bathymetry
+PMIN_BATHY        = XMIN_BATHY
 IF (LHOOK) CALL DR_HOOK('READ_NAM_PGD_SEABATHY',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

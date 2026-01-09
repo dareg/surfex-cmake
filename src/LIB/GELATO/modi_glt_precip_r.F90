@@ -117,9 +117,10 @@
 ! sea ice.
 !
 SUBROUTINE glt_precip_r( orain,osnow,tpmxl,tpatm,tpsit,tpsil,tptfl,tpdia,pqmelt,  &
-  ncdlssh,nilay,nl,nleviti,np,nsalflx,nt,dtt,rn_htopoc )
+  & ncdlssh,nilay,nl,nleviti,np,nsalflx,nt,dtt,rn_htopoc ) 
 !
   USE modd_glt_const_thm
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_types_glt
   USE mode_gltools_enthalpy
   USE modi_glt_updtfl_r
@@ -129,31 +130,32 @@ SUBROUTINE glt_precip_r( orain,osnow,tpmxl,tpatm,tpsit,tpsil,tptfl,tpdia,pqmelt,
   INTEGER,INTENT(IN) :: nilay,nleviti,nl,nt,np , ncdlssh,nsalflx
   REAL,INTENT(IN) :: dtt ,rn_htopoc
   LOGICAL, DIMENSION(np), INTENT(in) ::  &
-        orain,osnow
+        & orain,osnow 
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
-        tpmxl
+        & tpmxl 
   TYPE(t_atm), DIMENSION(np), INTENT(in) ::  &
-        tpatm   
+        & tpatm    
   TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
-        tpsit
+        & tpsit 
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(inout) ::  &
-        tpsil
+        & tpsil 
   TYPE(t_tfl), DIMENSION(np), INTENT(inout) ::  &
-        tptfl
+        & tptfl 
   TYPE(t_dia), DIMENSION(np), INTENT(inout) ::  &
-        tpdia
+        & tpdia 
   REAL, DIMENSION(nt,np), INTENT(inout) ::   &
-        pqmelt
+        & pqmelt 
 !
   INTEGER ::  &
-        jk,jl,jp
+        & jk,jl,jp 
   INTEGER, PARAMETER ::  &
-        nrn2ice=0
+        & nrn2ice=0 
   REAL, DIMENSION(np) ::  &
-        zpcps,zpcpr,zfsit,zwork,zqm
+        & zpcps,zpcpr,zfsit,zwork,zqm 
   REAL, DIMENSION(nt,np) ::  &
-        zrsn,zhsn,zmsn,zt,zdmwat,zent,zentsn,zsalt
+        & zrsn,zhsn,zmsn,zt,zdmwat,zent,zentsn,zsalt 
         real,dimension(np) :: zei1,zei2,zes1,zes2
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !        real,dimension(nl,nt,np) :: zenth
 !
 !
@@ -163,6 +165,7 @@ SUBROUTINE glt_precip_r( orain,osnow,tpmxl,tpatm,tpsit,tpsil,tptfl,tpdia,pqmelt,
 !
 ! .. 3D real arrays
 !
+IF (LHOOK) CALL DR_HOOK('GLT_PRECIP_R',0,ZHOOK_HANDLE)
   pqmelt(:,:) = 0.
   zdmwat(:,:) = 0.
 !  CALL glt_aventh(tpsit,tpsil,zei1,zes1)
@@ -205,9 +208,9 @@ SUBROUTINE glt_precip_r( orain,osnow,tpmxl,tpatm,tpsit,tpsil,tptfl,tpdia,pqmelt,
 !
   WHERE ( tpsit(:,:)%esi )
       tpsit(:,:)%rsn = rhosnwmax +  &
-        (tpsit(:,:)%rsn-rhosnwmax)*exp(-tauf*dtt/xday2sec)
+        & (tpsit(:,:)%rsn-rhosnwmax)*exp(-tauf*dtt/xday2sec) 
       tpsit(:,:)%hsn =  &
-        tpsit(:,:)%hsn * zrsn(:,:) / tpsit(:,:)%rsn
+        & tpsit(:,:)%hsn * zrsn(:,:) / tpsit(:,:)%rsn 
   ENDWHERE 
 !
   WHERE ( .NOT.tpsit(:,:)%esi )
@@ -249,11 +252,11 @@ SUBROUTINE glt_precip_r( orain,osnow,tpmxl,tpatm,tpsit,tpsil,tptfl,tpdia,pqmelt,
     zwork(:) = 0.
 !    print*,'avant =',tpsil(nilay+1,jk,:)%ent
     WHERE ( orain(:) .AND. tpsit(jk,:)%esi .AND.  &
-    zhsn(jk,:)>epsil1 )
+    & zhsn(jk,:)>epsil1 ) 
 !
 ! .. Density increase without increase in snow layer thickness
       tpsit(jk,:)%rsn =  &
-        ( zmsn(jk,:) + zpcpr(:) ) / zhsn(jk,:)
+        & ( zmsn(jk,:) + zpcpr(:) ) / zhsn(jk,:) 
       zwork(:) =  zpcpr(:)*tpsit(jk,:)%fsi / dtt
     ENDWHERE
 !    print*,'apres =',tpsil(nilay+1,jk,:)%ent
@@ -267,9 +270,9 @@ SUBROUTINE glt_precip_r( orain,osnow,tpmxl,tpatm,tpsit,tpsil,tptfl,tpdia,pqmelt,
 ! to the leads)
 !
     WHERE ( orain(:) .AND. tpsit(jk,:)%esi .AND.  &
-    zhsn(jk,:)<=epsil1 )
+    & zhsn(jk,:)<=epsil1 ) 
       tptfl(:)%wlo = tptfl(:)%wlo +  &
-        tpsit(jk,:)%fsi*zpcpr(:)/dtt
+        & tpsit(jk,:)%fsi*zpcpr(:)/dtt 
     ENDWHERE
 !
 !
@@ -289,12 +292,12 @@ SUBROUTINE glt_precip_r( orain,osnow,tpmxl,tpatm,tpsit,tpsil,tptfl,tpdia,pqmelt,
     IF ( nrn2ice == 1 ) THEN    ! Transform snow into ice 
 !
         WHERE ( orain(:) .AND. tpsit(jk,:)%esi .AND.  &
-        tpsit(jk,:)%hsn>epsil1 .AND.  &
-        tpsit(jk,:)%rsn>rhosnwmax .AND. tpsit(jk,:)%rsn<rhoice )
+        & tpsit(jk,:)%hsn>epsil1 .AND.  &
+        & tpsit(jk,:)%rsn>rhosnwmax .AND. tpsit(jk,:)%rsn<rhoice ) 
           tpsit(jk,:)%hsi = tpsit(jk,:)%hsi + tpsit(jk,:)%hsn*  &
-            (tpsit(jk,:)%rsn-rhosnwmax)/(rhoice-rhosnwmax)
+            & (tpsit(jk,:)%rsn-rhosnwmax)/(rhoice-rhosnwmax) 
           tpsit(jk,:)%hsn = tpsit(jk,:)%hsn*  &
-            (rhoice-tpsit(jk,:)%rsn)/(rhoice-rhosnwmax) 
+            & (rhoice-tpsit(jk,:)%rsn)/(rhoice-rhosnwmax)  
           tpsit(jk,:)%rsn = rhosnwmax
         ENDWHERE
 !
@@ -302,7 +305,7 @@ SUBROUTINE glt_precip_r( orain,osnow,tpmxl,tpatm,tpsit,tpsil,tptfl,tpdia,pqmelt,
 ! snow is turned into sea ice
 !
         WHERE ( orain(:) .AND. tpsit(jk,:)%esi .AND.  &
-        tpsit(jk,:)%hsn>epsil1 .AND. tpsit(jk,:)%rsn>rhoice )
+        & tpsit(jk,:)%hsn>epsil1 .AND. tpsit(jk,:)%rsn>rhoice ) 
           tpsit(jk,:)%hsi = tpsit(jk,:)%hsi + tpsit(jk,:)%hsn
           tpsit(jk,:)%hsn = 0.
           tpsit(jk,:)%rsn = rhosnwmin
@@ -313,16 +316,16 @@ SUBROUTINE glt_precip_r( orain,osnow,tpmxl,tpatm,tpsit,tpsil,tptfl,tpdia,pqmelt,
 !
         WHERE ( orain(:) .AND. tpsit(jk,:)%esi .AND. pqmelt(jk,:)>0. )
           tpsit(jk,:)%hsn = tpsit(jk,:)%hsn -  &
-            dtt*pqmelt(jk,:) / ( xmhofusn0*tpsit(jk,:)%rsn )
+            & dtt*pqmelt(jk,:) / ( xmhofusn0*tpsit(jk,:)%rsn ) 
           pqmelt(jk,:) = -AMIN1( 0.,tpsit(jk,:)%hsn )*  &
-            xmhofusn0*tpsit(jk,:)%rsn / dtt
+            & xmhofusn0*tpsit(jk,:)%rsn / dtt 
         ENDWHERE
 !
 ! zqmelt  should go to the mixed layer in this case, not to the surface of sea
 ! ice !
 !
         WHERE ( orain(:) .AND.  &
-        (.NOT. tpsit(jk,:)%esi .OR. tpsit(jk,:)%hsn<epsil1) )
+        & (.NOT. tpsit(jk,:)%esi .OR. tpsit(jk,:)%hsn<epsil1) ) 
           tpsit(jk,:)%hsn = 0.
           tpsit(jk,:)%rsn = rhosnwmin
         ENDWHERE
@@ -336,9 +339,9 @@ SUBROUTINE glt_precip_r( orain,osnow,tpmxl,tpatm,tpsit,tpsil,tptfl,tpdia,pqmelt,
       ELSE
 ! 
         WHERE ( orain(:) .AND. tpsit(jk,:)%esi .AND.  &
-        tpsit(jk,:)%hsn>epsil1 .AND. tpsit(jk,:)%rsn>rhosnwmax  )
+        & tpsit(jk,:)%hsn>epsil1 .AND. tpsit(jk,:)%rsn>rhosnwmax  ) 
           zdmwat(jk,:) = -zhsn(jk,:)*tpsit(jk,:)%fsi*  &
-            ( tpsit(jk,:)%rsn-rhosnwmax )
+            & ( tpsit(jk,:)%rsn-rhosnwmax ) 
           tpsit(jk,:)%rsn = rhosnwmax
 !          pqmelt(jk,:) =  &
 !            zhsn(jk,:)*( tpsit(jk,:)%rsn-zrsn(jk,:) ) *  &
@@ -358,15 +361,15 @@ SUBROUTINE glt_precip_r( orain,osnow,tpmxl,tpatm,tpsit,tpsil,tptfl,tpdia,pqmelt,
 !
 ! .. Total mass of snow (current snow layer + new snowfalls)
       zqm(:) =  &
-        tpsit(jk,:)%hsn*tpsit(jk,:)%rsn + zpcps(:)
+        & tpsit(jk,:)%hsn*tpsit(jk,:)%rsn + zpcps(:) 
 !
 ! .. Total snow thickness (current snow layer + new snowfalls) 
       tpsit(jk,:)%hsn =  &
-        tpsit(jk,:)%hsn + zpcps(:)/rhosnwmin
+        & tpsit(jk,:)%hsn + zpcps(:)/rhosnwmin 
 !
 ! .. New density is the ratio of new snow mass over new snow thickness
       tpsit(jk,:)%rsn =  &
-        zqm(:) / tpsit(jk,:)%hsn
+        & zqm(:) / tpsit(jk,:)%hsn 
       zwork(:) = zpcps(:) * tpsit(jk,:)%fsi / dtt
     ENDWHERE
     tpdia(:)%s_prsn = tpdia(:)%s_prsn + zwork(:)
@@ -387,7 +390,7 @@ SUBROUTINE glt_precip_r( orain,osnow,tpmxl,tpatm,tpsit,tpsil,tptfl,tpdia,pqmelt,
 !
 do jp=1,np
 if ( orain(jp) .AND. tpsit(jk,jp)%esi .AND.  &
-      tpsit(jk,jp)%hsn>epsil1 ) then
+      & tpsit(jk,jp)%hsn>epsil1 ) then 
 !      print*,'essai'
     DO jl=nilay+1,nl
 !!      WHERE( orain(:) .AND. tpsit(jk,:)%esi .AND.  &
@@ -396,8 +399,8 @@ if ( orain(jp) .AND. tpsit(jk,jp)%esi .AND.  &
 !!              zrsn(jk,:) / tpsit(jk,:)%rsn
 !print*,'avant =',tpsil(jl,jk,jp)%ent
         tpsil(jl,jk,jp)%ent =   &
-          tpsil(jl,jk,jp)%ent* ( zmsn(jk,jp) + zpcps(jp) ) /  &
-          ( tpsit(jk,jp)%rsn * tpsit(jk,jp)%hsn )
+          & tpsil(jl,jk,jp)%ent* ( zmsn(jk,jp) + zpcps(jp) ) /  &
+          & ( tpsit(jk,jp)%rsn * tpsit(jk,jp)%hsn ) 
 !print*,'apres =',tpsil(jl,jk,jp)%ent
 !!      ENDWHERE
 !!
@@ -430,7 +433,7 @@ end do
 !
   IF ( nrn2ice==0 ) THEN
     CALL glt_updtfl_r('FW2O',tpmxl,tptfl,zdmwat,&
-        ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc)
+        & ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc) 
   ENDIF  
 !
 !
@@ -459,6 +462,7 @@ end do
 ! .. Snow flux falling on the sea ice part of the grid cell 
 !
   tpdia(:)%sop = zfsit(:)*tpatm(:)%sop
+IF (LHOOK) CALL DR_HOOK('GLT_PRECIP_R',1,ZHOOK_HANDLE)
 !CALL glt_aventh(tpsit,tpsil,zei2,zes2)
 !print*,'Enthalpie apres  =',zei2+zes2
 !print*,'Delta Enthalpie  =',(zei2+zes2-zei1-zes1)/dtt

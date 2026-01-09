@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE PREP_TEB_GARDEN (DTCO, UG, U, USS, GCP, TG, TOP, IO, S, K, P, PEK, &
-                            HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH,YDCTL)
+                            HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !     #################################################################################
 !
 !!****  *PREP_TEB_GARDEN* - Prepares ISBA fields
@@ -63,8 +63,6 @@ USE MODD_ISBA_PAR,    ONLY : XWGMIN
 USE MODD_CO2V_PAR,    ONLY : XANFMINIT, XCA_NIT, XCC_NIT
 USE MODD_SURF_PAR,    ONLY : XUNDEF
 !
-USE MODE_PREP_CTL, ONLY : PREP_CTL
-!
 USE MODN_PREP_ISBA
 USE MODE_POS_SURF
 !
@@ -89,8 +87,6 @@ TYPE(ISBA_S_t), INTENT(INOUT) :: S
 TYPE(ISBA_K_t), INTENT(INOUT) :: K
 TYPE(ISBA_P_t), INTENT(INOUT) :: P
 TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
-!
-TYPE (PREP_CTL),    INTENT(INOUT) :: YDCTL
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=28),  INTENT(IN)  :: HATMFILE    ! name of the Atmospheric file
@@ -120,34 +116,34 @@ REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('PREP_TEB_GARDEN',0,ZHOOK_HANDLE)
  CALL PREP_HOR_TEB_GARDEN_FIELD(DTCO, UG, U, USS, GCP, IO, S, K, P, PEK, TG, TOP, &
-                                HPROGRAM,'WG     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH,YDCTL)
+                                HPROGRAM,'WG     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !
 !*      2.2    Soil ice reservoirs
 !
  CALL PREP_HOR_TEB_GARDEN_FIELD(DTCO, UG, U, USS, GCP, IO, S, K, P, PEK, TG, TOP, &         
-                                HPROGRAM,'WGI    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH,YDCTL)
+                                HPROGRAM,'WGI    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !
 !*      2.3    Leaves interception water reservoir
 !
  CALL PREP_HOR_TEB_GARDEN_FIELD(DTCO, UG, U, USS, GCP, IO, S, K, P, PEK, TG, TOP, &
-                                HPROGRAM,'WR     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH,YDCTL)
+                                HPROGRAM,'WR     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !
 !*      2.4    Temperature profile
 !
  CALL PREP_HOR_TEB_GARDEN_FIELD(DTCO, UG, U, USS, GCP, IO, S, K, P, PEK, TG, TOP, &
-                                HPROGRAM,'TG     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH,YDCTL)
+                                HPROGRAM,'TG     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !
 !*      2.5    Snow variables
 !
  CALL PREP_HOR_TEB_GARDEN_FIELD(DTCO, UG, U, USS, GCP, IO, S, K, P, PEK, TG, TOP, &
-                                HPROGRAM,'SN_VEG ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH,YDCTL)
+                                HPROGRAM,'SN_VEG ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 
 !
 !*      2.6    LAI
 !
 IF (IO%CPHOTO/='NON')  &
  CALL PREP_HOR_TEB_GARDEN_FIELD(DTCO, UG, U, USS, GCP, IO, S, K, P, PEK, TG, TOP, &
-                                HPROGRAM,'LAI    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH,YDCTL)
+                                HPROGRAM,'LAI    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !
 !-------------------------------------------------------------------------------------
 !

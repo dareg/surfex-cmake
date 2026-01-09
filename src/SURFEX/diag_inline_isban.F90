@@ -90,7 +90,8 @@ IF (.NOT. OCANOPY) THEN
   IF (DGO%N2M==2) THEN
     ZH(:)=2.          
     CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, DK%XCD, DK%XCH, DK%XRI, &
-                DK%XTS, DK%XHU, DK%XQS, DK%XZ0H, ZH, DK%XT2M, DK%XQ2M, DK%XHU2M )  
+                DK%XTS, DK%XHU, DK%XQS, DK%XZ0H, ZH, DGO%LHU2M_QSAT, &
+                DK%XT2M, DK%XQ2M, DK%XHU2M )
     ZH(:)=10.                
     CALL CLS_WIND(PZONA, PMERA, PHW, DK%XCD, DK%XCDN, DK%XRI, ZH, &
                  DK%XZON10M, DK%XMER10M  )  
@@ -101,7 +102,7 @@ IF (.NOT. OCANOPY) THEN
     ZH(:)=2.
     CALL CLS_TQ_DIAN(PZONA, PMERA, PTA, PQA, PPA, PPS, PHT, &
                      DK%XCD, DK%XCH, DK%XRI, DK%XTS, DK%XHU, DK%XQS, DK%XZ0H, &
-                     ZH, DK%XT2M, DK%XQ2M, DK%XHU2M,DGO%N2M )
+                     ZH, DGO%LHU2M_QSAT, DK%XT2M, DK%XQ2M, DK%XHU2M,DGO%N2M )
     ZH(:)=10.
     CALL CLS_WIND(PZONA, PMERA, PHW, DK%XCD, DK%XCDN, DK%XRI, ZH, &
                    DK%XZON10M, DK%XMER10M  )                       

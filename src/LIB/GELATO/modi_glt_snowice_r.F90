@@ -91,9 +91,10 @@
 ! * Subroutine which takes into account the formation of snow ice.
 !
 SUBROUTINE glt_snowice_r( tpmxl,tpsil,tptfl,tpsit,tpdia,&
-   ncdlssh,nilay,nl,nleviti,np,nsalflx,nslay,nt,dtt,rn_htopoc,sf3tinv )
+   & ncdlssh,nilay,nl,nleviti,np,nsalflx,nslay,nt,dtt,rn_htopoc,sf3tinv ) 
 !
   USE modd_glt_const_thm
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_types_glt
   USE mode_gltools_enthalpy
   USE modi_glt_updtfl_r
@@ -104,22 +105,23 @@ SUBROUTINE glt_snowice_r( tpmxl,tpsil,tptfl,tpsit,tpdia,&
   REAL, INTENT(IN) ::  dtt,rn_htopoc
   REAL, DIMENSION(:), INTENT(IN) ::  sf3tinv
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
-        tpmxl 
+        & tpmxl  
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(inout) ::  &
-        tpsil
+        & tpsil 
   TYPE(t_tfl), DIMENSION(np), INTENT(inout) ::  &
-        tptfl
+        & tptfl 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
-        tpsit
+        & tpsit 
   TYPE(t_dia), DIMENSION(np), INTENT(inout) ::  &
-        tpdia
+        & tpdia 
 !
   INTEGER ::  &
-        jl,jp,jk 
+        & jl,jp,jk  
   REAL ::  &
-        zenti,zentf,zssinew,zhsinew
+        & zenti,zentf,zssinew,zhsinew 
   REAL, DIMENSION(nt,np) ::  &
-        zdh,zdmass,zdmsi,zdmsn,zentsi,zentsn,zsalt,ztmp
+        & zdh,zdmass,zdmsi,zdmsn,zentsi,zentsn,zsalt,ztmp 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !  real,dimension(np) :: zei1,zes1,zei2,zes2
 !
 !
@@ -127,6 +129,7 @@ SUBROUTINE glt_snowice_r( tpmxl,tpsil,tptfl,tpsit,tpdia,&
 ! 1. Array initializations
 ! ======================== 
 !
+IF (LHOOK) CALL DR_HOOK('GLT_SNOWICE_R',0,ZHOOK_HANDLE)
   zdh(:,:) = 0.
 !call glt_aventh(tpsit,tpsil,zei1,zes1)
 !print*,'enthalpie au debut =',zei1+zes1
@@ -140,7 +143,7 @@ SUBROUTINE glt_snowice_r( tpmxl,tpsil,tptfl,tpsit,tpdia,&
 ! -------------------------------------
 !
   zdmass(:,:) = tpsit(:,:)%rsn*tpsit(:,:)%hsn -  &
-    (rhosw-rhoice)*tpsit(:,:)%hsi
+    & (rhosw-rhoice)*tpsit(:,:)%hsi 
 !!    write(noutlu,*)'AAAAAAAAAAAAAA'
 !!    write(noutlu,*)'zdmass=',zdmass
 !!    write(noutlu,*)'rsn=',tpsit(:,:)%rsn
@@ -157,7 +160,7 @@ SUBROUTINE glt_snowice_r( tpmxl,tpsil,tptfl,tpsit,tpdia,&
 !
 !  The "missing" mass is taken from the ocean
   zdh(:,:) =  zdmass(:,:) /  &
-    ( tpsit(:,:)%rsn+rhosw-rhoice )
+    & ( tpsit(:,:)%rsn+rhosw-rhoice ) 
 !
 !
 !
@@ -214,7 +217,7 @@ SUBROUTINE glt_snowice_r( tpmxl,tpsil,tptfl,tpsit,tpdia,&
 ! .. Massic gltools_enthalpy
 !
   zentsn(:,:) =  &
-    SUM( tpsil(nilay+1:nl,:,:)%ent, DIM=1 )/FLOAT(nslay)
+    & SUM( tpsil(nilay+1:nl,:,:)%ent, DIM=1 )/FLOAT(nslay) 
 !
 !
 ! 3.4. Update water, heat and salt fluxes affecting the ocean
@@ -235,13 +238,13 @@ SUBROUTINE glt_snowice_r( tpmxl,tpsil,tptfl,tpsit,tpdia,&
      ztmp(jk,:) = tpmxl(:)%sml
    END DO
   CALL glt_updtfl_r( 'I2O',tpmxl,tptfl,zdmsi+zdmsn,&
-      ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc,&
-      pent=zentsi,psalt=ztmp)
+      & ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc,&
+      & pent=zentsi,psalt=ztmp) 
 !
 ! A recrire de facon plus logique apres recombinaison des 2 glt_updtfl_r
   tptfl(:)%tio = tptfl(:)%tio -  &
-    SUM(zdmsi*zentsi,DIM=1)/dtt - &
-    SUM(zdmsn*zentsn,DIM=1)/dtt
+    & SUM(zdmsi*zentsi,DIM=1)/dtt - &
+    & SUM(zdmsn*zentsn,DIM=1)/dtt 
 
 !!    write(noutlu,*)'(2) tio=',tptfl%tio
 !!    write(noutlu,*)'(2) wio=',tptfl%wio
@@ -257,8 +260,8 @@ SUBROUTINE glt_snowice_r( tpmxl,tpsil,tptfl,tpsit,tpdia,&
 !!    write(noutlu,*)'(3) wio=',tptfl%wio
 !!    write(noutlu,*)'(3) wlo=',tptfl%wlo
   CALL glt_updtfl_r( 'FW2I',tpmxl,tptfl,-1.*zdmsn,&
-      ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc,&
-      pent=zentsn )
+      & ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc,&
+      & pent=zentsn ) 
 !!    write(noutlu,*)'(4) tio=',tptfl%tio
 !!    write(noutlu,*)'(4) wio=',tptfl%wio
 !!    write(noutlu,*)'(4) wlo=',tptfl%wlo
@@ -302,12 +305,12 @@ SUBROUTINE glt_snowice_r( tpmxl,tpsil,tptfl,tpsit,tpdia,&
 !!         print*,'Enth. Glace avant (jk=',jk,')=',  &
 !!           zenti*tpsit(jk,jp)%hsi/dtt*rhoice
           zentf = ( zenti*tpsit(jk,jp)%hsi + zentsi(jk,jp)*zdh(jk,jp) ) /  &
-            zhsinew
+            & zhsinew 
 !!          print*,'Enth. Glace apres (jk=',jk,')=',  &
 !!            zentf*zhsinew/dtt*rhoice
           IF ( zenti/=0. ) THEN
               tpsil(1:nilay,jk,jp)%ent =  &
-                tpsil(1:nilay,jk,jp)%ent * zentf/zenti
+                & tpsil(1:nilay,jk,jp)%ent * zentf/zenti 
             ELSE
               tpsil(1:nilay,jk,jp)%ent = zentf 
           ENDIF
@@ -317,8 +320,8 @@ SUBROUTINE glt_snowice_r( tpmxl,tpsil,tptfl,tpsit,tpdia,&
 !
 ! .. Update sea ice salinity
           tpsit(jk,jp)%ssi =  &
-            ( tpsit(jk,jp)%ssi*tpsit(jk,jp)%hsi + zsalt(jk,jp)*zdh(jk,jp) ) /  &
-            zhsinew
+            & ( tpsit(jk,jp)%ssi*tpsit(jk,jp)%hsi + zsalt(jk,jp)*zdh(jk,jp) ) /  &
+            & zhsinew 
 !
 ! .. Update sea ice thickness
           tpsit(jk,jp)%hsi = zhsinew
@@ -326,6 +329,7 @@ SUBROUTINE glt_snowice_r( tpmxl,tpsil,tptfl,tpsit,tpdia,&
       ENDIF
     END DO
   END DO
+IF (LHOOK) CALL DR_HOOK('GLT_SNOWICE_R',1,ZHOOK_HANDLE)
 !print*,'calcul enthalpie (a la fin) =',  &
 !sum(rhoice*tpsit%fsi*zentsi*zdh,dim=1)/dtt - &
 !sum(tpsit%fsi*tpsit%rsn*zentsn*zdh,dim=1)/dtt
@@ -357,6 +361,8 @@ SUBROUTINE glt_snowice_r( tpmxl,tpsil,tptfl,tpsit,tpdia,&
 !SUM( tpsit%rsn*tpsit%hsn*tpsit%fsi*tpsil(nl,:,:)%ent)/dtt
 !write(noutlu,*)'with snow', zenti
 !
+CONTAINS
+#include "glt_enthalpy0d.func.h"
 END SUBROUTINE glt_snowice_r
 !
 ! ---------------------- END SUBROUTINE glt_snowice_r -----------------------

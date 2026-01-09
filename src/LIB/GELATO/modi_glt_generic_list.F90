@@ -59,6 +59,7 @@
 ! THE SOFTWARE.
 
 module data
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   implicit none
 
   private
@@ -79,6 +80,7 @@ end module data
 
 
 module modi_glt_generic_list
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   implicit none
 
   private
@@ -102,7 +104,9 @@ contains
   subroutine list_init(self, data)
     type(list_node_t), pointer :: self
     integer, dimension(:), intent(in), optional :: data
+    REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
+    IF (LHOOK) CALL DR_HOOK('MODI_GLT_GENERIC_LIST:LIST_INIT',0,ZHOOK_HANDLE)
     allocate(self)
     nullify(self%next)
 
@@ -112,6 +116,7 @@ contains
     else
        nullify(self%data)
     end if
+    IF (LHOOK) CALL DR_HOOK('MODI_GLT_GENERIC_LIST:LIST_INIT',1,ZHOOK_HANDLE)
   end subroutine list_init
 
   ! Free the entire list and all data, beginning at SELF
@@ -119,7 +124,9 @@ contains
     type(list_node_t), pointer :: self
     type(list_node_t), pointer :: current
     type(list_node_t), pointer :: next
+    REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
+    IF (LHOOK) CALL DR_HOOK('MODI_GLT_GENERIC_LIST:LIST_FREE',0,ZHOOK_HANDLE)
     current => self
     do while (associated(current))
        next => current%next
@@ -131,6 +138,7 @@ contains
        nullify(current)
        current => next
     end do
+    IF (LHOOK) CALL DR_HOOK('MODI_GLT_GENERIC_LIST:LIST_FREE',1,ZHOOK_HANDLE)
   end subroutine list_free
 
   ! Insert a list node after SELF containing DATA (optional)
@@ -138,7 +146,9 @@ contains
     type(list_node_t), pointer :: self
     integer, dimension(:), intent(in), optional :: data
     type(list_node_t), pointer :: next
+    REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
+    IF (LHOOK) CALL DR_HOOK('MODI_GLT_GENERIC_LIST:LIST_INSERT',0,ZHOOK_HANDLE)
     allocate(next)
 
     if (present(data)) then
@@ -150,18 +160,22 @@ contains
 
     next%next => self%next
     self%next => next
+    IF (LHOOK) CALL DR_HOOK('MODI_GLT_GENERIC_LIST:LIST_INSERT',1,ZHOOK_HANDLE)
   end subroutine list_insert
 
   ! Store the encoded DATA in list node SELF
   subroutine list_put(self, data)
     type(list_node_t), pointer :: self
     integer, dimension(:), intent(in) :: data
+    REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
+    IF (LHOOK) CALL DR_HOOK('MODI_GLT_GENERIC_LIST:LIST_PUT',0,ZHOOK_HANDLE)
     if (associated(self%data)) then
        deallocate(self%data)
        nullify(self%data)
     end if
     self%data = data
+    IF (LHOOK) CALL DR_HOOK('MODI_GLT_GENERIC_LIST:LIST_PUT',1,ZHOOK_HANDLE)
   end subroutine list_put
 
   ! Return the DATA stored in the node SELF

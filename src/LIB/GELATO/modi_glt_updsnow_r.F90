@@ -80,42 +80,45 @@
 ! .. Subroutine used to check global water budget.
 !
 SUBROUTINE glt_updsnow_r  &
-  ( kinit,omsg,tpdom,tptfl,tpsit,psnow_a,pemp_a,&
-  noutlu,np,nt,dtt,xdomsrf_r,lwg,&
-  paddterm,paddterm2)
+  & ( kinit,omsg,tpdom,tptfl,tpsit,psnow_a,pemp_a,&
+  & noutlu,np,nt,dtt,xdomsrf_r,lwg,&
+  & paddterm,paddterm2) 
 !
   USE modd_types_glt
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_thm
   USE mode_glt_stats_r
   USE mode_glt_info_r
 !
   IMPLICIT NONE
   INTEGER, INTENT(in) ::  &
-         kinit,noutlu,nt,np
+         & kinit,noutlu,nt,np 
   REAL, INTENT(in) ::  &
-         xdomsrf_r,dtt
+         & xdomsrf_r,dtt 
   LOGICAL, INTENT(in) ::  &
-         lwg
+         & lwg 
   CHARACTER(*), INTENT(in) ::  &
-        omsg
+        & omsg 
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
-        tpdom
+        & tpdom 
   TYPE(t_tfl), DIMENSION(np), INTENT(in) ::  &
-        tptfl
+        & tptfl 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::  &
-        tpsit
+        & tpsit 
   REAL, INTENT(inout) :: &
-        pemp_a, psnow_a
+        & pemp_a, psnow_a 
   REAL, DIMENSION(np), INTENT(in), OPTIONAL :: &
-        paddterm,paddterm2
+        & paddterm,paddterm2 
 !
   REAL, DIMENSION(np) :: &
-        zsnow, zemp
+        & zsnow, zemp 
   REAL :: &
-        zsnow_a, zemp_a, zdemp, zdmsnow, zaddterm_a
+        & zsnow_a, zemp_a, zdemp, zdmsnow, zaddterm_a 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
+IF (LHOOK) CALL DR_HOOK('GLT_UPDSNOW_R',0,ZHOOK_HANDLE)
    zsnow(:) = SUM( tpsit(:,:)%fsi*tpsit(:,:)%rsn*tpsit(:,:)%hsn, DIM=1 )
    zsnow_a = glt_avg_r(tpdom, zsnow(:), 1,np,xdomsrf_r)
    zemp(:) = tptfl(:)%wlo + tptfl(:)%wio
@@ -125,7 +128,7 @@ SUBROUTINE glt_updsnow_r  &
      zdemp = zemp_a - pemp_a 
      IF (lwg) THEN
        WRITE(noutlu,*)  &
-       '--------------------------------------------------------------------'
+       & '--------------------------------------------------------------------' 
        WRITE(noutlu,*) omsg ,'    Snow Content      :',  zsnow_a
        WRITE(noutlu,*) '    Change in snow content      :', zdmsnow 
        WRITE(noutlu,*) '    Change in emp               :', zdemp
@@ -146,6 +149,7 @@ SUBROUTINE glt_updsnow_r  &
    ENDIF
    pemp_a = zemp_a
    psnow_a = zsnow_a
+IF (LHOOK) CALL DR_HOOK('GLT_UPDSNOW_R',1,ZHOOK_HANDLE)
 
 END SUBROUTINE glt_updsnow_r
 

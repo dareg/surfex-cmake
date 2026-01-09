@@ -51,6 +51,7 @@
 ! ------------------- BEGIN MODULE mode_gltools_sigma ---------------------
 
 MODULE mode_gltools_sigma
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
 CONTAINS
 
 ! -------------------- END MODULE mode_gltools_sigma ----------------------
@@ -70,13 +71,13 @@ FUNCTION glt_sigma(pt,ps,nx,ny)
 
   INTEGER, INTENT(IN) :: nx,ny 
   REAL, DIMENSION(nx,ny) ::                                             &
-    glt_sigma
+    & glt_sigma 
   REAL, DIMENSION(nx,ny), INTENT(in) ::                                 &
-    pt,ps
+    & pt,ps 
 
   glt_sigma(:,:) =                                                          &
-     (c1 + c3 * ps(:,:) + pt(:,:) * (c2 + c5 * ps(:,:) +                &
-     pt(:,:) * (c4 + c7 * ps(:,:) + pt(:,:) * c6))) * 1.E-03 
+     & (c1 + c3 * ps(:,:) + pt(:,:) * (c2 + c5 * ps(:,:) +                &
+     & pt(:,:) * (c4 + c7 * ps(:,:) + pt(:,:) * c6))) * 1.E-03  
 !
 END FUNCTION glt_sigma
 
@@ -96,12 +97,12 @@ FUNCTION glt_dsigmadt(pt,ps)
   IMPLICIT NONE
 
   REAL ::                                                               &
-    glt_dsigmadt
+    & glt_dsigmadt 
   REAL, INTENT(in) ::                                                   &
-    pt,ps
+    & pt,ps 
 
   glt_dsigmadt = (c2 + c5 * ps + 2. * pt * (c4 + c7 * ps +                  &
-    1.5 * pt * c6)) * 1.E-3
+    & 1.5 * pt * c6)) * 1.E-3 
 !
 END FUNCTION glt_dsigmadt
 
@@ -121,9 +122,9 @@ FUNCTION glt_dsigmads(pt,ps)
   IMPLICIT NONE
 
   REAL ::                                                               &
-    glt_dsigmads
+    & glt_dsigmads 
   REAL, INTENT(in) ::                                                   &
-    pt,ps
+    & pt,ps 
 
   glt_dsigmads = (c3 + pt * (c5 + pt * c7)) * 1.E-3
 !
@@ -132,49 +133,4 @@ END FUNCTION glt_dsigmads
 ! ------------------------ END FUNCTION glt_dsigmads ------------------------
 ! -----------------------------------------------------------------------
 
-
-! -----------------------------------------------------------------------
-! -------------------------- FUNCTION glt_salfrac ---------------------------
-! 
-! If S is the ocean salinity, as sea ice forms at a rate V (in m.s-1),
-! the salinity of the new formed sea ice is : Si = keff.Sw
-! Here we follow Cox and Weeks (1988) to compute keff as a function of V.
-!
-FUNCTION glt_salfrac( pv )
-!
-  IMPLICIT NONE
-  REAL ::  &
-    glt_salfrac
-  REAL, INTENT(in) ::  &
-    pv
-  REAL ::  &
-    zalpha
-
-!!  IF ( pv > 3.8e-7 ) THEN
-!!      glt_salfrac = 0.26 / ( 0.26+0.74*exp( -724300.*pv ) )
-!!    ELSE IF ( pv > 3.4e-7 ) THEN
-!!      zalpha = ( pv-3.4e-7 ) / 0.4e-7 
-!!      glt_salfrac = zalpha * 0.26 / ( 0.26+0.74*exp( -724300.*pv ) ) +  &
-!!        ( 1.-zalpha ) * 0.8925 + 0.0568*log( 100.*pv )
-!!    ELSE IF ( pv > 2.2e-8 ) THEN
-!!      glt_salfrac = 0.8925 + 0.0568*log( 100.*pv )
-!!    ELSE IF ( pv > 1.8e-8 ) THEN
-!!      zalpha = ( pv-1.8e-8 ) / 0.4e-8 
-!!      glt_salfrac = zalpha * ( 0.8925 + 0.0568*log( 100.*pv ) ) +  &
-!!        ( 1.-zalpha ) * 0.12
-!!    ELSE 
-!!      glt_salfrac = 0.12
-!!  ENDIF
-  IF ( pv > 3.6e-7 ) THEN
-      glt_salfrac = 0.26 / ( 0.26+0.74*EXP( -724300.*pv ) )
-    ELSE IF ( pv > 1.24e-8 ) THEN
-      glt_salfrac = 0.8925 + 0.0568*LOG( 100.*pv )
-    ELSE 
-      glt_salfrac = 0.12
-  ENDIF
-!        
-END FUNCTION glt_salfrac
 END MODULE mode_gltools_sigma
-!
-! ------------------------- END FUNCTION glt_salfrac ------------------------
-! -----------------------------------------------------------------------

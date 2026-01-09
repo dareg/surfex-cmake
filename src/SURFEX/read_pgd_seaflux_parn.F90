@@ -150,7 +150,7 @@ END DO
 IF ( EXT_FORC ) THEN
    open(unit = 100,file=FORCINGFILE, status ='old',action = 'read')
    DO JTIME = 1,DTS%NTIME
-     read(100,*, END=200),YY, MM, DD, HH, SST
+     read(100,*, END=200) YY, MM, DD, HH, SST
      DTS%TDATA_SST(JTIME)%TDATE%YEAR=YY
      DTS%TDATA_SST(JTIME)%TDATE%MONTH=MM
      DTS%TDATA_SST(JTIME)%TDATE%DAY=DD

@@ -96,9 +96,10 @@
 ! ------------------------- SUBROUTINE glt_lmltsi_r -------------------------
 !
 SUBROUTINE glt_lmltsi_r  &
-        ( tpmxl,tpsil,tpsit,tpdia,tptfl,&
-        ncdlssh,niceage,nicesal,nilay,nl,nleviti,nmponds,np,nsalflx,nslay,nt,dtt,rn_htopoc,xlmelt,sf3t ) 
+        & ( tpmxl,tpsil,tpsit,tpdia,tptfl,&
+        & ncdlssh,niceage,nicesal,nilay,nl,nleviti,nmponds,np,nsalflx,nslay,nt,dtt,rn_htopoc,xlmelt,sf3t )  
   USE modd_glt_const_thm
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_types_glt
   USE modi_glt_updtfl_r
 !
@@ -110,24 +111,25 @@ SUBROUTINE glt_lmltsi_r  &
   REAL   ,INTENT(in) :: xlmelt,dtt,rn_htopoc
   REAL,DIMENSION(:)   ,INTENT(in) :: sf3t
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
-        tpmxl
+        & tpmxl 
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(in) ::  &
-        tpsil
+        & tpsil 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
-        tpsit
+        & tpsit 
   TYPE(t_dia), DIMENSION(np), INTENT(inout) ::  &
-        tpdia
+        & tpdia 
   TYPE(t_tfl), DIMENSION(np), INTENT(inout) ::  &
-        tptfl
+        & tptfl 
 !
 !* Local variables
 !
   INTEGER ::  &
-        jl
+        & jl 
   REAL, DIMENSION(np) ::  &
-        zdtml
+        & zdtml 
   REAL, DIMENSION(nt,np) ::  &
-        zfsia,zdmsi,zdmsn,zmrate3,zent
+        & zfsia,zdmsi,zdmsn,zmrate3,zent 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -136,6 +138,7 @@ SUBROUTINE glt_lmltsi_r  &
 !
 ! .. Sea ice concentration field "after" lateral ablation
 !
+IF (LHOOK) CALL DR_HOOK('GLT_LMLTSI_R',0,ZHOOK_HANDLE)
   zfsia(:,:) = tpsit(:,:)%fsi
 !
 ! .. Total sea ice concentration field (3D expanded) --> for Hakkinen
@@ -183,14 +186,14 @@ SUBROUTINE glt_lmltsi_r  &
 ! lateral melting does not depend on the number of ice categories).
 !
   zfsia(:,:) = zfsia(:,:) *  &
-    ( 1. - xlmelt*dtt*zmrate3(:,:) )
+    & ( 1. - xlmelt*dtt*zmrate3(:,:) ) 
   zfsia(:,:) = AMAX1( zfsia(:,:),0. )
 !
 ! .. Compute diagnostic
 !
   tpdia(:)%mrl =  &
-    SUM( ( zfsia(:,:)-tpsit(:,:)%fsi )*  &
-    tpsit(:,:)%hsi, DIM=1 ) * rhoice / dtt
+    & SUM( ( zfsia(:,:)-tpsit(:,:)%fsi )*  &
+    & tpsit(:,:)%hsi, DIM=1 ) * rhoice / dtt 
 !
 !
 !
@@ -207,12 +210,12 @@ SUBROUTINE glt_lmltsi_r  &
 ! .. Variation of sea ice mass due to lateral melting
 !
   zdmsi(:,:) = rhoice *  &
-    ( zfsia(:,:)-tpsit(:,:)%fsi ) * tpsit(:,:)%hsi
+    & ( zfsia(:,:)-tpsit(:,:)%fsi ) * tpsit(:,:)%hsi 
 !
 ! .. Variation of snow mass due to lateral melting
 !
   zdmsn(:,:) = tpsit(:,:)%rsn *  &
-    ( zfsia(:,:)-tpsit(:,:)%fsi ) * tpsit(:,:)%hsn
+    & ( zfsia(:,:)-tpsit(:,:)%fsi ) * tpsit(:,:)%hsn 
 !
 !
 ! 3.2. Massic gltools_enthalpy and salinity of removed ice
@@ -223,7 +226,7 @@ SUBROUTINE glt_lmltsi_r  &
   zent(:,:) = 0.
   DO jl=1,nilay
     zent(:,:) = zent(:,:) +  &
-      sf3t(nilay+1-jl)*tpsil(jl,:,:)%ent
+      & sf3t(nilay+1-jl)*tpsil(jl,:,:)%ent 
   END DO
 !
 !
@@ -233,8 +236,8 @@ SUBROUTINE glt_lmltsi_r  &
 ! .. This is the contribution of sea ice melting
 !
   CALL glt_updtfl_r( 'I2O',tpmxl,tptfl,zdmsi,&
-      ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc,&
-      pent=zent,psalt=tpsit%ssi )
+      & ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc,&
+      & pent=zent,psalt=tpsit%ssi ) 
 !
 !
 ! 3.4. Massic gltools_enthalpy of removed snow
@@ -247,8 +250,8 @@ SUBROUTINE glt_lmltsi_r  &
 ! ------------------------------------------------------------
 !
   CALL glt_updtfl_r('FW2O',tpmxl,tptfl,zdmsn,&
-  ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc,&
-  pent=zent )
+  & ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc,&
+  & pent=zent ) 
   tpdia(:)%snml = SUM( zdmsn(:,:), DIM=1 ) / dtt
 !    
 !
@@ -288,6 +291,7 @@ SUBROUTINE glt_lmltsi_r  &
       tpsit(:,:)%vmp = 0.
     ENDWHERE
   ENDIF
+IF (LHOOK) CALL DR_HOOK('GLT_LMLTSI_R',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE glt_lmltsi_r
 

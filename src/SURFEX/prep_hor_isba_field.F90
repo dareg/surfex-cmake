@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE PREP_HOR_ISBA_FIELD (DTCO, UG, U, USS, GCP, IG, IO, S, NK, NP, NPE, TPTIME,  &
-                                HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL,OKEY)
+                                HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,OKEY)
 !     #################################################################################
 !
 !!****  *PREP_HOR_ISBA_FIELD* - reads, interpolates and prepares an ISBA field
@@ -67,8 +67,6 @@ USE MODD_ISBA_PAR,       ONLY : XWGMIN
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 USE MODD_SURF_PAR,       ONLY : XUNDEF,NUNDEF
 !
-USE MODE_PREP_CTL, ONLY : PREP_CTL, PREP_CTL_INT_PART2, PREP_CTL_INT_PART4
-!
 USE MODI_PREP_GRIB_GRID
 USE MODI_READ_PREP_ISBA_CONF
 USE MODI_READ_PREP_ISBA_SNOW
@@ -113,8 +111,6 @@ TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SSO_t), INTENT(INOUT) :: USS
 TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
-!
-TYPE (PREP_CTL),    INTENT(INOUT) :: YDCTL
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
@@ -242,7 +238,7 @@ IF (HSURF=='SN_VEG ') THEN
                             XWSNOW, XRSNOW, XTSNOW, XLWCSNOW,    &
                             XASNOW, LSNOW_IDEAL, XSG1SNOW,       &
                             XSG2SNOW, XHISTSNOW, XAGESNOW,       &
-                            YDCTL,XIMPURSNOW,                    &
+                            XIMPURSNOW,                          &
                             PVEGTYPE_PATCH=ZVEGTYPE_PATCH,       &
                             PPATCH=ZPATCH, KSIZE_P=ISIZE_P,      &
                             KR_P=IR_P, OKEY=OKEY   )
@@ -288,8 +284,6 @@ END IF
 !
 NULLIFY (ZFIELDIN, ZFIELDOUTP, ZFIELDOUTV)
 !
-IF (YDCTL%LPART1) THEN
-!
 IF (GUNIF) THEN
   CALL PREP_ISBA_UNIF(ILUOUT,HSURF,ZFIELDIN)
 ELSE IF (YFILETYPE=='ASCLLV') THEN
@@ -308,101 +302,89 @@ ELSE
    CALL ABOR1_SFX('PREP_HOR_ISBA_FIELD: data file type not supported : '//YFILETYPE)
 END IF
 !
-  INL = SIZE(ZFIELDIN,2)
-  INP = SIZE(ZFIELDIN,3)
-!
-ENDIF
+INL = SIZE(ZFIELDIN,2)
+INP = SIZE(ZFIELDIN,3)
 !
 !-------------------------------------------------------------------------------------
 !
 !*      5.     Horizontal interpolation
 !
- CALL PREP_CTL_INT_PART2 (YDCTL, HSURF, CMASK, 'NATURE', ZFIELDIN)
-!
-IF (YDCTL%LPART3) THEN
-!
-  IF (NRANK==NPIO) THEN
+IF (NRANK==NPIO) THEN
 INL = SIZE(ZFIELDIN,2)
 INP = SIZE(ZFIELDIN,3)
-  ELSEIF (.NOT.ASSOCIATED(ZFIELDIN)) THEN
-    ALLOCATE(ZFIELDIN(0,0,0))
-  ENDIF
+ELSEIF (.NOT.ASSOCIATED(ZFIELDIN)) THEN
+  ALLOCATE(ZFIELDIN(0,0,0))
+ENDIF
 !
-  IF (NPROC>1) THEN
+IF (NPROC>1) THEN
 #ifdef SFX_MPI
-    IF (LSFX_MPI) THEN
-      CALL MPI_BCAST(INL,KIND(INL)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
-      CALL MPI_BCAST(INP,KIND(INP)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
-    ENDIF
-#endif
+  IF (LSFX_MPI) THEN
+    CALL MPI_BCAST(INL,KIND(INL)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
+    CALL MPI_BCAST(INP,KIND(INP)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
   ENDIF
+#endif
+ENDIF
 ALLOCATE(ZFIELDOUTP(INI,INL,INP))
 !
 ! ZPATCH is the array of output patches put on the input patches
-  ALLOCATE(ZPATCH(INI,INP))
-  ZPATCH(:,:) = 0.
+ALLOCATE(ZPATCH(INI,INP))
+ZPATCH(:,:) = 0.
 !
-  CALL GET_PREP_INTERP(INP,IO%NPATCH,S%XVEGTYPE,S%XPATCH,ZPATCH)
+CALL GET_PREP_INTERP(INP,IO%NPATCH,S%XVEGTYPE,S%XPATCH,ZPATCH)
 !
-  DO JP = 1, INP
-  ! we interpolate each point the output patch is present
-    LINTERP(:) = (ZPATCH(:,JP) > 0.)
-    CALL HOR_INTERPOL(DTCO, U, GCP, ILUOUT,ZFIELDIN(:,:,JP),ZFIELDOUTP(:,:,JP))
-  LINTERP = .TRUE.
+DO JP = 1, INP
+! we interpolate each point the output patch is present
+  LINTERP(:) = (ZPATCH(:,JP) > 0.)
+  CALL HOR_INTERPOL(DTCO, U, GCP, ILUOUT,ZFIELDIN(:,:,JP),ZFIELDOUTP(:,:,JP))
+LINTERP = .TRUE.
 END DO
 !
-  DEALLOCATE(ZFIELDIN,ZPATCH)
+DEALLOCATE(ZFIELDIN,ZPATCH)
 !
-ENDIF
+INL = SIZE (ZFIELDOUTP,2)
+INP = SIZE (ZFIELDOUTP,3)
 !
- CALL PREP_CTL_INT_PART4 (YDCTL, HSURF, 'NATURE', CMASK, ZFIELDIN, ZFIELDOUTP)
+IF (TRIM(HSURF)/="ZS") THEN
 !
-IF (YDCTL%LPART5) THEN
+  ALLOCATE(ZW%AL(IO%NPATCH))
 !
-  INL = SIZE (ZFIELDOUTP,2)
-  INP = SIZE (ZFIELDOUTP,3)
-!
-  IF (TRIM(HSURF)/="ZS") THEN
-  !
-    ALLOCATE(ZW%AL(IO%NPATCH))
-  !
-    IF (IO%NPATCH/=INP) THEN
+  IF (IO%NPATCH/=INP) THEN
 !
 ALLOCATE(ZFIELDOUTV(INI,INL,NVEGTYPE))
 CALL PUT_ON_ALL_VEGTYPES(INI,INL,INP,NVEGTYPE,ZFIELDOUTP,ZFIELDOUTV)
 !
-    !*      6.     Transformation from vegtype grid to patch grid
-    !
+!*      6.     Transformation from vegtype grid to patch grid
+!
 DEALLOCATE(ZFIELDOUTP)
 !
-      DO JP = 1,IO%NPATCH
-        PK => NP%AL(JP)
+    DO JP = 1,IO%NPATCH
+      PK => NP%AL(JP)
 !
-        ALLOCATE(ZW%AL(JP)%ZOUT(PK%NSIZE_P,INL))
+      ALLOCATE(ZW%AL(JP)%ZOUT(PK%NSIZE_P,INL))
 !
-        CALL VEGTYPE_GRID_TO_PATCH_GRID(JP, IO%NPATCH, PK%XVEGTYPE_PATCH, PK%XPATCH,&
-                                      PK%NR_P, ZFIELDOUTV, ZW%AL(JP)%ZOUT)
-      ENDDO
+      CALL VEGTYPE_GRID_TO_PATCH_GRID(JP, IO%NPATCH, PK%XVEGTYPE_PATCH, PK%XPATCH,&
+                                    PK%NR_P, ZFIELDOUTV, ZW%AL(JP)%ZOUT)
+    ENDDO
 !
-      DEALLOCATE(ZFIELDOUTV)
+    DEALLOCATE(ZFIELDOUTV)
     !
-    ELSE
+  ELSE
+  !
+    DO JP = 1,IO%NPATCH
     !
-      DO JP = 1,IO%NPATCH
-      !
-        PK => NP%AL(JP)
-      !
-        ALLOCATE(ZW%AL(JP)%ZOUT(PK%NSIZE_P,INL))
-      !
-        CALL PACK_SAME_RANK(PK%NR_P,ZFIELDOUTP(:,:,JP),ZW%AL(JP)%ZOUT)
-      !
-      ENDDO
+      PK => NP%AL(JP)
     !
-      DEALLOCATE(ZFIELDOUTP)
+      ALLOCATE(ZW%AL(JP)%ZOUT(PK%NSIZE_P,INL))
     !
-    ENDIF
+      CALL PACK_SAME_RANK(PK%NR_P,ZFIELDOUTP(:,:,JP),ZW%AL(JP)%ZOUT)
+    !
+    ENDDO
+  !
+    DEALLOCATE(ZFIELDOUTP)
   !
   ENDIF
+!
+ENDIF
 !
 !
 !-------------------------------------------------------------------------------------
@@ -636,13 +618,11 @@ SELECT CASE (HSURF)
   !
 END SELECT
 !
-  IF (TRIM(HSURF)/="ZS") THEN
-    DO JP = 1,IO%NPATCH
-      DEALLOCATE(ZW%AL(JP)%ZOUT)
-    ENDDO
-    DEALLOCATE(ZW%AL)
-  ENDIF
-!
+IF (TRIM(HSURF)/="ZS") THEN
+  DO JP = 1,IO%NPATCH
+    DEALLOCATE(ZW%AL(JP)%ZOUT)
+  ENDDO
+  DEALLOCATE(ZW%AL)
 ENDIF
 !-------------------------------------------------------------------------------------
 !
@@ -749,3 +729,4 @@ END SUBROUTINE INIT_FROM_REF_GRID
 !-------------------------------------------------------------------------------------
 !
 END SUBROUTINE PREP_HOR_ISBA_FIELD
+

@@ -78,6 +78,7 @@
 SUBROUTINE gltools_dealloc(tpglt,nnflxin,noutlu,ntd,lwg)
 !
 USE modd_types_glt 
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
 #if ! defined in_surfex
 USE modd_CB_DynVariables
 USE modd_CB_DynDim
@@ -91,12 +92,14 @@ IMPLICIT NONE
 INTEGER,INTENT(in) :: noutlu,nnflxin,ntd
 LOGICAL,INTENT(in) :: lwg
 TYPE(t_glt), INTENT(inout) ::  &
-    tpglt
+    & tpglt 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 ! 1. Initialisations 
 ! ===================
 !
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_DEALLOC',0,ZHOOK_HANDLE)
 IF (lwg) THEN
   WRITE(noutlu,*) ' '
   WRITE(noutlu,*) '  ** LEVEL 3 - SUBROUTINE DEALLOC'
@@ -251,6 +254,7 @@ IF (lwg) THEN
   WRITE(noutlu,*) '  ** LEVEL 3 - END SUBROUTINE DEALLOC'
   WRITE(noutlu,*) ' '
 ENDIF
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_DEALLOC',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE gltools_dealloc
 !

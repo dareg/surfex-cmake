@@ -50,45 +50,6 @@ CONTAINS
 !
 !
 ! -----------------------------------------------------------------------
-! --------------------------- FUNCTION glt_interpz --------------------------
-!
-! Goal: Interpolate a vertical tracer profile, pvtpo (dimension n),
-! defined on a vertical, normalized grid :
-!   [ plevo(1)=1, plevo(2), ..., plevo(n), plevo(n+1)=1 ],
-! where plevo(jl),plevo(jl+1) define the height (from ice/water bottom
-! interface) of respectively the lower and upper boundaries of layer jl.
-! Note that n can be any number.
-! 
-! The glt_output is delivered on the model's standard vertical levels.
-!
-FUNCTION glt_interpz(plevn,pvtpo,plevo,nilay) RESULT(tab_interp)
-!
-  USE mode_glt_stats
-!
-  IMPLICIT NONE
-!
-  INTEGER, INTENT(IN) :: nilay
-  REAL, DIMENSION(nilay+1), INTENT(in) ::  &
-    plevn
-  REAL, DIMENSION(:), INTENT(in) ::  &
-    pvtpo
-  REAL, DIMENSION(:), INTENT(in) ::  &
-    plevo
-  REAL, DIMENSION(nilay) ::  &
-    tab_interp
-!
-  INTEGER :: jl
-!
-  DO jl=1,nilay
-    tab_interp(jl) =  &
-      ( glt_vtpint(plevn(jl+1),pvtpo,plevo)-  &
-        glt_vtpint(plevn(jl),pvtpo,plevo) ) /  &
-      ( plevn(jl+1)-plevn(jl) )
-  END DO
-!
-END FUNCTION glt_interpz
-!
-! ------------------------- END FUNCTION glt_interpz ------------------------
 ! -----------------------------------------------------------------------
 !
 #if ! defined in_surfex
@@ -108,17 +69,19 @@ IMPLICIT NONE
 !
 INTEGER,INTENT(in) :: nx,ny
 REAL, DIMENSION(nx,ny),INTENT(in) ::  &
-  pcu,pcv
+  & pcu,pcv 
 REAL, DIMENSION(nx,ny),INTENT(out) ::  &
-  pbu,pbv
+  & pbu,pbv 
 INTEGER ::  &
-  ji,jj
+  & ji,jj 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
 ! 1. Initializations
 ! ==================
 !
+IF (LHOOK) CALL DR_HOOK('MODE_GLTOOLS_INTERP:GLT_C2B',0,ZHOOK_HANDLE)
   pbu(:,:) = 0.
   pbv(:,:) = 0.
 !
@@ -146,6 +109,7 @@ INTEGER ::  &
       pbv(ji,jj) = .5*( pcv(ji,jj)+pcv(ji+1,jj) )
     END DO
   END DO
+IF (LHOOK) CALL DR_HOOK('MODE_GLTOOLS_INTERP:GLT_C2B',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE glt_c2b
 !
@@ -170,13 +134,14 @@ IMPLICIT NONE
 !
 INTEGER,INTENT(in) :: nx,ny    
 REAL, DIMENSION(nx,ny),INTENT(in) ::  &
-REAL, DIMENSION(nx,ny),INTENT(in) ::  &
-  pbu,pbv
+& REAL, DIMENSION(nx,ny),INTENT(in) ::  &
+  & pbu,pbv 
 REAL, DIMENSION(ilo:ihi,jlo:jhi), INTENT(out) ::  &
-  pcu,pcv
+  & pcu,pcv 
 !
 INTEGER ::  &
-  ji,jj
+  & ji,jj 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -189,16 +154,19 @@ INTEGER ::  &
 ! 1.2. Compute velocity components
 ! ---------------------------------
 !
+IF (LHOOK) CALL DR_HOOK('MODE_GLTOOLS_INTERP:GLT_B2C',0,ZHOOK_HANDLE)
   DO jj=jlo,jhi
     DO ji=ilo,ihi
       pcu(ji,jj) = 0.5*( pbu(ji,jj)+pbu(ji,jj-1) )
       pcv(ji,jj) = 0.5*( pbv(ji,jj)+pbv(ji-1,jj) )
     END DO
   END DO 
+IF (LHOOK) CALL DR_HOOK('MODE_GLTOOLS_INTERP:GLT_B2C',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE glt_b2c
 !
 ! ------------------------ END SUBROUTINE glt_b2c --------------------------
 ! ----------------------------------------------------------------------
 #endif
+
 END MODULE mode_gltools_interp

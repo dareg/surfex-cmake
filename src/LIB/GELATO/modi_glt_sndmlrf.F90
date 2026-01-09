@@ -98,9 +98,10 @@
 ! ----------------------- SUBROUTINE glt_sndmlrf ----------------------------
 !
 SUBROUTINE glt_sndmlrf( pbathy,tpdom,tpatc,tpml,tpdia,tpsit,tptfl,  &
-  pustar,tpall_oce,&
-  nadvect,ncdlssh,ndyncor,nleviti,nsalflx,nt,nx,ny,dtt,rn_htopoc )
+  & pustar,tpall_oce,&
+  & nadvect,ncdlssh,ndyncor,nleviti,nsalflx,nt,nx,ny,dtt,rn_htopoc ) 
   USE modd_types_glt
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_thm
   USE modd_glt_const_evp
 #if ! defined in_surfex
@@ -114,36 +115,37 @@ SUBROUTINE glt_sndmlrf( pbathy,tpdom,tpatc,tpml,tpdia,tpsit,tptfl,  &
   INTEGER,INTENT(in) :: ncdlssh,nsalflx,nadvect,ndyncor,nleviti,nx,ny,nt
   REAL,INTENT(in) :: dtt,rn_htopoc
   REAL, DIMENSION(nx,ny), INTENT(in) ::  &
-        pbathy
+        & pbathy 
   TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &
-        tpdom
+        & tpdom 
   TYPE(t_atm), DIMENSION(nx,ny), INTENT(in) ::  &
-        tpatc
+        & tpatc 
   TYPE(t_mxl), DIMENSION(nx,ny), INTENT(in) ::  &
-        tpml
+        & tpml 
   TYPE(t_dia), DIMENSION(nx,ny), INTENT(inout) ::  &
-        tpdia
+        & tpdia 
   TYPE(t_sit), DIMENSION(nt,nx,ny), INTENT(in) ::  &
-        tpsit
+        & tpsit 
   TYPE(t_tfl), DIMENSION(nx,ny), INTENT(inout) ::  &
-        tptfl
+        & tptfl 
   REAL, DIMENSION(nx,ny), INTENT(out) ::  &
-        pustar
+        & pustar 
   TYPE(t_2oc), DIMENSION(nx,ny), INTENT(inout) ::  &
-        tpall_oce
+        & tpall_oce 
 !
   INTEGER ::  &
-        ji,jj
+        & ji,jj 
   LOGICAL, DIMENSION(nx,ny) ::  &
-        ycrit
+        & ycrit 
   REAL, DIMENSION(nx,ny) ::  &
-        zfsit,zfld,ztxgw,ztygw,zmsi,zmsa,zssi
+        & zfsit,zfld,ztxgw,ztygw,zmsi,zmsa,zssi 
   REAL, DIMENSION(nt,nx,ny) ::  &
-        zdm,zent,zsalt
+        & zdm,zent,zsalt 
   REAL, DIMENSION(nx,ny) ::  &
-        zwork2,zhsit_ext,zdx_ext,zdy_ext
+        & zwork2,zhsit_ext,zdx_ext,zdy_ext 
   TYPE(t_tfl), DIMENSION(nx,ny) ::  &
-        tzdfl
+        & tzdfl 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 ! 
@@ -165,6 +167,7 @@ SUBROUTINE glt_sndmlrf( pbathy,tpdom,tpatc,tpml,tpdia,tpsit,tptfl,  &
 !
 ! .. Sea ice total fraction and lead fraction
 !
+IF (LHOOK) CALL DR_HOOK('GLT_SNDMLRF',0,ZHOOK_HANDLE)
   zfsit(:,:) = SUM( tpsit(:,:,:)%fsi,DIM=1 )
   zfld(:,:) = 1.-zfsit(:,:)
 !
@@ -279,7 +282,7 @@ SUBROUTINE glt_sndmlrf( pbathy,tpdom,tpatc,tpml,tpdia,tpsit,tptfl,  &
 !    print*,'compensatory flux=',glt_avg(tpdom,zsalt(1,:,:)*zdm(1,:,:),0)/1000.
 !
     CALL glt_updtfl('I2O', tpml,tzdfl,zdm,&
-        ncdlssh,nleviti,nsalflx,nt,nx,ny,dtt,rn_htopoc,pent=zent,psalt=zsalt )
+        & ncdlssh,nleviti,nsalflx,nt,nx,ny,dtt,rn_htopoc,pent=zent,psalt=zsalt ) 
 !
 ! 
 ! 2.4. Add up correction to initial fluxes
@@ -306,8 +309,8 @@ SUBROUTINE glt_sndmlrf( pbathy,tpdom,tpatc,tpml,tpdia,tpsit,tptfl,  &
 ! ---------------------------------------------
 !
   zwork2(:,:) =  &
-    ( tptfl(:,:)%tio + tptfl(:,:)%tlo )*  &
-    FLOAT( tpdom(:,:)%tmk )
+    & ( tptfl(:,:)%tio + tptfl(:,:)%tlo )*  &
+    & FLOAT( tpdom(:,:)%tmk ) 
 #if ! defined in_surfex
   CALL gltools_bound( 'T','scalar',zwork2 )
 #endif
@@ -318,7 +321,7 @@ SUBROUTINE glt_sndmlrf( pbathy,tpdom,tpatc,tpml,tpdia,tpsit,tptfl,  &
 ! -----------------------------------------
 !
   zwork2(:,:) = ( tptfl(:,:)%lio + tptfl(:,:)%llo )*  &
-    FLOAT( tpdom(:,:)%tmk )
+    & FLOAT( tpdom(:,:)%tmk ) 
 #if ! defined in_surfex
   CALL gltools_bound( 'T','scalar',zwork2 )
 #endif
@@ -334,8 +337,8 @@ SUBROUTINE glt_sndmlrf( pbathy,tpdom,tpatc,tpml,tpdia,tpsit,tptfl,  &
 ! Concentration / dilution flux
 !
   zwork2(:,:) =  &
-    ( tptfl(:,:)%cio + tptfl(:,:)%wlo + tptfl(:,:)%wio )*  &
-    FLOAT( tpdom(:,:)%tmk )
+    & ( tptfl(:,:)%cio + tptfl(:,:)%wlo + tptfl(:,:)%wio )*  &
+    & FLOAT( tpdom(:,:)%tmk ) 
 #if ! defined in_surfex
   CALL gltools_bound( 'T','scalar',zwork2 )
 #endif
@@ -345,7 +348,7 @@ SUBROUTINE glt_sndmlrf( pbathy,tpdom,tpatc,tpml,tpdia,tpsit,tptfl,  &
 !  Note that the ocean uses the concentration/dilution flux or the salt flux not both  
 !
   zwork2(:,:) =  &
-    ( tptfl(:,:)%sio )*FLOAT( tpdom(:,:)%tmk )
+    & ( tptfl(:,:)%sio )*FLOAT( tpdom(:,:)%tmk ) 
 #if ! defined in_surfex
   CALL gltools_bound( 'T','scalar',zwork2 )
 #endif
@@ -356,7 +359,7 @@ SUBROUTINE glt_sndmlrf( pbathy,tpdom,tpatc,tpml,tpdia,tpsit,tptfl,  &
 ! If the ocean model ignores the mass of water exchanged between sea ice and
 ! ocean ("levitating sea ice")
   zwork2(:,:) =  &
-    ( tptfl(:,:)%wio + tptfl(:,:)%wlo )*FLOAT( tpdom(:,:)%tmk )
+    & ( tptfl(:,:)%wio + tptfl(:,:)%wlo )*FLOAT( tpdom(:,:)%tmk ) 
 !
 ! Just comment these two lines if you do not want to have %sp1, %sp2 as outputs
   tpdia%sp1 = tzdfl%wio
@@ -396,6 +399,7 @@ SUBROUTINE glt_sndmlrf( pbathy,tpdom,tpatc,tpml,tpdia,tpsit,tptfl,  &
   CALL gltools_bound( 'T','scalar',zwork2 )
 #endif
   tpall_oce(:,:)%ust = zwork2(:,:)
+IF (LHOOK) CALL DR_HOOK('GLT_SNDMLRF',1,ZHOOK_HANDLE)
 
 
 ! 

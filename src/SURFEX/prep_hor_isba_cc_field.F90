@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE PREP_HOR_ISBA_CC_FIELD (DTCO, U, GCP, KLAT, IO, S, NK, NP, NPE,  &
-                                   HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
+                                   HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !     #################################################################################
 !
 !!****  *PREP_HOR_ISBA_CC_FIELD* - reads, interpolates and prepares an ISBA-CC field
@@ -47,8 +47,6 @@ USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NCOMM, NPROC, LSFX_MPI
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 USE MODD_SURF_PAR,       ONLY : XUNDEF,NUNDEF
 !
-USE MODE_PREP_CTL, ONLY : PREP_CTL, PREP_CTL_INT_PART2, PREP_CTL_INT_PART4
-!
 USE MODI_READ_PREP_ISBA_CONF
 USE MODI_ABOR1_SFX
 USE MODI_HOR_INTERPOL
@@ -79,7 +77,6 @@ TYPE(ISBA_S_t), INTENT(INOUT) :: S
 TYPE(ISBA_NK_t), INTENT(INOUT) :: NK
 TYPE(ISBA_NP_t), INTENT(INOUT) :: NP
 TYPE(ISBA_NPE_t), INTENT(INOUT) :: NPE
-TYPE (PREP_CTL),    INTENT(INOUT) :: YDCTL
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=8),   INTENT(IN)  :: HSURF     ! type of field
@@ -144,244 +141,232 @@ GPREP_AGS = .TRUE.
 !
 NULLIFY (ZFIELDIN, ZFIELDOUTP, ZFIELDOUTV)
 !
-IF (YDCTL%LPART1) THEN
 !
-  IF (GUNIF) THEN
-    GPREP_AGS = .FALSE.
-  ELSE IF (YFILETYPE=='ASCLLV') THEN
-    GPREP_AGS = .FALSE.
-  ELSE IF (YFILETYPE=='GRIB  ') THEN
-    GPREP_AGS = .FALSE.
-  ELSE IF (YFILETYPE=='MESONH' .OR. YFILETYPE=='ASCII ' .OR. YFILETYPE=='LFI   '&
-          .OR.YFILETYPE=='FA    '.OR. YFILETYPE=='AROME '.OR.YFILETYPE=='NC    ') THEN
-    CALL PREP_ISBA_CC_EXTERN(GCP,HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,ILUOUT,ZFIELDIN,GPREP_AGS)
-  ELSE IF (YFILETYPE=='BUFFER') THEN
-    GPREP_AGS = .FALSE.
-  ELSE IF (YFILETYPE=='NETCDF') THEN
-    GPREP_AGS = .FALSE.
-  ELSE
-    CALL ABOR1_SFX('PREP_HOR_ISBA_CC_FIELD: data file type not supported : '//YFILETYPE)
-  END IF
+IF (GUNIF) THEN
+  GPREP_AGS = .FALSE.
+ELSE IF (YFILETYPE=='ASCLLV') THEN
+  GPREP_AGS = .FALSE.
+ELSE IF (YFILETYPE=='GRIB  ') THEN
+  GPREP_AGS = .FALSE.
+ELSE IF (YFILETYPE=='MESONH' .OR. YFILETYPE=='ASCII ' .OR. YFILETYPE=='LFI   '&
+        .OR.YFILETYPE=='FA    '.OR. YFILETYPE=='AROME '.OR.YFILETYPE=='NC    ') THEN
+  CALL PREP_ISBA_CC_EXTERN(GCP,HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,ILUOUT,ZFIELDIN,GPREP_AGS)
+ELSE IF (YFILETYPE=='BUFFER') THEN
+  GPREP_AGS = .FALSE.
+ELSE IF (YFILETYPE=='NETCDF') THEN
+  GPREP_AGS = .FALSE.
+ELSE
+  CALL ABOR1_SFX('PREP_HOR_ISBA_CC_FIELD: data file type not supported : '//YFILETYPE)
+END IF
 !
   INL = SIZE(ZFIELDIN,2)
   INP = SIZE(ZFIELDIN,3)
 !
-ENDIF
 !-------------------------------------------------------------------------------------
 !
 !*      3.     Horizontal interpolation
 !
- CALL PREP_CTL_INT_PART2 (YDCTL, HSURF, CMASK, 'NATURE', ZFIELDIN)
 !
-IF (YDCTL%LPART3) THEN
-!
-  IF(GPREP_AGS)THEN
-    !
-    IF (NRANK==NPIO) THEN
-      INL = SIZE(ZFIELDIN,2)
-      INP = SIZE(ZFIELDIN,3)
-    ELSEIF (.NOT.ASSOCIATED(ZFIELDIN)) THEN
-      ALLOCATE(ZFIELDIN(0,0,0))
-    ENDIF
-    !
-    IF (NPROC>1) THEN
+IF(GPREP_AGS)THEN
+  !
+  IF (NRANK==NPIO) THEN
+    INL = SIZE(ZFIELDIN,2)
+    INP = SIZE(ZFIELDIN,3)
+  ELSEIF (.NOT.ASSOCIATED(ZFIELDIN)) THEN
+    ALLOCATE(ZFIELDIN(0,0,0))
+  ENDIF
+  !
+  IF (NPROC>1) THEN
 #ifdef SFX_MPI
       IF (LSFX_MPI) THEN
         CALL MPI_BCAST(INL,KIND(INL)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
         CALL MPI_BCAST(INP,KIND(INP)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
       ENDIF
 #endif
-    ENDIF
-    ALLOCATE(ZFIELDOUTP(KLAT,INL,INP))
-  !
-  ! ZPATCH is the array of output patches put on the input patches
-    ALLOCATE(ZPATCH(KLAT,INP))
-    ZPATCH(:,:) = 0.
-!
-    CALL GET_PREP_INTERP(INP,IO%NPATCH,S%XVEGTYPE,S%XPATCH,ZPATCH)
-  
-    DO JP = 1, INP
-  ! we interpolate each point the output patch is present
-      LINTERP(:) = (ZPATCH(:,JP) > 0.)
-      CALL HOR_INTERPOL(DTCO, U, GCP, ILUOUT,ZFIELDIN(:,:,JP),ZFIELDOUTP(:,:,JP))
-      LINTERP = .TRUE.
-    END DO
-!
-    DEALLOCATE(ZFIELDIN)
-!
   ENDIF
-  !
+  ALLOCATE(ZFIELDOUTP(KLAT,INL,INP))
+!
+! ZPATCH is the array of output patches put on the input patches
+  ALLOCATE(ZPATCH(KLAT,INP))
+  ZPATCH(:,:) = 0.
+!
+  CALL GET_PREP_INTERP(INP,IO%NPATCH,S%XVEGTYPE,S%XPATCH,ZPATCH)
+
+  DO JP = 1, INP
+! we interpolate each point the output patch is present
+    LINTERP(:) = (ZPATCH(:,JP) > 0.)
+    CALL HOR_INTERPOL(DTCO, U, GCP, ILUOUT,ZFIELDIN(:,:,JP),ZFIELDOUTP(:,:,JP))
+    LINTERP = .TRUE.
+  END DO
+!
+  DEALLOCATE(ZFIELDIN)
+!
 ENDIF
 !
- CALL PREP_CTL_INT_PART4 (YDCTL, HSURF, 'NATURE', CMASK, ZFIELDIN, ZFIELDOUTP)
+ALLOCATE(ZW%AL(IO%NPATCH))
+
+IF (GPREP_AGS) THEN
+
+  INL = SIZE (ZFIELDOUTP,2)
+  INP = SIZE (ZFIELDOUTP,3)
+
+  IF (IO%NPATCH/=INP) THEN
+
+    ALLOCATE(ZFIELDOUTV(KLAT,INL,NVEGTYPE))
+    CALL PUT_ON_ALL_VEGTYPES(KLAT,INL,INP,NVEGTYPE,ZFIELDOUTP,ZFIELDOUTV)
 !
-IF (YDCTL%LPART5) THEN
-
-  ALLOCATE(ZW%AL(IO%NPATCH))
-
-  IF (GPREP_AGS) THEN
-
-    INL = SIZE (ZFIELDOUTP,2)
-    INP = SIZE (ZFIELDOUTP,3)
-
-    IF (IO%NPATCH/=INP) THEN
-
-      ALLOCATE(ZFIELDOUTV(KLAT,INL,NVEGTYPE))
-      CALL PUT_ON_ALL_VEGTYPES(KLAT,INL,INP,NVEGTYPE,ZFIELDOUTP,ZFIELDOUTV)
-!
-      DEALLOCATE(ZFIELDOUTP)
+    DEALLOCATE(ZFIELDOUTP)
 !
 !-------------------------------------------------------------------------------------
 !
 !*      6.     Transformation from vegtype grid to patch grid
 !
+  !
+    DO JP = 1,IO%NPATCH
+      PK => NP%AL(JP)
+      !
+      ALLOCATE(ZW%AL(JP)%ZOUT(PK%NSIZE_P,INL))
+      !
+      CALL VEGTYPE_GRID_TO_PATCH_GRID(JP,IO%NPATCH,PK%XVEGTYPE_PATCH,PK%XPATCH,&
+                                      PK%NR_P,ZFIELDOUTV,ZW%AL(JP)%ZOUT)
+    ENDDO
     !
-      DO JP = 1,IO%NPATCH
-        PK => NP%AL(JP)
-        !
-        ALLOCATE(ZW%AL(JP)%ZOUT(PK%NSIZE_P,INL))
-        !
-        CALL VEGTYPE_GRID_TO_PATCH_GRID(JP,IO%NPATCH,PK%XVEGTYPE_PATCH,PK%XPATCH,&
-                                        PK%NR_P,ZFIELDOUTV,ZW%AL(JP)%ZOUT)
-      ENDDO
-      !
-      DEALLOCATE(ZFIELDOUTV)
-      !
-    ELSE
-      !
-      DO JP = 1,IO%NPATCH
-        !
-        PK => NP%AL(JP)
-        !
-        ALLOCATE(ZW%AL(JP)%ZOUT(PK%NSIZE_P,INL))
-        !
-        CALL PACK_SAME_RANK(PK%NR_P,ZFIELDOUTP(:,:,JP),ZW%AL(JP)%ZOUT)
-        !
-      ENDDO
-      !
-      DEALLOCATE(ZFIELDOUTP)
-      !
-    ENDIF
+    DEALLOCATE(ZFIELDOUTV)
     !
   ELSE
     !
     DO JP = 1,IO%NPATCH
-      PK => NP%AL(JP)
-      PEK => NPE%AL(JP)
       !
-      SELECT CASE (HSURF)
-        !
-        CASE('BIOMASS') 
-          ALLOCATE(ZW%AL(JP)%ZOUT(PK%NSIZE_P,IO%NNBIOMASS))
-          ZW%AL(JP)%ZOUT(:,:) = 0.
-          WHERE(PEK%XLAI(:)/=XUNDEF)
-            ZW%AL(JP)%ZOUT(:,1) = PEK%XLAI(:) * PK%XBSLAI_NITRO(:)
-          ENDWHERE
-          ZW%AL(JP)%ZOUT(:,2) = MAX( 0., (ZW%AL(JP)%ZOUT(:,1)/ (XCC_NIT/10.**XCA_NIT))  &
-                                        **(1.0/(1.0-XCA_NIT)) - ZW%AL(JP)%ZOUT(:,1) )
-          !
-        CASE('LITTER') 
-          ALLOCATE(ZW%AL(JP)%ZOUT(PK%NSIZE_P,IO%NNLITTER*IO%NNLITTLEVS))
-          ZW%AL(JP)%ZOUT(:,:) = 0.0
-          !
-        CASE('SOILCARB') 
-          ALLOCATE(ZW%AL(JP)%ZOUT(PK%NSIZE_P,IO%NNSOILCARB))
-          ZW%AL(JP)%ZOUT(:,:) = 0.0
-          !
-        CASE('LIGNIN') 
-          ALLOCATE(ZW%AL(JP)%ZOUT(PK%NSIZE_P,IO%NNLITTLEVS))
-          ZW%AL(JP)%ZOUT(:,:) = 0.0
-         !
-       END SELECT
-       !
-     ENDDO
-     !
+      PK => NP%AL(JP)
+      !
+      ALLOCATE(ZW%AL(JP)%ZOUT(PK%NSIZE_P,INL))
+      !
+      CALL PACK_SAME_RANK(PK%NR_P,ZFIELDOUTP(:,:,JP),ZW%AL(JP)%ZOUT)
+      !
+    ENDDO
+    !
+    DEALLOCATE(ZFIELDOUTP)
+    !
   ENDIF
+  !
+ELSE
+  !
+  DO JP = 1,IO%NPATCH
+    PK => NP%AL(JP)
+    PEK => NPE%AL(JP)
+    !
+    SELECT CASE (HSURF)
+      !
+      CASE('BIOMASS') 
+        ALLOCATE(ZW%AL(JP)%ZOUT(PK%NSIZE_P,IO%NNBIOMASS))
+        ZW%AL(JP)%ZOUT(:,:) = 0.
+        WHERE(PEK%XLAI(:)/=XUNDEF)
+          ZW%AL(JP)%ZOUT(:,1) = PEK%XLAI(:) * PK%XBSLAI_NITRO(:)
+        ENDWHERE
+        ZW%AL(JP)%ZOUT(:,2) = MAX( 0., (ZW%AL(JP)%ZOUT(:,1)/ (XCC_NIT/10.**XCA_NIT))  &
+                                      **(1.0/(1.0-XCA_NIT)) - ZW%AL(JP)%ZOUT(:,1) )
+        !
+      CASE('LITTER') 
+        ALLOCATE(ZW%AL(JP)%ZOUT(PK%NSIZE_P,IO%NNLITTER*IO%NNLITTLEVS))
+        ZW%AL(JP)%ZOUT(:,:) = 0.0
+        !
+      CASE('SOILCARB') 
+        ALLOCATE(ZW%AL(JP)%ZOUT(PK%NSIZE_P,IO%NNSOILCARB))
+        ZW%AL(JP)%ZOUT(:,:) = 0.0
+        !
+      CASE('LIGNIN') 
+        ALLOCATE(ZW%AL(JP)%ZOUT(PK%NSIZE_P,IO%NNLITTLEVS))
+        ZW%AL(JP)%ZOUT(:,:) = 0.0
+       !
+     END SELECT
+     !
+   ENDDO
+   !
+ENDIF
 !-------------------------------------------------------------------------------------
 !
 !*      7.     Return to historical variable
 !
 !
-  SELECT CASE (HSURF)
-    !
-    CASE('BIOMASS') 
-      DO JP = 1,IO%NPATCH
-        PEK => NPE%AL(JP)
-        PK => NP%AL(JP)
+SELECT CASE (HSURF)
+  !
+  CASE('BIOMASS') 
+    DO JP = 1,IO%NPATCH
+      PEK => NPE%AL(JP)
+      PK => NP%AL(JP)
 
-        ALLOCATE(PEK%XBIOMASS(PK%NSIZE_P,IO%NNBIOMASS))
-        INL=MIN(IO%NNBIOMASS,SIZE(ZW%AL(JP)%ZOUT,2))
-        DO JL=1,INL
+      ALLOCATE(PEK%XBIOMASS(PK%NSIZE_P,IO%NNBIOMASS))
+      INL=MIN(IO%NNBIOMASS,SIZE(ZW%AL(JP)%ZOUT,2))
+      DO JL=1,INL
+        WHERE(ZW%AL(JP)%ZOUT(:,JL)/=XUNDEF)
+          PEK%XBIOMASS(:,JL) = ZW%AL(JP)%ZOUT(:,JL)
+        ELSEWHERE
+          PEK%XBIOMASS(:,JL) = 0.0
+        ENDWHERE
+      ENDDO
+      IF(IO%NNBIOMASS>INL)THEN
+        DO JL=INL+1,IO%NNBIOMASS
           WHERE(ZW%AL(JP)%ZOUT(:,JL)/=XUNDEF)
-            PEK%XBIOMASS(:,JL) = ZW%AL(JP)%ZOUT(:,JL)
+            PEK%XBIOMASS(:,JL) = ZW%AL(JP)%ZOUT(:,INL)
           ELSEWHERE
             PEK%XBIOMASS(:,JL) = 0.0
           ENDWHERE
-        ENDDO
-        IF(IO%NNBIOMASS>INL)THEN
-          DO JL=INL+1,IO%NNBIOMASS
-            WHERE(ZW%AL(JP)%ZOUT(:,JL)/=XUNDEF)
-              PEK%XBIOMASS(:,JL) = ZW%AL(JP)%ZOUT(:,INL)
-            ELSEWHERE
-              PEK%XBIOMASS(:,JL) = 0.0
-            ENDWHERE
-          ENDDO          
-        ENDIF
-      ENDDO
-      !
-    CASE('LITTER')
-      DO JP = 1,IO%NPATCH
-        PEK => NPE%AL(JP)
-        PK => NP%AL(JP)
-   
-        ALLOCATE(PEK%XLITTER(PK%NSIZE_P,IO%NNLITTER,IO%NNLITTLEVS))
-        INL=0
-        DO JJ=1,IO%NNLITTER
-          DO JL=1,IO%NNLITTLEVS
-            INL=INL+1
-            WHERE(ZW%AL(JP)%ZOUT(:,INL)/=XUNDEF)
-              PEK%XLITTER(:,JJ,JL) = ZW%AL(JP)%ZOUT(:,INL)
-            ELSEWHERE
-              PEK%XLITTER(:,JJ,JL) = 0.0
-            ENDWHERE
-          ENDDO
-        ENDDO
-      END DO
-      !
-    CASE('SOILCARB') 
-      DO JP = 1,IO%NPATCH
-        PEK => NPE%AL(JP)
-        PK => NP%AL(JP)
+        ENDDO          
+      ENDIF
+    ENDDO
+    !
+  CASE('LITTER')
+    DO JP = 1,IO%NPATCH
+      PEK => NPE%AL(JP)
+      PK => NP%AL(JP)
  
-        ALLOCATE(PEK%XSOILCARB(PK%NSIZE_P,IO%NNSOILCARB))
-        WHERE(ZW%AL(JP)%ZOUT(:,:)/=XUNDEF)
-          PEK%XSOILCARB(:,:) = ZW%AL(JP)%ZOUT(:,:)
-        ELSEWHERE
-          PEK%XSOILCARB(:,:) = 0.0
-        ENDWHERE
+      ALLOCATE(PEK%XLITTER(PK%NSIZE_P,IO%NNLITTER,IO%NNLITTLEVS))
+      INL=0
+      DO JJ=1,IO%NNLITTER
+        DO JL=1,IO%NNLITTLEVS
+          INL=INL+1
+          WHERE(ZW%AL(JP)%ZOUT(:,INL)/=XUNDEF)
+            PEK%XLITTER(:,JJ,JL) = ZW%AL(JP)%ZOUT(:,INL)
+          ELSEWHERE
+            PEK%XLITTER(:,JJ,JL) = 0.0
+          ENDWHERE
+        ENDDO
       ENDDO
-      !
-    CASE('LIGNIN') 
-      DO JP = 1,IO%NPATCH
-        PEK => NPE%AL(JP)
-        PK => NP%AL(JP)
- 
-        ALLOCATE(PEK%XLIGNIN_STRUC(PK%NSIZE_P,IO%NNLITTLEVS))
-        WHERE(ZW%AL(JP)%ZOUT(:,:)/=XUNDEF)
-          PEK%XLIGNIN_STRUC(:,:) = ZW%AL(JP)%ZOUT(:,:)
-        ELSEWHERE
-          PEK%XLIGNIN_STRUC(:,:) = 0.0
-        ENDWHERE
-      ENDDO
-      !
-   END SELECT
-   !
-   DO JP = 1,IO%NPATCH
-     DEALLOCATE(ZW%AL(JP)%ZOUT)
-   ENDDO
-   DEALLOCATE(ZW%AL)
-   !
-ENDIF
+    END DO
+    !
+  CASE('SOILCARB') 
+    DO JP = 1,IO%NPATCH
+      PEK => NPE%AL(JP)
+      PK => NP%AL(JP)
+
+      ALLOCATE(PEK%XSOILCARB(PK%NSIZE_P,IO%NNSOILCARB))
+      WHERE(ZW%AL(JP)%ZOUT(:,:)/=XUNDEF)
+        PEK%XSOILCARB(:,:) = ZW%AL(JP)%ZOUT(:,:)
+      ELSEWHERE
+        PEK%XSOILCARB(:,:) = 0.0
+      ENDWHERE
+    ENDDO
+    !
+  CASE('LIGNIN') 
+    DO JP = 1,IO%NPATCH
+      PEK => NPE%AL(JP)
+      PK => NP%AL(JP)
+
+      ALLOCATE(PEK%XLIGNIN_STRUC(PK%NSIZE_P,IO%NNLITTLEVS))
+      WHERE(ZW%AL(JP)%ZOUT(:,:)/=XUNDEF)
+        PEK%XLIGNIN_STRUC(:,:) = ZW%AL(JP)%ZOUT(:,:)
+      ELSEWHERE
+        PEK%XLIGNIN_STRUC(:,:) = 0.0
+      ENDWHERE
+    ENDDO
+    !
+END SELECT
+ !
+DO JP = 1,IO%NPATCH
+  DEALLOCATE(ZW%AL(JP)%ZOUT)
+ENDDO
+DEALLOCATE(ZW%AL)
+!
 !-------------------------------------------------------------------------------------
 !
 !*      8.     Deallocations
@@ -394,3 +379,4 @@ IF (LHOOK) CALL DR_HOOK('PREP_HOR_ISBA_CC_FIELD',1,ZHOOK_HANDLE)
 !
 !
 END SUBROUTINE PREP_HOR_ISBA_CC_FIELD
+

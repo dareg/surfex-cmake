@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-SUBROUTINE PREP_SEAFLUX_EXTERN (GCP,HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,KLUOUT,PFIELD)
+SUBROUTINE PREP_SEAFLUX_EXTERN (GCP,HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,KLUOUT,PFIELD,CNIV)
 !     #################################################################################
 !
 !
@@ -37,6 +37,7 @@ TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
  CHARACTER(LEN=28),  INTENT(IN)  :: HFILEPGD     ! name of file
  CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! type of input file
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
+ CHARACTER(LEN=6),   INTENT(IN), OPTIONAL  :: CNIV
 REAL,DIMENSION(:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
 !
 !*      0.2    declarations of local variables
@@ -106,6 +107,26 @@ SELECT CASE(HSURF)
     CALL READ_SURF(HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='E')
     CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
     WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF    
+!
+!*      4.1  Sea temperature and salinity
+!           ----------------------------
+!
+  CASE('TEMP_OCXX')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM=trim(HSURF(1:7))//trim(adjustl(CNIV))
+    CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'SEA   ')
+    CALL READ_SURF(HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='E')
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF
+!
+  CASE('SALT_OCXX')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM=trim(HSURF(1:7))//trim(adjustl(CNIV))
+    CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'SEA   ')
+    CALL READ_SURF(HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='E')
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF
+
 !
 !*      5.  Sea surface salinity
 !           --------------------

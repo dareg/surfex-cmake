@@ -55,11 +55,11 @@ INTERFACE
 !
 FUNCTION glt_strlast( hval,kn )
   CHARACTER(*), INTENT(in) ::  &
-    hval
+    & hval 
   INTEGER, INTENT(in) ::  &
-    kn
+    & kn 
   CHARACTER(LEN=kn) ::  &
-    glt_strlast
+    & glt_strlast 
 END FUNCTION glt_strlast
 !
 END INTERFACE
@@ -73,16 +73,16 @@ FUNCTION glt_strlast( hval,kn )
 IMPLICIT NONE
 !
 CHARACTER(*), INTENT(in) ::  &
-  hval
+  & hval 
 INTEGER, INTENT(in) ::  &
-  kn
+  & kn 
 CHARACTER(LEN=kn) ::  &
-  glt_strlast
+  & glt_strlast 
 !
 INTEGER ::  &
-  ilen
+  & ilen 
 CHARACTER(LEN=LEN(TRIM(hval))) ::  &
-  ystr
+  & ystr 
 !
 ilen = LEN(TRIM(hval))
 ystr = TRIM(hval)

@@ -80,27 +80,31 @@
 ! -----------------------------------------------------------------------
 ! ----------------------- SUBROUTINE glt_invert -----------------------------
 !
-SUBROUTINE glt_invert(kdiag,pmat,noutlu,lwg)
+SUBROUTINE glt_invert(kilay,kdiag,pmat,noutlu,lwg)
   USE modi_gltools_glterr
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
 
   USE MODI_ABOR1_SFX
 !
   IMPLICIT NONE
+  INTEGER ::  &
+        & kilay
   INTEGER,INTENT(IN) :: noutlu
   LOGICAL,INTENT(IN) :: lwg
   INTEGER ::  &
-        kdiag
-  REAL, DIMENSION(:,:), INTENT(inout) ::  &
-        pmat
+        & kdiag 
+  REAL, DIMENSION(kilay+2,kilay+2), INTENT(inout) ::  &
+        & pmat 
 !
   INTEGER ::  &
-        ji,jpiv,jdiag
+        & ji,jpiv,jdiag 
   INTEGER ::  &
-        iim,imax
+        & iim,imax 
   REAL ::  &
-        zfac
-  REAL, DIMENSION(:,:), ALLOCATABLE ::  &
-        zmat
+        & zfac 
+  REAL, DIMENSION(kilay+2,2*(kilay+2)) ::  &
+        & zmat 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -109,13 +113,18 @@ SUBROUTINE glt_invert(kdiag,pmat,noutlu,lwg)
 !
 ! .. Compute matrix dimension
 !
-  iim = SIZE(pmat,1)
+IF (LHOOK) CALL DR_HOOK('GLT_INVERT',0,ZHOOK_HANDLE)
+  iim = kilay+2
 !
 ! .. Allocate and initialize work matrix
 !
-  ALLOCATE( zmat(iim,2*iim) ) 
-  zmat(:,:) = 0.
-  zmat(:,1:iim) = pmat(:,:)
+  DO ji=1,iim
+!NEC$ shortloop
+    zmat(:,ji) = pmat(:,ji)
+!NEC$ shortloop
+    zmat(:,ji+iim) = 0.
+  END DO
+!NEC$ shortloop
   DO ji=1,iim
     zmat(ji,ji+iim) = 1.
   END DO
@@ -129,7 +138,7 @@ SUBROUTINE glt_invert(kdiag,pmat,noutlu,lwg)
 !
   IF ( kdiag<1 .OR. kdiag>iim ) THEN
       IF(lwg) WRITE(noutlu,*) '      kdiag =',kdiag,' is lower than 1 or',  &
-        ' greater than matrix dimension'
+        & ' greater than matrix dimension' 
       CALL gltools_glterr( 'invert','','STOP',noutlu,lwg)
   ENDIF
 !
@@ -142,14 +151,15 @@ SUBROUTINE glt_invert(kdiag,pmat,noutlu,lwg)
   DO jpiv=1,iim-1
     IF ( ABS(zmat(jpiv,jpiv))>1.e-10 ) THEN
         imax = MIN( jpiv+kdiag,iim )
+!NEC$ nointerchange
         DO jdiag=jpiv+1,imax
           zfac = zmat(jdiag,jpiv) / zmat(jpiv,jpiv)
+!NEC$ shortloop
           zmat(jdiag,:) = zmat(jdiag,:) - zfac*zmat(jpiv,:)
         END DO
       ELSE
         IF (lwg) THEN
-          WRITE(noutlu,*) '      This kind of matrix cannot be ',  &
-            'inverted by this programme !'
+          WRITE(noutlu,*) '      This kind of matrix cannot be inverted by this programme $2' 
           WRITE(noutlu,*) '      Current status of the matrix:'
           DO ji=1,iim
             WRITE(noutlu,*) '          ',zmat(ji,:)
@@ -163,11 +173,14 @@ SUBROUTINE glt_invert(kdiag,pmat,noutlu,lwg)
 ! 2.3. Transformation of the upper triangular matrix into identity
 ! ----------------------------------------------------------------
 !
+!NEC$ shortloop
   zmat(iim,:) = zmat(iim,:) / zmat(iim,iim)
   DO jpiv=iim,2,-1
     DO ji=1,jpiv-1
+!NEC$ shortloop
       zmat(ji,:) = zmat(ji,:)-zmat(ji,jpiv)*zmat(jpiv,:)
     END DO
+!NEC$ shortloop
     zmat(jpiv-1,:) = zmat(jpiv-1,:) / zmat(jpiv-1,jpiv-1)
   END DO
 !
@@ -177,7 +190,7 @@ SUBROUTINE glt_invert(kdiag,pmat,noutlu,lwg)
 !
   pmat(:,:) = zmat(:,iim+1:2*iim)
 
-  DEALLOCATE( zmat)
+IF (LHOOK) CALL DR_HOOK('GLT_INVERT',1,ZHOOK_HANDLE)
 END SUBROUTINE glt_invert
 
 ! --------------------- END SUBROUTINE glt_invert ---------------------------

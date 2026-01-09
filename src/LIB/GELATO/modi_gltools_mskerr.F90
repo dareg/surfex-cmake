@@ -76,9 +76,10 @@
 ! -------------------------- SUBROUTINE gltools_mskerr --------------------------
 !
 SUBROUTINE gltools_mskerr  &
-        ( href,hfile,hword ,noutlu,lwg)
+        & ( href,hfile,hword ,noutlu,lwg) 
 !
   USE mode_gltools_strlast
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modi_gltools_glterr
   USE MODI_ABOR1_SFX
 !
@@ -87,29 +88,32 @@ SUBROUTINE gltools_mskerr  &
   INTEGER, INTENT(IN) :: noutlu
 !
   CHARACTER(LEN=*), INTENT(in) ::  &
-        href
+        & href 
   CHARACTER(LEN=*), INTENT(in) ::  &
-        hfile
+        & hfile 
   CHARACTER(LEN=*), INTENT(in) ::  &
-        hword
+        & hword 
 !
   INTEGER ::  &
-    ilen
+    & ilen 
   CHARACTER(LEN=LEN(href)) ::  &
-    yw
+    & yw 
   CHARACTER(200) ::  &
-    ymess
+    & ymess 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_MSKERR',0,ZHOOK_HANDLE)
   ilen = LEN(href)
   yw = glt_strlast(hword,ilen)
   IF ( yw /= href ) THEN
       WRITE( ymess,FMT='(A," field expected in ",A,". Read ",A)' )  &
-        href,TRIM(hfile),TRIM(hword)
+        & href,TRIM(hfile),TRIM(hword) 
       CALL gltools_glterr( 'inidmn',ymess,'STOP',noutlu,lwg )
     ELSE
       IF(lwg) WRITE(noutlu,'("Read ",A," mask field.")') TRIM(hword)
   ENDIF
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_MSKERR',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE gltools_mskerr
 !

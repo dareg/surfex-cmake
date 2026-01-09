@@ -78,39 +78,42 @@
 ! .. Subroutine used to check global water budget.
 !
 SUBROUTINE glt_updice  &
-  ( kinit,omsg,tpdom,tptfl,tpsit,pice_a,pemps_a,psalt_a,psalf_a,&
-    noutlu,nt,nx,ny,                                            &
-    dtt,xdomsrf_g,                                              &
-    lwg)
+  & ( kinit,omsg,tpdom,tptfl,tpsit,pice_a,pemps_a,psalt_a,psalf_a,&
+    & noutlu,nt,nx,ny,                                            &
+    & dtt,xdomsrf_g,                                              &
+    & lwg) 
 !
   USE modd_types_glt
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_thm
   USE mode_glt_stats
   USE mode_glt_info
 !
   IMPLICIT NONE
   INTEGER, INTENT(in) ::  &
-         kinit,noutlu,nt,nx,ny
+         & kinit,noutlu,nt,nx,ny 
   REAL, INTENT(in) ::  dtt,xdomsrf_g
   LOGICAL, INTENT(in) ::  lwg
   CHARACTER(*), INTENT(in) ::  &
-        omsg
+        & omsg 
   TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &
-        tpdom
+        & tpdom 
   TYPE(t_tfl), DIMENSION(nx,ny), INTENT(in) ::  &
-        tptfl
+        & tptfl 
   TYPE(t_sit), DIMENSION(nt,nx,ny), INTENT(in) ::  &
-        tpsit
+        & tpsit 
   REAL, INTENT(inout) :: &
-        pemps_a, pice_a, psalt_a, psalf_a
+        & pemps_a, pice_a, psalt_a, psalf_a 
 !
   REAL, DIMENSION(nx,ny) :: &
-        zice, zemps, zsalt, zsalf
+        & zice, zemps, zsalt, zsalf 
   REAL :: &
-        zice_a, zemps_a, zdemps, zdmice, zaddterm_a, zsalt_a, zsalf_a, zdmsalt, zdsalf
+        & zice_a, zemps_a, zdemps, zdmice, zaddterm_a, zsalt_a, zsalf_a, zdmsalt, zdsalf 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
+IF (LHOOK) CALL DR_HOOK('GLT_UPDICE',0,ZHOOK_HANDLE)
    zice(:,:) = rhoice*SUM( tpsit(:,:,:)%fsi*tpsit(:,:,:)%hsi, DIM=1 )
    zice_a = glt_avg(tpdom, zice(:,:), 1,nx,ny,xdomsrf_g)
    zemps(:,:) = tptfl(:,:)%cio
@@ -128,7 +131,7 @@ SUBROUTINE glt_updice  &
      zdsalf = zsalf_a - psalf_a
      IF (lwg) THEN
        WRITE(noutlu,*)  &
-       '--------------------------------------------------------------------'
+       & '--------------------------------------------------------------------' 
        WRITE(noutlu,*) omsg 
        WRITE(noutlu,*) '    Change in ice content       :', zdmice 
        WRITE(noutlu,*) '    Change in emps              :', zdemps
@@ -148,6 +151,7 @@ SUBROUTINE glt_updice  &
    pice_a = zice_a
    psalt_a = zsalt_a
    psalf_a = zsalf_a
+IF (LHOOK) CALL DR_HOOK('GLT_UPDICE',1,ZHOOK_HANDLE)
 
 END SUBROUTINE glt_updice
 

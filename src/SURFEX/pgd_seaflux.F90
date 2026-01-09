@@ -35,6 +35,7 @@
 !!
 !!    Original    03/2004
 !!    Lebeaupin-B C. 01/2008 : include bathymetry
+!!    A. Napoly 12/2024      : add minimum bathymetry
 !!
 !----------------------------------------------------------------------------
 !
@@ -96,6 +97,7 @@ REAL, DIMENSION(NL)               :: ZSEABATHY ! bathymetry on all surface point
  CHARACTER(LEN=28)        :: YNCVARNAME        ! variable to read in netcdf
                                               ! file
 REAL                     :: XUNIF_SEABATHY    ! uniform value of bathymetry
+REAL                     :: XMIN_BATHY        ! min value of bathymetry
 REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
@@ -110,8 +112,8 @@ REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !             -------------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_SEAFLUX',0,ZHOOK_HANDLE)
- CALL READ_NAM_PGD_SEABATHY(HPROGRAM,YSEABATHY,YSEABATHYFILETYPE,YNCVARNAME,&
-       XUNIF_SEABATHY)  
+CALL READ_NAM_PGD_SEABATHY(HPROGRAM,YSEABATHY,YSEABATHYFILETYPE,YNCVARNAME,&
+                           XUNIF_SEABATHY,XMIN_BATHY)  
 !
 !-------------------------------------------------------------------------------
 !
@@ -123,14 +125,15 @@ IF (LHOOK) CALL DR_HOOK('PGD_SEAFLUX',0,ZHOOK_HANDLE)
 !*    4.      Bathymetry
 !             ----------
 !
- CALL PGD_BATHYFIELD(UG, U, USS, HPROGRAM,'bathymetry','SEA',YSEABATHY,YSEABATHYFILETYPE,&
-       YNCVARNAME,XUNIF_SEABATHY,ZSEABATHY(:))  
+CALL PGD_BATHYFIELD(UG, U, USS, HPROGRAM,'bathymetry','SEA',YSEABATHY,YSEABATHYFILETYPE,&
+                    YNCVARNAME,XUNIF_SEABATHY,ZSEABATHY(:))  
+ZSEABATHY(:)=MIN(ZSEABATHY(:),XMIN_BATHY)
 !-------------------------------------------------------------------------------
 !
 !*    5.      Number of points and packing
 !             ----------------------------
 !
- CALL GET_SURF_SIZE_n(DTCO, U, 'SEA   ',SG%NDIM)
+CALL GET_SURF_SIZE_n(DTCO, U, 'SEA   ',SG%NDIM)
 !
 ALLOCATE(S%LCOVER     (JPCOVER))
 ALLOCATE(S%XZS        (SG%NDIM))

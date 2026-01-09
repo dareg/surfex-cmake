@@ -90,12 +90,13 @@
 ! ------------------------- SUBROUTINE glt_updhsi_r -------------------------
 !
 SUBROUTINE glt_updhsi_r  &
-        ( pcondb,pqtopmelt,pdhmelt,tpmxl,tpdia,tptfl,tpsit,tpsil,&
-       ncdlssh,niceage,nicesal,nilay,nl,nleviti,nmponds,noutlu,np,nsalflx,nslay,nt,&
-       dtt,rn_htopoc,lp3,&
-       sf3tinv,height )
+        & ( pcondb,pqtopmelt,pdhmelt,tpmxl,tpdia,tptfl,tpsit,tpsil,&
+       & ncdlssh,niceage,nicesal,nilay,nl,nleviti,nmponds,noutlu,np,nsalflx,nslay,nt,&
+       & dtt,rn_htopoc,lp3,&
+       & sf3tinv,height ) 
 !
   USE modd_glt_const_thm
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_types_glt
   USE modi_glt_updtfl_r
   USE modi_glt_saltrap_r
@@ -113,34 +114,35 @@ SUBROUTINE glt_updhsi_r  &
   LOGICAL, INTENT(IN) ::  lp3
   REAL,DIMENSION(:),INTENT(IN) ::  sf3tinv,height
   REAL, DIMENSION(nt,np), INTENT(in) ::  &
-        pcondb,pqtopmelt
+        & pcondb,pqtopmelt 
   REAL, DIMENSION(nl,nt,np), INTENT(in) ::  &
-        pdhmelt
+        & pdhmelt 
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
-        tpmxl
+        & tpmxl 
   TYPE(t_dia), DIMENSION(np), INTENT(inout) ::   &
-        tpdia
+        & tpdia 
   TYPE(t_tfl), DIMENSION(np), INTENT(inout) ::   &
-        tptfl
+        & tptfl 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
-        tpsit
+        & tpsit 
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(inout) ::  &
-        tpsil
+        & tpsil 
 !
 !* Local variables
 !
   CHARACTER(4) ::  &
-        yword
+        & yword 
   INTEGER ::  &
-        jk,jl
+        & jk,jl 
   LOGICAL, DIMENSION(np) ::  &
-        yfreeze
+        & yfreeze 
   REAL, DIMENSION(np) ::  &
-        zfsit,zqtio,zwork,zssib,zentb,zdhsib,ztem
+        & zfsit,zqtio,zwork,zssib,zentb,zdhsib,ztem 
   REAL, DIMENSION(nt,np) ::  &
-        zlf,zhsi,zhsn,zssi,zdmsi,zdmsn,zqfac,zqres,zwork2,zent0,zqtio2,zhsi_m
+        & zlf,zhsi,zhsn,zssi,zdmsi,zdmsn,zqfac,zqres,zwork2,zent0,zqtio2,zhsi_m 
   REAL, DIMENSION(nilay,nt,np) ::  &
-        zdhi
+        & zdhi 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !  real,dimension(np) :: zei1,zei2,zes1,zes2
 !
 !
@@ -150,13 +152,14 @@ SUBROUTINE glt_updhsi_r  &
 !
 ! .. Enthalpy transfer between melted ice and ocean
 ! 
+IF (LHOOK) CALL DR_HOOK('GLT_UPDHSI_R',0,ZHOOK_HANDLE)
   zqtio2(:,:) = 0.
 !
 ! .. Total available flux (zqfac) and flux affecting the ocean (zqtio)
 !
   zfsit(:) = SUM( tpsit(:,:)%fsi,DIM=1 )
   zqfac(:,:) = pcondb(:,:) +  &
-    SPREAD( tpmxl(:)%qoc + tpmxl(:)%qml,1,nt )
+    & SPREAD( tpmxl(:)%qoc + tpmxl(:)%qml,1,nt ) 
 !write(noutlu,*) '(1) pdhmelt =',pdhmelt
 !write(noutlu,*) '(7) pcondb =',pcondb
 !write(noutlu,*) '(7) qoc =',tpmxl%qoc
@@ -208,7 +211,7 @@ SUBROUTINE glt_updhsi_r  &
 ! (i.e. sea ice has melted completely); sea ice gltools_enthalpy goes to the mixed layer
     WHERE( pdhmelt(jl,:,:)>0. )
       zqtio2(:,:) = zqtio2(:,:) +  &
-        ( rhoice * zdhi(jl,:,:) * tpsil(jl,:,:)%ent + pdhmelt(jl,:,:) ) / dtt 
+        & ( rhoice * zdhi(jl,:,:) * tpsil(jl,:,:)%ent + pdhmelt(jl,:,:) ) / dtt  
       zdhi(jl,:,:) = 0.
 !      zqfac(:,:) = zqfac(:,:) + pdhmelt(jl,:,:)/dtt
     ENDWHERE
@@ -221,7 +224,7 @@ SUBROUTINE glt_updhsi_r  &
 ! Melt some ice (if at this level sea ice temperature > tice_m)
     WHERE( tpsil(jl,:,:)%ent>=zent0(:,:) .AND. zhsi(:,:)>0. )
       zqtio2(:,:) = zqtio2(:,:) +  &
-        rhoice*( tpsil(jl,:,:)%ent-zent0(:,:) )* zdhi(jl,:,:)/dtt
+        & rhoice*( tpsil(jl,:,:)%ent-zent0(:,:) )* zdhi(jl,:,:)/dtt 
 !      zqtio2(:,:) = zqtio2(:,:) +  &
 !        rhoice*zent0(:,:)*tpsit(:,:)%fsi*zdhi(jl,:,:)/dtt
       zdhi(jl,:,:) = 0.
@@ -239,8 +242,8 @@ SUBROUTINE glt_updhsi_r  &
 ! [kg.m-2.s-1]
 !
   tpdia(:)%mrt =  &
-    rhoice*SUM(  &
-      tpsit(:,:)%fsi*( SUM( zdhi(:,:,:),DIM=1 )-tpsit(:,:)%hsi ), DIM=1 )/dtt
+    & rhoice*SUM(  &
+      & tpsit(:,:)%fsi*( SUM( zdhi(:,:,:),DIM=1 )-tpsit(:,:)%hsi ), DIM=1 )/dtt 
 ! 
 !
 !
@@ -261,7 +264,7 @@ SUBROUTINE glt_updhsi_r  &
 !
     WHERE ( zqfac(:,:)>0. .AND. zdhi(jl,:,:)>0. )
       zdhi(jl,:,:) = zdhi(jl,:,:) + dtt*zqfac(:,:)/  &
-        ( tpsil(jl,:,:)%ent*rhoice )
+        & ( tpsil(jl,:,:)%ent*rhoice ) 
 !
 ! No problem in melting current ice layer: all zqfac was used.
       WHERE ( zdhi(jl,:,:)>=0. )
@@ -292,8 +295,8 @@ SUBROUTINE glt_updhsi_r  &
   zqres(:,:) = 0.
   WHERE ( zqfac(:,:)>0. )
     zqfac(:,:) =  zqfac(:,:) +  &
-      tpsit(:,:)%hsn*tpsit(:,:)%rsn/dtt *  &
-        SUM( tpsil(nilay+1:nl,:,:)%ent,DIM=1 )/FLOAT(nslay)
+      & tpsit(:,:)%hsn*tpsit(:,:)%rsn/dtt *  &
+        & SUM( tpsil(nilay+1:nl,:,:)%ent,DIM=1 )/FLOAT(nslay) 
     zhsn(:,:) = 0.
     WHERE ( zqfac(:,:)<0. )  ! Compute residual heat flux
       zqres(:,:) = zqfac(:,:)
@@ -315,7 +318,7 @@ SUBROUTINE glt_updhsi_r  &
 !CALL glt_aventh(tpsit,tpsil,zei1,zes1)
 !print*,'Enthalpie avant =',zei1+zes1
   CALL glt_mltvtp_r( zdhi,zhsi,tpsil,&
-     nilay,nl,np,nt,lp3,height,sf3tinv)
+     & nilay,nl,np,nt,lp3,height,sf3tinv) 
 !print*,'zqtio2 =',sum(zqtio2*tpsit%fsi,dim=1)
 !    print*,'(2) zqfac=',sum(zqfac*tpsit%fsi,dim=1)
 !    print*,'(2) zqres=',sum(zqres*tpsit%fsi,dim=1)
@@ -323,11 +326,11 @@ SUBROUTINE glt_updhsi_r  &
 
 ! Update water, heat and salt fluxes affecting the ocean due to melting
   zdmsi(:,:) = rhoice *  &
-    ( zhsi(:,:)-tpsit(:,:)%hsi ) * tpsit(:,:)%fsi
+    & ( zhsi(:,:)-tpsit(:,:)%hsi ) * tpsit(:,:)%fsi 
   zhsi_m(:,:) = zhsi(:,:)
   zwork2(:,:) = 0.
   CALL glt_updtfl_r( 'I2O',tpmxl,tptfl,zdmsi,&
-      ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc,pent=zwork2,psalt=tpsit(:,:)%ssi )
+      & ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc,pent=zwork2,psalt=tpsit(:,:)%ssi ) 
 !  print*,'Enthalpie envoyee a l ocean =',SUM(0.*zdmsi,dim=1)/dtt
 !
 !
@@ -348,7 +351,7 @@ SUBROUTINE glt_updhsi_r  &
   tpdia(:)%cgl = rhoice*tpdia(:)%cgl/dtt   ! Convert to kg.m-2.s-1
 !
   CALL glt_frzvtp_r( tpmxl,tpsit,zqfac,zhsi,zssi,tpsil,&
-     nilay,nl,noutlu,np,nt,dtt,lp3,height,sf3tinv)
+     & nilay,nl,noutlu,np,nt,dtt,lp3,height,sf3tinv) 
 !
 ! .. Sea ice freezing 
 !   - zqfac was completely used: set it to 0.
@@ -359,9 +362,9 @@ SUBROUTINE glt_updhsi_r  &
 !
 ! Update water, heat and salt fluxes affecting the ocean due to freezing
   zdmsi(:,:) = rhoice *  &
-    ( zhsi(:,:)-zhsi_m(:,:) ) * tpsit(:,:)%fsi
+    & ( zhsi(:,:)-zhsi_m(:,:) ) * tpsit(:,:)%fsi 
   CALL glt_updtfl_r( 'I2O',tpmxl,tptfl,zdmsi,&
-      ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc,pent=zent0,psalt=zssi )
+      & ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc,pent=zent0,psalt=zssi ) 
 !
 !
 !
@@ -375,8 +378,8 @@ SUBROUTINE glt_updhsi_r  &
 !!write(noutlu,*) '(avant)qfac =',zqfac
 !!write(noutlu,*) '(avant)qtio2=',zqtio2
   tptfl(:)%tio = tptfl(:)%tio +  &
-    SUM( ( zqfac(:,:)+zqtio2(:,:)+zqres(:,:) )*tpsit(:,:)%fsi,DIM=1 ) +  &
-    zqtio(:)
+    & SUM( ( zqfac(:,:)+zqtio2(:,:)+zqres(:,:) )*tpsit(:,:)%fsi,DIM=1 ) +  &
+    & zqtio(:) 
 !print*,'tio=',tptfl(:)%tio
 !print*,'zqfac=',zqfac
 !print*,'fsi=',tpsit%fsi
@@ -398,7 +401,7 @@ SUBROUTINE glt_updhsi_r  &
     zhsn(:,:) = 0.
   ENDWHERE
   zdmsn(:,:) = tpsit(:,:)%rsn *  &
-    ( zhsn(:,:)-tpsit(:,:)%hsn ) * tpsit(:,:)%fsi
+    & ( zhsn(:,:)-tpsit(:,:)%hsn ) * tpsit(:,:)%fsi 
 !
 !
 ! 5.3. Massic gltools_enthalpy of removed snow
@@ -413,7 +416,7 @@ SUBROUTINE glt_updhsi_r  &
 ! ------------------------------------------------------------
 !
   CALL glt_updtfl_r( 'FW2O',tpmxl,tptfl,zdmsn,&
-      ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc)
+      & ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc) 
 !
 !
 !
@@ -481,6 +484,7 @@ SUBROUTINE glt_updhsi_r  &
       tpsit(:,:)%vmp = 0.
     ENDWHERE
   ENDIF
+IF (LHOOK) CALL DR_HOOK('GLT_UPDHSI_R',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE glt_updhsi_r
 !

@@ -73,33 +73,36 @@
 SUBROUTINE gltools_nextval( klun,hlistfld,klistfound,kok,hpar,hval,lwg,hcomment ) 
 !
 USE modi_gltools_nextline
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
 !
 !
 IMPLICIT NONE
 ! 
   LOGICAL,INTENT(IN) :: lwg
   INTEGER, INTENT(in) ::  &
-    klun    
+    & klun     
   CHARACTER(80), DIMENSION(:), INTENT(in) ::  &
-    hlistfld
+    & hlistfld 
   INTEGER, DIMENSION(:), INTENT(inout) ::  &
-    klistfound
+    & klistfound 
   INTEGER, INTENT(out) ::  &
-    kok
+    & kok 
   CHARACTER(80), INTENT(out) ::  &
-    hpar,hval
+    & hpar,hval 
   CHARACTER(1), OPTIONAL, INTENT(in) ::  &
-    hcomment
+    & hcomment 
 !
   INTEGER ::  &
-    iend,infld,ji
+    & iend,infld,ji 
   CHARACTER(1) :: ycomment
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
 ! 1. Define the comment character
 ! ================================
 !
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_NEXTVAL',0,ZHOOK_HANDLE)
 IF (PRESENT(hcomment)) THEN
   ycomment = hcomment
 ELSE
@@ -141,5 +144,6 @@ IF ( ALL(klistfound==1) ) THEN
   ELSE
     kok=0
 ENDIF
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_NEXTVAL',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE gltools_nextval

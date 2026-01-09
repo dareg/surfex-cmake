@@ -51,6 +51,7 @@
 ! ------------------- BEGIN MODULE mode_gltools_prtrarr -------------------
 
 MODULE mode_gltools_prtrarr
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
 CONTAINS
 ! ------------------- END MODULE mode_gltools_prtrarr ---------------------
 
@@ -63,31 +64,33 @@ SUBROUTINE glt_prtrarr2(omess,pfield,kin,kix,kjn,kjx,ktab,noutlu,lwg)
 !
   IMPLICIT NONE
   CHARACTER(*), INTENT(in) ::                                           &
-        omess
+        & omess 
   REAL, DIMENSION(:,:), INTENT(in) ::                                   &
-        pfield
+        & pfield 
   LOGICAL, INTENT(in) :: lwg
   INTEGER, INTENT(in) :: noutlu
   INTEGER, INTENT(in) ::                                                &
-        kin,kix,kjn,kjx
+        & kin,kix,kjn,kjx 
   INTEGER, INTENT(in) ::                                                &
-        ktab
+        & ktab 
   INTEGER ::                                                            &
-        jl
+        & jl 
   INTEGER ::                                                            &
-        kx,ky 
+        & kx,ky  
   REAL, DIMENSION(:,:), ALLOCATABLE ::                                  &
-        zwork21
+        & zwork21 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 
 ! *** Get input array dimensions
+IF (LHOOK) CALL DR_HOOK('MODE_GLTOOLS_PRTRARR:GLT_PRTRARR2',0,ZHOOK_HANDLE)
   kx = SIZE(pfield,1)
   ky = SIZE(pfield,2)
 
 ! *** Test specified array sections vs array dimensions
   IF (kix<1 .OR. kix>kx .OR. kjx<1 .OR. kjx>ky .OR.                     &
-      kin<1 .OR. kin>kx .OR. kjn<1 .OR. kjn>ky .OR.                     &
-      kix<kin .OR. kjx<kjn) THEN
+      & kin<1 .OR. kin>kx .OR. kjn<1 .OR. kjn>ky .OR.                     &
+      & kix<kin .OR. kjx<kjn) THEN 
     IF(lwg) THEN 
       WRITE(noutlu,*) '      *** WARNING ***'
       WRITE(noutlu,*) '        glt_prtrarr2 : check array section boundaries'
@@ -119,6 +122,7 @@ SUBROUTINE glt_prtrarr2(omess,pfield,kin,kix,kjn,kjx,ktab,noutlu,lwg)
 ! * Deallocate work array
     DEALLOCATE(zwork21) 
   ENDIF 
+IF (LHOOK) CALL DR_HOOK('MODE_GLTOOLS_PRTRARR:GLT_PRTRARR2',1,ZHOOK_HANDLE)
 
 ! *** Formats
 1300 FORMAT(6X,I3,10(1X,E10.4))
@@ -141,34 +145,36 @@ SUBROUTINE glt_prtrarr3(omess,pfield,klay,kin,kix,kjn,kjx,ktab, noutlu,lwg)
 !
   IMPLICIT NONE
   CHARACTER(*), INTENT(in) ::                                           &
-        omess
+        & omess 
   REAL, DIMENSION(:,:,:), INTENT(in) ::                                 &
-        pfield
+        & pfield 
   INTEGER, INTENT(in) ::                                                &
-        klay
+        & klay 
   INTEGER, INTENT(in) ::                                                &
-        kin,kix,kjn,kjx
+        & kin,kix,kjn,kjx 
   INTEGER, INTENT(in) ::                                                &
-        ktab
+        & ktab 
   LOGICAL, INTENT(in) :: lwg
   INTEGER, INTENT(in) :: noutlu
   INTEGER ::                                                            &
-        jl
+        & jl 
   INTEGER ::                                                            &
-        kx,ky,kz 
+        & kx,ky,kz  
   REAL, DIMENSION(:,:), ALLOCATABLE ::                                  &
-        zwork21
+        & zwork21 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 
 ! *** Get input array dimensions
+IF (LHOOK) CALL DR_HOOK('MODE_GLTOOLS_PRTRARR:GLT_PRTRARR3',0,ZHOOK_HANDLE)
   kx = SIZE(pfield,2)
   ky = SIZE(pfield,3)
   kz = SIZE(pfield,1)
 
 ! *** Test specified array sections vs array dimensions
   IF (kix<1 .OR. kix>kx .OR. kjx<1 .OR. kjx>ky .OR.                     &
-      kin<1 .OR. kin>kx .OR. kjn<1 .OR. kjn>ky .OR.                     &
-      klay<1 .OR. klay>kz .OR. kix<kin .OR. kjx<kjn) THEN
+      & kin<1 .OR. kin>kx .OR. kjn<1 .OR. kjn>ky .OR.                     &
+      & klay<1 .OR. klay>kz .OR. kix<kin .OR. kjx<kjn) THEN 
     IF(lwg) WRITE(noutlu,*) '      *** WARNING ***'
     IF(lwg) WRITE(noutlu,*) '        glt_prtrarr3 : check array section boundaries'
     IF(lwg) WRITE(noutlu,*) '  '
@@ -195,6 +201,7 @@ SUBROUTINE glt_prtrarr3(omess,pfield,klay,kin,kix,kjn,kjx,ktab, noutlu,lwg)
 ! * Deallocate work array
     DEALLOCATE(zwork21) 
   ENDIF 
+IF (LHOOK) CALL DR_HOOK('MODE_GLTOOLS_PRTRARR:GLT_PRTRARR3',1,ZHOOK_HANDLE)
 
 ! *** Formats
 1300 FORMAT(6X,I3,5(1X,E10.4))

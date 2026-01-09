@@ -124,9 +124,9 @@
 ! ---------------------- SUBROUTINE glt_thermo_r ----------------------------
 !
 SUBROUTINE glt_thermo_r  &
-  ( tpdom,pustar,tpmxl,tpatm,  &
-    tpblkw,tpblki,tpbud,tpdia,tptfl,tpsit,tpsil,&
-    ygltparam,ygltvhd)
+  & ( tpdom,pustar,tpmxl,tpatm,  &
+    & tpblkw,tpblki,tpbud,tpdia,tptfl,tpsit,tpsil,&
+    & ygltparam,ygltvhd) 
 !
 !
 ! 1. DECLARATIONS
@@ -136,6 +136,7 @@ SUBROUTINE glt_thermo_r  &
 ! ------------------------
 !
   USE modd_glt_const_thm
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_types_glt
   USE mode_glt_info_r 
   USE modi_glt_updbud_r
@@ -159,46 +160,48 @@ SUBROUTINE glt_thermo_r  &
   TYPE(t_glt_vhd), INTENT(inout) :: ygltvhd
   TYPE(t_glt_param), INTENT(inout) :: ygltparam
   TYPE(t_dom), DIMENSION(ygltparam%np), INTENT(in) ::  &
-        tpdom
+        & tpdom 
   REAL, DIMENSION(ygltparam%np), INTENT(in) ::  &
-        pustar
+        & pustar 
   TYPE(t_mxl), DIMENSION(ygltparam%np), INTENT(inout) ::  &
-        tpmxl
+        & tpmxl 
   TYPE(t_atm), DIMENSION(ygltparam%np), INTENT(in) ::  &
-        tpatm
+        & tpatm 
   TYPE(t_blk), DIMENSION(ygltparam%np), INTENT(inout) ::  &
-        tpblkw
+        & tpblkw 
   TYPE(t_blk), DIMENSION(ygltparam%nt,ygltparam%np), INTENT(in) ::  &
-        tpblki
+        & tpblki 
   TYPE(t_bud), DIMENSION(ygltparam%np), INTENT(inout) ::  &
-        tpbud
+        & tpbud 
   TYPE(t_dia), DIMENSION(ygltparam%np), INTENT(inout) ::  &
-        tpdia
+        & tpdia 
   TYPE(t_tfl), DIMENSION(ygltparam%np), INTENT(inout) ::  &
-        tptfl
+        & tptfl 
   TYPE(t_sit), DIMENSION(ygltparam%nt,ygltparam%np), INTENT(inout) ::  &
-        tpsit
+        & tpsit 
   TYPE(t_vtp), DIMENSION(ygltparam%nl,ygltparam%nt,ygltparam%np), INTENT(inout) ::  &
-        tpsil
+        & tpsil 
 !
 !
 ! 1.3. Local variables declarations
 ! ---------------------------------
 !
   TYPE(t_sit), DIMENSION(ygltparam%nt,ygltparam%np) ::  &
-        tzldsit
+        & tzldsit 
   TYPE(t_vtp), DIMENSION(ygltparam%nl,ygltparam%nt,ygltparam%np) ::  &
-        tzldsil
+        & tzldsil 
   REAL :: &
-        zice_a, zemps_a, zsalt_a, zsalf_a, zsalt_a_0, zsalf_a_0
+        & zice_a, zemps_a, zsalt_a, zsalf_a, zsalt_a_0, zsalf_a_0 
 ! MCH
   INTEGER :: jt
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 ! MCH
 !
 !
 ! 1.4. Welcome message
 ! --------------------
 !
+IF (LHOOK) CALL DR_HOOK('GLT_THERMO_R',0,ZHOOK_HANDLE)
   IF (ygltparam%lp1) THEN
     WRITE(ygltparam%noutlu,*) ' '
     WRITE(ygltparam%noutlu,*) ' *** LEVEL 3 - SUBROUTINE THERMO_R'
@@ -231,7 +234,7 @@ SUBROUTINE glt_thermo_r  &
 ! .. Idem for sea ice fresh water content
 !
   tpdia(:)%dwi = rhoice*SUM( tpsit(:,:)%fsi*tpsit(:,:)%hsi*  &
-    ( 1.-1.e-3*tpsit(:,:)%ssi ), DIM=1 )
+    & ( 1.-1.e-3*tpsit(:,:)%ssi ), DIM=1 ) 
 !
 ! .. Idem for snow mass variations
 !
@@ -256,26 +259,26 @@ SUBROUTINE glt_thermo_r  &
 !
   IF ( ygltparam%nupdbud==1 ) THEN
       CALL glt_updbud_r( 1,'Before THERMO_LEAD_R:',  &
-        tpdom,tpmxl,tptfl,tpatm,tpblkw,tpblki,tpsit,tpsil,tpbud ,&
-        ygltparam%niceage,ygltparam%nicesal,ygltparam%nilay,ygltparam%nl,ygltparam%nmponds,&
-        ygltparam%noutlu,ygltparam%np,ygltparam%nprinto,ygltparam%nslay,ygltparam%nsnwrad,ygltparam%nt,  &   
-        ygltparam%dtt,ygltparam%xdomsrf_r,&
-        ygltparam%lp1,ygltparam%lp2,ygltparam%lp3,ygltparam%lwg,ygltparam%sf3tinv)
+        & tpdom,tpmxl,tptfl,tpatm,tpblkw,tpblki,tpsit,tpsil,tpbud ,&
+        & ygltparam%niceage,ygltparam%nicesal,ygltparam%nilay,ygltparam%nl,ygltparam%nmponds,&
+        & ygltparam%noutlu,ygltparam%np,ygltparam%nprinto,ygltparam%nslay,ygltparam%nsnwrad,ygltparam%nt,     &
+        & ygltparam%dtt,ygltparam%xdomsrf_r,&
+        & ygltparam%lp1,ygltparam%lp2,ygltparam%lp3,ygltparam%lwg,ygltparam%sf3tinv) 
 
       CALL glt_updice_r(0,' BEFORE glt_thermo_lead_r ', &
-        tpdom, tpsit, zsalt_a, zice_a,ygltparam%noutlu,ygltparam%np,ygltparam%nt,ygltparam%dtt, &
-        ygltparam%xdomsrf_r,ygltparam%lwg, tptfl, zemps_a, zsalf_a)
+        & tpdom, tpsit, zsalt_a, zice_a,ygltparam%noutlu,ygltparam%np,ygltparam%nt,ygltparam%dtt, &
+        & ygltparam%xdomsrf_r,ygltparam%lwg, tptfl, zemps_a, zsalf_a) 
       zsalt_a_0 = zsalt_a
       zsalf_a_0 = zsalf_a
   ENDIF
 !
   CALL glt_thermo_lead_r  &
-  (ygltparam%ncdlssh,ygltparam%nextqoc,ygltparam%niceage,ygltparam%nicesal,ygltparam%nl,ygltparam%nleviti,&
-  ygltparam%nmponds,ygltparam%noutlu,ygltparam%np,ygltparam%nprinto,ygltparam%nsalflx,ygltparam%nsnwrad,ygltparam%nt,&
-  ygltparam%dtt,ygltparam%rn_htopoc,ygltparam%xhsimin,ygltparam%lp1,ygltparam%lp2,ygltparam%lp3,ygltparam%lwg,ygltparam%thick,&
-    tpdom,pustar,tpmxl,tpatm,tpblkw,  &
-    tpdia,tptfl,tpsit,tpsil,  &
-    tzldsit,tzldsil)
+  & (ygltparam%ncdlssh,ygltparam%nextqoc,ygltparam%niceage,ygltparam%nicesal,ygltparam%nl,ygltparam%nleviti,&
+  & ygltparam%nmponds,ygltparam%noutlu,ygltparam%np,ygltparam%nprinto,ygltparam%nsalflx,ygltparam%nsnwrad,ygltparam%nt,&
+  & ygltparam%dtt,ygltparam%rn_htopoc,ygltparam%xhsimin,ygltparam%lp1,ygltparam%lp2,ygltparam%lp3,ygltparam%lwg,ygltparam%thick,&
+    & tpdom,pustar,tpmxl,tpatm,tpblkw,  &
+    & tpdia,tptfl,tpsit,tpsil,  &
+    & tzldsit,tzldsil) 
 !
 !
 !
@@ -301,15 +304,15 @@ SUBROUTINE glt_thermo_r  &
 !
   IF ( ygltparam%nupdbud==1 ) THEN
       CALL glt_updbud_r( 0,'After glt_thermo_lead_r / Before THERMO_ICE_R:',  &
-        tpdom,tpmxl,tptfl,tpatm,tpblkw,tpblki,tpsit,tpsil,tpbud ,&
-        ygltparam%niceage,ygltparam%nicesal,ygltparam%nilay,ygltparam%nl,ygltparam%nmponds,ygltparam%noutlu,ygltparam%np,&
-        ygltparam%nprinto,ygltparam%nslay,ygltparam%nsnwrad,ygltparam%nt,  &   
-        ygltparam%dtt,ygltparam%xdomsrf_r,&
-        ygltparam%lp1,ygltparam%lp2,ygltparam%lp3,ygltparam%lwg,ygltparam%sf3tinv)
+        & tpdom,tpmxl,tptfl,tpatm,tpblkw,tpblki,tpsit,tpsil,tpbud ,&
+        & ygltparam%niceage,ygltparam%nicesal,ygltparam%nilay,ygltparam%nl,ygltparam%nmponds,ygltparam%noutlu,ygltparam%np,&
+        & ygltparam%nprinto,ygltparam%nslay,ygltparam%nsnwrad,ygltparam%nt,     &
+        & ygltparam%dtt,ygltparam%xdomsrf_r,&
+        & ygltparam%lp1,ygltparam%lp2,ygltparam%lp3,ygltparam%lwg,ygltparam%sf3tinv) 
 
       CALL glt_updice_r(1, ' AFTER THERMO_LEAD_R', &
-        tpdom, tpsit, zsalt_a, zice_a,ygltparam%noutlu,ygltparam%np,ygltparam%nt,ygltparam%dtt, &
-        ygltparam%xdomsrf_r,ygltparam%lwg, tptfl, zemps_a, zsalf_a)
+        & tpdom, tpsit, zsalt_a, zice_a,ygltparam%noutlu,ygltparam%np,ygltparam%nt,ygltparam%dtt, &
+        & ygltparam%xdomsrf_r,ygltparam%lwg, tptfl, zemps_a, zsalf_a) 
   ENDIF
 !
 !
@@ -317,15 +320,15 @@ SUBROUTINE glt_thermo_r  &
 ! ----------------------------------------
 !
   CALL glt_thermo_ice_r  &
-    ( tpdom,tpmxl,tpatm,tpblki,tpbud,tpdia,tptfl,tpsit,tpsil,&
-   ygltparam%ncdlssh,ygltparam%niceage,ygltparam%nicesal,ygltparam%nicesub,ygltparam%nilay,ygltparam%nl,ygltparam%nleviti,&
-   ygltparam%nmponds,ygltparam%noutlu,ygltparam%np,ygltparam%nprinto,ygltparam%nsalflx,ygltparam%nslay,ygltparam%nsnwrad, &
-   ygltparam%nt,ygltparam%nupdbud,&
-   ygltparam%albimlt,ygltparam%albsdry,ygltparam%albsmlt,&
-   ygltparam%dtt,ygltparam%rn_htopoc,ygltparam%xdomsrf_r,ygltparam%xlmelt,ygltparam%xswhdfr,&
-   ygltparam%lp1,ygltparam%lp2,ygltparam%lp3,ygltparam%lp4,ygltparam%lp5,ygltparam%lwg,&
-   ygltparam%depth,ygltparam%height,ygltparam%sf3t,ygltparam%sf3tinv,&
-   ygltvhd)
+    & ( tpdom,tpmxl,tpatm,tpblki,tpbud,tpdia,tptfl,tpsit,tpsil,&
+   & ygltparam%ncdlssh,ygltparam%niceage,ygltparam%nicesal,ygltparam%nicesub,ygltparam%nilay,ygltparam%nl,ygltparam%nleviti,&
+   & ygltparam%nmponds,ygltparam%noutlu,ygltparam%np,ygltparam%nprinto,ygltparam%nsalflx,ygltparam%nslay,ygltparam%nsnwrad, &
+   & ygltparam%nt,ygltparam%nupdbud,&
+   & ygltparam%albimlt,ygltparam%albsdry,ygltparam%albsmlt,&
+   & ygltparam%dtt,ygltparam%rn_htopoc,ygltparam%xdomsrf_r,ygltparam%xlmelt,ygltparam%xswhdfr,&
+   & ygltparam%lp1,ygltparam%lp2,ygltparam%lp3,ygltparam%lp4,ygltparam%lp5,ygltparam%lwg,&
+   & ygltparam%depth,ygltparam%height,ygltparam%sf3t,ygltparam%sf3tinv,&
+   & ygltvhd) 
 
 !
 ! 
@@ -350,15 +353,15 @@ SUBROUTINE glt_thermo_r  &
 !
   IF ( ygltparam%nupdbud==1 ) THEN
       CALL glt_updbud_r( 0,'After glt_thermo_ice_r / Before THERMO_END_R:',  &
-        tpdom,tpmxl,tptfl,tpatm,tpblkw,tpblki,tpsit,tpsil,tpbud,&
-        ygltparam%niceage,ygltparam%nicesal,ygltparam%nilay,ygltparam%nl,ygltparam%nmponds,&
-        ygltparam%noutlu,ygltparam%np,ygltparam%nprinto,ygltparam%nslay,ygltparam%nsnwrad,ygltparam%nt,    &   
-        ygltparam%dtt,ygltparam%xdomsrf_r,&
-        ygltparam%lp1,ygltparam%lp2,ygltparam%lp3,ygltparam%lwg,ygltparam%sf3tinv)
+        & tpdom,tpmxl,tptfl,tpatm,tpblkw,tpblki,tpsit,tpsil,tpbud,&
+        & ygltparam%niceage,ygltparam%nicesal,ygltparam%nilay,ygltparam%nl,ygltparam%nmponds,&
+        & ygltparam%noutlu,ygltparam%np,ygltparam%nprinto,ygltparam%nslay,ygltparam%nsnwrad,ygltparam%nt,       &
+        & ygltparam%dtt,ygltparam%xdomsrf_r,&
+        & ygltparam%lp1,ygltparam%lp2,ygltparam%lp3,ygltparam%lwg,ygltparam%sf3tinv) 
 
       CALL glt_updice_r(1, ' AFTER glt_thermo_ice_r ', &
-        tpdom, tpsit, zsalt_a, zice_a,ygltparam%noutlu,ygltparam%np,ygltparam%nt,ygltparam%dtt,ygltparam%xdomsrf_r,ygltparam%lwg,&
-        tptfl, zemps_a, zsalf_a)
+        & tpdom, tpsit, zsalt_a, zice_a,ygltparam%noutlu,ygltparam%np,ygltparam%nt,ygltparam%dtt,ygltparam%xdomsrf_r,ygltparam%lwg,&
+        & tptfl, zemps_a, zsalf_a) 
   ENDIF
 !
 !
@@ -366,8 +369,8 @@ SUBROUTINE glt_thermo_r  &
 ! ---------------------
 !
   CALL glt_thermo_end_r(tpdom,tpmxl,tzldsit,tzldsil,tpsit,tpsil,&
-ygltparam%niceage,ygltparam%nicesal,ygltparam%nilay,ygltparam%nl,ygltparam%nmponds,&
-ygltparam%noutlu,ygltparam%np,ygltparam%nprinto,ygltparam%nt,ygltparam%dtt,ygltparam%lp1,ygltparam%lwg,ygltparam%thick)
+& ygltparam%niceage,ygltparam%nicesal,ygltparam%nilay,ygltparam%nl,ygltparam%nmponds,&
+& ygltparam%noutlu,ygltparam%np,ygltparam%nprinto,ygltparam%nt,ygltparam%dtt,ygltparam%lp1,ygltparam%lwg,ygltparam%thick) 
 !
 ! 
 ! 4.3. Compute some diagnostics
@@ -377,11 +380,11 @@ ygltparam%noutlu,ygltparam%np,ygltparam%nprinto,ygltparam%nt,ygltparam%dtt,ygltp
 ! of certain diagnostics if wished by the user. 
 !
   CALL glt_updbud_r( 0,'After THERMO_END_R:',  &
-    tpdom,tpmxl,tptfl,tpatm,tpblkw,tpblki,tpsit,tpsil,tpbud,&
-    ygltparam%niceage,ygltparam%nicesal,ygltparam%nilay,ygltparam%nl,ygltparam%nmponds,ygltparam%noutlu,&
-    ygltparam%np,ygltparam%nprinto,ygltparam%nslay,ygltparam%nsnwrad,ygltparam%nt,  &   
-    ygltparam%dtt,ygltparam%xdomsrf_r,&
-    ygltparam%lp1,ygltparam%lp2,ygltparam%lp3,ygltparam%lwg,ygltparam%sf3tinv)
+    & tpdom,tpmxl,tptfl,tpatm,tpblkw,tpblki,tpsit,tpsil,tpbud,&
+    & ygltparam%niceage,ygltparam%nicesal,ygltparam%nilay,ygltparam%nl,ygltparam%nmponds,ygltparam%noutlu,&
+    & ygltparam%np,ygltparam%nprinto,ygltparam%nslay,ygltparam%nsnwrad,ygltparam%nt,     &
+    & ygltparam%dtt,ygltparam%xdomsrf_r,&
+    & ygltparam%lp1,ygltparam%lp2,ygltparam%lp3,ygltparam%lwg,ygltparam%sf3tinv) 
 
 !
 ! Compute change in stored latent heat and enthalpy in sea ice/snow
@@ -392,32 +395,32 @@ ygltparam%noutlu,ygltparam%np,ygltparam%nprinto,ygltparam%nt,ygltparam%dtt,ygltp
 ! Compute net sea ice production field
 !
   tpdia(:)%dsi =  &
-    ( rhoice * SUM( tpsit(:,:)%fsi*tpsit(:,:)%hsi, DIM=1 )-  &
-    tpdia(:)%dsi ) / ygltparam%dtt
+    & ( rhoice * SUM( tpsit(:,:)%fsi*tpsit(:,:)%hsi, DIM=1 )-  &
+    & tpdia(:)%dsi ) / ygltparam%dtt 
 !
 ! Compute net sea ice fresh water content change field
 !
   tpdia(:)%dwi =  &
-    ( rhoice * SUM( tpsit(:,:)%fsi*tpsit(:,:)%hsi* &
-      ( 1.-1.e-3*tpsit(:,:)%ssi ), DIM=1 )-  &
-      tpdia(:)%dwi ) / ygltparam%dtt
+    & ( rhoice * SUM( tpsit(:,:)%fsi*tpsit(:,:)%hsi* &
+      & ( 1.-1.e-3*tpsit(:,:)%ssi ), DIM=1 )-  &
+      & tpdia(:)%dwi ) / ygltparam%dtt 
 !
 ! Compute net snow mass change field
 !
   tpdia(:)%dsn =  &
-    ( SUM( tpsit(:,:)%rsn*tpsit(:,:)%fsi*tpsit(:,:)%hsn, DIM=1 )-  &
-    tpdia(:)%dsn ) / ygltparam%dtt
+    & ( SUM( tpsit(:,:)%rsn*tpsit(:,:)%fsi*tpsit(:,:)%hsn, DIM=1 )-  &
+    & tpdia(:)%dsn ) / ygltparam%dtt 
 !
 ! Compute net salt mass change field
 !
   tpdia(:)%dsa = rhoice*1.e-3*  &
-    ( SUM( tpsit(:,:)%fsi*tpsit(:,:)%hsi*tpsit(:,:)%ssi, DIM=1 )-  &
-    tpdia(:)%dsa ) / ygltparam%dtt
+    & ( SUM( tpsit(:,:)%fsi*tpsit(:,:)%hsi*tpsit(:,:)%ssi, DIM=1 )-  &
+    & tpdia(:)%dsa ) / ygltparam%dtt 
 !
 ! Compute sea ice and snow heat content
 !
   CALL glt_aventh( tpsit,tpsil,tpdia%sie,tpdia%sne,ygltparam%nilay,ygltparam%nslay,ygltparam%nl,ygltparam%np, &
-                 & ygltparam%nt,ygltparam%sf3tinv )
+                  & ygltparam%nt,ygltparam%sf3tinv ) 
 !
 !-------------------------------------------------------------------
 ! MCH - For AMIP run
@@ -448,9 +451,10 @@ ygltparam%noutlu,ygltparam%np,ygltparam%nprinto,ygltparam%nt,ygltparam%dtt,ygltp
   ENDIF
   IF ( ygltparam%nupdbud==1 ) THEN
      CALL glt_updice_r(1, '   SALT BUDGET OVER ENTIRE glt_thermo_r ', &
-        tpdom, tpsit, zsalt_a_0, zice_a,ygltparam%noutlu,ygltparam%np,ygltparam%nt,&
-        ygltparam%dtt,ygltparam%xdomsrf_r,ygltparam%lwg, tptfl, zemps_a, zsalf_a_0)
+        & tpdom, tpsit, zsalt_a_0, zice_a,ygltparam%noutlu,ygltparam%np,ygltparam%nt,&
+        & ygltparam%dtt,ygltparam%xdomsrf_r,ygltparam%lwg, tptfl, zemps_a, zsalf_a_0) 
   ENDIF
+IF (LHOOK) CALL DR_HOOK('GLT_THERMO_R',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE glt_thermo_r
 

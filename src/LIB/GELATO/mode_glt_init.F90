@@ -52,6 +52,7 @@
 ! ----------------------- BEGIN MODULE mode_glt_init ------------------------
 
 MODULE mode_glt_init 
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
 CONTAINS
 
 
@@ -76,18 +77,19 @@ SUBROUTINE inidmn( tpglt )
   IMPLICIT NONE 
 !
   TYPE(t_glt), INTENT(inout) ::  &
-    tpglt
+    & tpglt 
 !
   CHARACTER(80) ::  &
-        yfname,yword
+        & yfname,yword 
   INTEGER, DIMENSION(SIZE(tpglt%dom,1),SIZE(tpglt%dom,2)) ::  &
-        iwork2_p
+        & iwork2_p 
   INTEGER, DIMENSION(nxglo,nyglo) ::  &
-        iwork2
+        & iwork2 
   REAL, DIMENSION(SIZE(tpglt%dom,1),SIZE(tpglt%dom,2)) ::  &
-        zwork2_p
+        & zwork2_p 
   REAL, DIMENSION(nxglo,nyglo) ::  &
-        zwork2
+        & zwork2 
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -96,6 +98,7 @@ SUBROUTINE inidmn( tpglt )
 !
 ! .. Welcome message
 !
+  IF (LHOOK) CALL DR_HOOK('MODE_GLT_INIT:INIDMN',0,ZHOOK_HANDLE)
   IF (lwg) THEN
     WRITE(noutlu,*) ' '
     WRITE(noutlu,*) ' *** LEVEL 3 - SUBROUTINE INIDMN'
@@ -120,7 +123,7 @@ SUBROUTINE inidmn( tpglt )
 !
   IF (lwg) THEN
     WRITE(noutlu,'("Processor ",I5," : read grid from ",A)')  &
-      gelato_myrank,yfname
+      & gelato_myrank,yfname 
     WRITE(noutlu,*) ' '
   ENDIF
 
@@ -192,6 +195,7 @@ SUBROUTINE inidmn( tpglt )
     WRITE(noutlu,*) ' *** LEVEL 3 - END SUBROUTINE INIDMN'
     WRITE(noutlu,*) ' '
   ENDIF
+  IF (LHOOK) CALL DR_HOOK('MODE_GLT_INIT:INIDMN',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE inidmn
 !
@@ -211,14 +215,15 @@ SUBROUTINE bnddmn( tpglt,noutlu,lwg )
   IMPLICIT NONE 
 !
   TYPE(t_glt), INTENT(inout) ::  &
-    tpglt
+    & tpglt 
 !
   INTEGER ::  &
-        ji,jj
+        & ji,jj 
   INTEGER, DIMENSION(SIZE(tpglt%dom,1),SIZE(tpglt%dom,2)) ::  &
-        iwork2_p
+        & iwork2_p 
   REAL, DIMENSION(SIZE(tpglt%dom,1),SIZE(tpglt%dom,2)) ::  &
-        zwork2_p
+        & zwork2_p 
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -227,6 +232,7 @@ SUBROUTINE bnddmn( tpglt,noutlu,lwg )
 !
 ! .. Welcome message
 !
+  IF (LHOOK) CALL DR_HOOK('MODE_GLT_INIT:BNDDMN',0,ZHOOK_HANDLE)
   IF (lwg) THEN
     WRITE(noutlu,*) ' '
     WRITE(noutlu,*) ' *** LEVEL 3 - SUBROUTINE BNDDMN'
@@ -353,6 +359,7 @@ SUBROUTINE bnddmn( tpglt,noutlu,lwg )
     WRITE(noutlu,*) ' *** LEVEL 3 - END SUBROUTINE BNDDMN'
     WRITE(noutlu,*) ' '
   ENDIF
+  IF (LHOOK) CALL DR_HOOK('MODE_GLT_INIT:BNDDMN',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE bnddmn
 !
@@ -369,11 +376,13 @@ SUBROUTINE initfl(tptfl,nx,ny)
 !
   INTEGER, INTENT(in) :: nx,ny
   TYPE(t_tfl), DIMENSION(nx,ny), INTENT(inout) ::  &
-        tptfl
+        & tptfl 
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 ! * Initialize fluxes transmitted by sea ice and water
 !
+  IF (LHOOK) CALL DR_HOOK('MODE_GLT_INIT:INITFL',0,ZHOOK_HANDLE)
   tptfl(:,:)%lio = 0.
   tptfl(:,:)%llo = 0.
   tptfl(:,:)%tio = 0.
@@ -384,6 +393,7 @@ SUBROUTINE initfl(tptfl,nx,ny)
   tptfl(:,:)%wlo = 0.
   tptfl(:,:)%xio = 0.
   tptfl(:,:)%yio = 0.
+  IF (LHOOK) CALL DR_HOOK('MODE_GLT_INIT:INITFL',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE initfl
 !
@@ -395,7 +405,7 @@ END SUBROUTINE initfl
 ! ------------------------- SUBROUTINE INISAL ---------------------------
 !
 SUBROUTINE inisal  &
-  ( tpdom,tpmxl,tpsit,nicesal,nt,nx,ny )
+  & ( tpdom,tpmxl,tpsit,nicesal,nt,nx,ny ) 
 !
   USE modd_types_glt
   USE modd_glt_const_thm
@@ -403,14 +413,15 @@ SUBROUTINE inisal  &
   INTEGER, INTENT(in) :: nt,nx,ny,nicesal
 !
   TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &
-    tpdom
+    & tpdom 
   TYPE(t_mxl), DIMENSION(nx,ny), INTENT(in) ::  &
-    tpmxl
+    & tpmxl 
   TYPE(t_sit), DIMENSION(nt,nx,ny), INTENT(inout) ::  &
-    tpsit
+    & tpsit 
 !
   INTEGER ::  &
-    jk
+    & jk 
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -420,16 +431,18 @@ SUBROUTINE inisal  &
 ! .. If a negative salinity is encountered, it means it was not 
 ! initialized
 !
+  IF (LHOOK) CALL DR_HOOK('MODE_GLT_INIT:INISAL',0,ZHOOK_HANDLE)
   IF ( ANY( tpsit(:,:,:)%ssi < -0.5 ) ) THEN
       IF ( nicesal==1 ) THEN
         DO jk=1,nt
           tpsit(jk,:,:)%ssi =  &
-            ssinew / ssw0 * tpmxl(:,:)%sml * FLOAT( tpdom(:,:)%tmk )
+            & ssinew / ssw0 * tpmxl(:,:)%sml * FLOAT( tpdom(:,:)%tmk ) 
         END DO
       ELSE
         tpsit(:,:,:)%ssi = sice 
       ENDIF 
   ENDIF
+  IF (LHOOK) CALL DR_HOOK('MODE_GLT_INIT:INISAL',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE inisal
 
@@ -446,17 +459,19 @@ SUBROUTINE inidia(tpind,tpdia,pcumdia0,pcumdia,ndiamax,nx,ny)
   INTEGER, INTENT(in) :: ndiamax,nx,ny
 !
   TYPE(t_ind), INTENT(inout) ::  &
-        tpind
+        & tpind 
   TYPE(t_dia), DIMENSION(nx,ny), INTENT(inout) ::  &
-        tpdia
+        & tpdia 
   REAL, DIMENSION(ndiamax,1,1), INTENT(out) ::  &
-        pcumdia0
+        & pcumdia0 
   REAL, DIMENSION(ndiamax,nx,ny), INTENT(out) ::  &
-        pcumdia
+        & pcumdia 
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 ! * Initialize diagnostic fields (see definitions in dmod_types.f90)
 !
+  IF (LHOOK) CALL DR_HOOK('MODE_GLT_INIT:INIDIA',0,ZHOOK_HANDLE)
   tpdia(:,:)%uvl = 0.
   tpdia(:,:)%vvl = 0.
   tpdia(:,:)%asi = 0.
@@ -519,6 +534,7 @@ SUBROUTINE inidia(tpind,tpdia,pcumdia0,pcumdia,ndiamax,nx,ny)
       pcumdia0(:,:,:) = 0.
       pcumdia(:,:,:) = 0.
   ENDIF
+  IF (LHOOK) CALL DR_HOOK('MODE_GLT_INIT:INIDIA',1,ZHOOK_HANDLE)
 ! - Note that tpdia%ifw, %swi, %sww were already initialized in glt_getatmf,
 ! so they must not be set to zero here ! (DOES NOT HOLD ANYMORE HERE: NO
 ! DANGER TO DO SO AS inidia IS NOW INVOKED BEFORE GETATMF...)
@@ -535,10 +551,13 @@ END SUBROUTINE inidia
 ! ----------------------- SUBROUTINE INIT_TIMERS ------------------------
 SUBROUTINE init_timers
 !
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
+  IF (LHOOK) CALL DR_HOOK('MODE_GLT_INIT:INIT_TIMERS',0,ZHOOK_HANDLE)
   IF ( ntimers==1 ) THEN
     CALL CPU_TIME( xtime )
     ntimnum = 1
   ENDIF
+  IF (LHOOK) CALL DR_HOOK('MODE_GLT_INIT:INIT_TIMERS',1,ZHOOK_HANDLE)
 END SUBROUTINE init_timers
 END MODULE mode_glt_init
 ! --------------------- END SUBROUTINE INIT_TIMERS ----------------------

@@ -34,15 +34,9 @@
 !
 !USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 !
-#ifdef AIX64 
- USE OMP_LIB
-#endif
+!$ USE OMP_LIB
 !
 IMPLICIT NONE
-!
-#ifndef AIX64
-  INCLUDE 'omp_lib.h'
-#endif
 !
 !RJ: this broke non openmp version before
 !RJ: OMP_GET_THREAD_NUM() returns 0 for first omp thread

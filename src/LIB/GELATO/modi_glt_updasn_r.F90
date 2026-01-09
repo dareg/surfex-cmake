@@ -116,9 +116,10 @@
 
 
 SUBROUTINE glt_updasn_r( gsmelt,tpatm,tpblki,pvsp,tpsit,tpdia,&
-        nilay,nl,nmponds,np,nt,albimlt,albsdry,albsmlt,dtt )
+        & nilay,nl,nmponds,np,nt,albimlt,albsdry,albsmlt,dtt ) 
 !
   USE modd_glt_const_thm
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_types_glt
   USE modi_gltools_updaponds_r
 !
@@ -127,26 +128,27 @@ SUBROUTINE glt_updasn_r( gsmelt,tpatm,tpblki,pvsp,tpsit,tpdia,&
   REAL, INTENT(IN) :: albimlt,albsmlt,albsdry,dtt
   INTEGER,INTENT(IN) :: nmponds,nilay,nl,nt,np
   LOGICAL, DIMENSION(nt,np), INTENT(in) ::  &
-        gsmelt
+        & gsmelt 
   TYPE(t_atm), DIMENSION(np), INTENT(in) ::  &
-        tpatm   
+        & tpatm    
   TYPE(t_blk), DIMENSION(nt,np), INTENT(in) ::  &
-        tpblki
+        & tpblki 
   REAL, DIMENSION(nl,nt,np), INTENT(in) ::  &
-        pvsp
+        & pvsp 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
-        tpsit   
+        & tpsit    
   TYPE(t_dia), DIMENSION(np), INTENT(inout) ::  &
-        tpdia   
+        & tpdia    
 !
   LOGICAL, DIMENSION(nt,np) ::  &
-        gsnmelt,gsimelt
+        & gsnmelt,gsimelt 
   REAL ::  &
-        zhsicr
+        & zhsicr 
   REAL, DIMENSION(np) ::  &
-        zfsit
+        & zfsit 
   REAL, DIMENSION(nt,np) ::  &
-        zpcps,zpcpr,zasi,zasn,zent0,zalf,zt
+        & zpcps,zpcpr,zasi,zasn,zent0,zalf,zt 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -156,6 +158,7 @@ SUBROUTINE glt_updasn_r( gsmelt,tpatm,tpblki,pvsp,tpsit,tpdia,&
 ! .. Compute critical thickness (where albedo parameterization for thin ice
 ! reaches standard sea ice albedo)
 !
+IF (LHOOK) CALL DR_HOOK('GLT_UPDASN_R',0,ZHOOK_HANDLE)
   zhsicr = ( ( albi-albw )/xalf1 )**( 1./xpow )
 !
 ! .. Initialize ancillary real arrays
@@ -308,7 +311,7 @@ SUBROUTINE glt_updasn_r( gsmelt,tpatm,tpblki,pvsp,tpsit,tpdia,&
 ! the entire slab. 
 !
   tpsit(:,:)%asn =  &
-    zalf(:,:)*zasn(:,:) + (1.-zalf(:,:))*zasi(:,:)
+    & zalf(:,:)*zasn(:,:) + (1.-zalf(:,:))*zasi(:,:) 
 !
 ! .. For AR5 diagnostics: weighted bare sea ice albedo
 ! Weights for final computation of the average bare ice albedo 
@@ -324,6 +327,7 @@ SUBROUTINE glt_updasn_r( gsmelt,tpatm,tpblki,pvsp,tpsit,tpdia,&
   tpdia(:)%asi = SUM( tpsit(:,:)%fsi*zasi(:,:),DIM=1 )
 !* Snow albedo: approximation (suppose zalf is generally close to 1)
   tpdia(:)%asn = SUM( tpsit(:,:)%fsi*zasn(:,:),DIM=1 )
+IF (LHOOK) CALL DR_HOOK('GLT_UPDASN_R',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE glt_updasn_r
 !

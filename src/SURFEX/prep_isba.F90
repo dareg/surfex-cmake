@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE PREP_ISBA (DTCO, UG, U, USS, GCP, SB, IG, IO, S, NK, NP, NPE,  &
-                      HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
+                      HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !     #################################################################################
 !
 !!****  *PREP_ISBA* - Prepares ISBA fields
@@ -79,8 +79,6 @@ USE MODD_SURFEX_MPI,  ONLY : NPROC, NCOMM, LSFX_MPI
 
 USE MODD_PREP_SNOW,   ONLY : LSNOW_PREP_PERM
 !
-USE MODE_PREP_CTL, ONLY : PREP_CTL
-!
 USE MODI_PREP_HOR_ISBA_FIELD
 USE MODI_PREP_VER_ISBA
 USE MODI_PREP_OUTPUT_GRID
@@ -121,8 +119,6 @@ TYPE(ISBA_S_t), INTENT(INOUT) :: S
 TYPE(ISBA_NK_t), INTENT(INOUT) :: NK
 TYPE(ISBA_NP_t), INTENT(INOUT) :: NP
 TYPE(ISBA_NPE_t), INTENT(INOUT) :: NPE
-!
-TYPE (PREP_CTL),    INTENT(INOUT) :: YDCTL
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=28),  INTENT(IN)  :: HATMFILE    ! name of the Atmospheric file
@@ -186,69 +182,69 @@ ISIZE_LMEB_PATCH=COUNT(IO%LMEB_PATCH(:))
 !*      2.0    Large scale orography
 !
  CALL PREP_HOR_ISBA_FIELD(DTCO, UG, U, USS, GCP, IG, IO, S, NK, NP, NPE, S%TTIME, &
-                          HPROGRAM,'ZS     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
+                          HPROGRAM,'ZS     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
 !*      2.1    Soil Water reservoirs
 !
  CALL PREP_HOR_ISBA_FIELD(DTCO, UG, U, USS, GCP, IG, IO, S, NK, NP, NPE, S%TTIME, &
-                          HPROGRAM,'WG     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL,GWG)
+                          HPROGRAM,'WG     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,GWG)
 !
 !*      2.2    Soil ice reservoirs
 !
  CALL PREP_HOR_ISBA_FIELD(DTCO, UG, U, USS, GCP, IG, IO, S, NK, NP, NPE, S%TTIME, &
-                          HPROGRAM,'WGI    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL,GWGI)
+                          HPROGRAM,'WGI    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,GWGI)
 !
 !*      2.3    Leaves interception water reservoir
 !
  CALL PREP_HOR_ISBA_FIELD(DTCO, UG, U, USS, GCP, IG, IO, S, NK, NP, NPE, S%TTIME, &
-                          HPROGRAM,'WR     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
+                          HPROGRAM,'WR     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
 !*      2.4    Temperature profile
 !
  CALL PREP_HOR_ISBA_FIELD(DTCO, UG, U, USS, GCP, IG, IO, S, NK, NP, NPE, S%TTIME, &
-                          HPROGRAM,'TG     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL,GTG)
+                          HPROGRAM,'TG     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,GTG)
 !
 !*      2.5    Snow variables
 !
  CALL PREP_HOR_ISBA_FIELD(DTCO, UG, U, USS, GCP, IG, IO, S, NK, NP, NPE, S%TTIME, &
-                          HPROGRAM,'SN_VEG ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL,GPERMSNOW)
+                          HPROGRAM,'SN_VEG ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,GPERMSNOW)
 !
 !*      2.6    LAI
 !
  CALL PREP_HOR_ISBA_FIELD(DTCO, UG, U, USS, GCP, IG, IO, S, NK, NP, NPE, S%TTIME, &
-                          HPROGRAM,'LAI    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
+                          HPROGRAM,'LAI    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
 !*      2.7    GLACIER
 !
 IF(IO%LGLACIER)THEN
   CALL PREP_HOR_ISBA_FIELD(DTCO, UG, U, USS, GCP, IG, IO, S, NK, NP, NPE, S%TTIME, &
-                          HPROGRAM,'ICE_STO',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
+                          HPROGRAM,'ICE_STO',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 ENDIF
 !
 !*      2.8    Canopy vegetation temperature and interception reservoirs and air variables
 !
 IF(ISIZE_LMEB_PATCH>0)THEN
   CALL PREP_HOR_ISBA_FIELD(DTCO, UG, U, USS, GCP, IG, IO, S, NK, NP, NPE, S%TTIME, &
-                          HPROGRAM,'TV     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
+                          HPROGRAM,'TV     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
   CALL PREP_HOR_ISBA_FIELD(DTCO, UG, U, USS, GCP, IG, IO, S, NK, NP, NPE, S%TTIME, &
-                        HPROGRAM,'TL     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
+                        HPROGRAM,'TL     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
   CALL PREP_HOR_ISBA_FIELD(DTCO, UG, U, USS, GCP, IG, IO, S, NK, NP, NPE, S%TTIME, &
-                          HPROGRAM,'WRL    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
+                          HPROGRAM,'WRL    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
   CALL PREP_HOR_ISBA_FIELD(DTCO, UG, U, USS, GCP, IG, IO, S, NK, NP, NPE, S%TTIME, &
-                          HPROGRAM,'WRLI   ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
+                          HPROGRAM,'WRLI   ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
   CALL PREP_HOR_ISBA_FIELD(DTCO, UG, U, USS, GCP, IG, IO, S, NK, NP, NPE, S%TTIME, &
-                          HPROGRAM,'WRVN   ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
+                          HPROGRAM,'WRVN   ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
   CALL PREP_HOR_ISBA_FIELD(DTCO, UG, U, USS, GCP, IG, IO, S, NK, NP, NPE, S%TTIME, &
-                          HPROGRAM,'TC     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
+                          HPROGRAM,'TC     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
   CALL PREP_HOR_ISBA_FIELD(DTCO, UG, U, USS, GCP, IG, IO, S, NK, NP, NPE, S%TTIME, &
-                          HPROGRAM,'QC     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
+                          HPROGRAM,'QC     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 ENDIF
 !
 !*      7.     Isba-Ags prognostic fields
 !
 IF (IO%CPHOTO == 'NIT' .OR. IO%CPHOTO == 'NCB') THEN
   CALL PREP_HOR_ISBA_CC_FIELD(DTCO, U, GCP, SIZE(IG%XLAT), IO, S, NK, NP, NPE,   &
-                             HPROGRAM,'BIOMASS ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
+                             HPROGRAM,'BIOMASS ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 ENDIF
 !
 !*      8.     Isba-CC prognostic fields
@@ -258,78 +254,77 @@ IF (IO%CPHOTO/='NON' .AND. IO%CRESPSL == 'CNT') THEN
   !*      8.1    Litter
   !
     CALL PREP_HOR_ISBA_CC_FIELD(DTCO, U, GCP, SIZE(IG%XLAT), IO, S, NK, NP, NPE,  &
-                                 HPROGRAM,'LITTER  ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
+                                 HPROGRAM,'LITTER  ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
   !
   !*      8.2    Soil carbon
   !
     CALL PREP_HOR_ISBA_CC_FIELD(DTCO, U, GCP, SIZE(IG%XLAT), IO, S, NK, NP, NPE,  &
-                               HPROGRAM,'SOILCARB',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
+                               HPROGRAM,'SOILCARB',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
   !
   !*      8.2    lignin
   !
    CALL PREP_HOR_ISBA_CC_FIELD(DTCO, U, GCP, SIZE(IG%XLAT), IO, S, NK, NP, NPE,  &
-                               HPROGRAM,'LIGNIN  ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
+                               HPROGRAM,'LIGNIN  ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 ENDIF
 !
  CALL CLEAN_PREP_OUTPUT_GRID
 
-IF (YDCTL%LPART6) THEN
 !-------------------------------------------------------------------------------------
 !
 !*      3.    Physical limitation: 
 !
-  DO JP=1,IO%NPATCH
-    PEK => NPE%AL(JP)
-    KK => NK%AL(JP)
+DO JP=1,IO%NPATCH
+  PEK => NPE%AL(JP)
+  KK => NK%AL(JP)
+!
+! No ice for force restore third layer:
+  IF (IO%CISBA == '3-L') THEN
   !
-  ! No ice for force restore third layer:
-    IF (IO%CISBA == '3-L') THEN
-    !
-      WHERE(PEK%XWG(:,3) /= XUNDEF)
-        PEK%XWG(:,3) = MIN(PEK%XWG(:,3)+ PEK%XWGI(:,3),KK%XWSAT(:,3))
-        PEK%XWGI(:,3) = 0.
-      END WHERE
-    ENDIF
-  !
-  ! Total water content should not exceed saturation:
-    WHERE(PEK%XWG(:,:) /= XUNDEF .AND. (PEK%XWG(:,:) + PEK%XWGI(:,:)) > KK%XWSAT(:,:) )
-      PEK%XWGI(:,:) = KK%XWSAT(:,:) - PEK%XWG(:,:)
+    WHERE(PEK%XWG(:,3) /= XUNDEF)
+      PEK%XWG(:,3) = MIN(PEK%XWG(:,3)+ PEK%XWGI(:,3),KK%XWSAT(:,3))
+      PEK%XWGI(:,3) = 0.
     END WHERE
+  ENDIF
+!
+! Total water content should not exceed saturation:
+  WHERE(PEK%XWG(:,:) /= XUNDEF .AND. (PEK%XWG(:,:) + PEK%XWGI(:,:)) > KK%XWSAT(:,:) )
+    PEK%XWGI(:,:) = KK%XWSAT(:,:) - PEK%XWG(:,:)
+  END WHERE
 
-  ENDDO
+ENDDO
 !
 !-------------------------------------------------------------------------------------
 !
 !*      3.     Vertical interpolations of all variables
 !
-  IF(LVERTSHIFT)THEN
-    CALL PREP_VER_ISBA(IO, NPE, S%XZS, NP)
-  ENDIF
+IF(LVERTSHIFT)THEN
+  CALL PREP_VER_ISBA(IO, NPE, S%XZS, NP)
+ENDIF
 !
-  DEALLOCATE(XZS_LS)
+DEALLOCATE(XZS_LS)
 !-------------------------------------------------------------------------------------
 !
 !*      4.     Treatment of permanent snow
 !
-  IF (GPERMSNOW.AND.LSNOW_PREP_PERM) THEN
-    ISNOW = VEGTYPE_TO_PATCH(NVT_SNOW,IO%NPATCH)
-    CALL PREP_PERM_SNOW(IO, NK%AL(ISNOW), NP%AL(ISNOW), NPE%AL(ISNOW))
-  ENDIF
+IF (GPERMSNOW.AND.LSNOW_PREP_PERM) THEN
+  ISNOW = VEGTYPE_TO_PATCH(NVT_SNOW,IO%NPATCH)
+  CALL PREP_PERM_SNOW(IO, NK%AL(ISNOW), NP%AL(ISNOW), NPE%AL(ISNOW))
+ENDIF
 !
+DO JP = 1,IO%NPATCH
+  CALL INIT_SNOW_LW(XEMISSN,NPE%AL(JP)%TSNOW)
+ENDDO
+!
+IF (LPHYSDOMC) THEN
   DO JP = 1,IO%NPATCH
-    CALL INIT_SNOW_LW(XEMISSN,NPE%AL(JP)%TSNOW)
+    NPE%AL(JP)%TSNOW%WSNOW(:,:)=0.
   ENDDO
-!
-  IF (LPHYSDOMC) THEN
-    DO JP = 1,IO%NPATCH
-      NPE%AL(JP)%TSNOW%WSNOW(:,:)=0.
-    ENDDO
-  ENDIF 
+ENDIF 
 !------------------------------------------------------------------------------------- 
 ! 
 !*      4.b     Possibility for setting an upper limit on the initial snow water equivalent field 
 !
-  IF (LSWEMAX) THEN
+IF (LSWEMAX) THEN
 
 #ifdef HIRLAM_SP_HACKS
 #define MPI_SFX_REAL MPI_REAL
@@ -337,96 +332,96 @@ IF (YDCTL%LPART6) THEN
 #define MPI_SFX_REAL MPI_DOUBLE_PRECISION
 #endif
 
-   DO JP = 1,IO%NPATCH
-    IF (NPROC>1) THEN
+ DO JP = 1,IO%NPATCH
+  IF (NPROC>1) THEN
 #ifdef SFX_MPI
-      IF (LSFX_MPI) CALL MPI_ALLREDUCE(MAXVAL(SUM(NPE%AL(JP)%TSNOW%WSNOW,DIM=2)), ZSMAX, 1, MPI_SFX_REAL, MPI_MAX, NCOMM, INFOMPI)
+    IF (LSFX_MPI) CALL MPI_ALLREDUCE(MAXVAL(SUM(NPE%AL(JP)%TSNOW%WSNOW,DIM=2)), ZSMAX, 1, MPI_SFX_REAL, MPI_MAX, NCOMM, INFOMPI)
 #endif
-    ELSE
-       ZSMAX = MAXVAL(SUM(NPE%AL(JP)%TSNOW%WSNOW,DIM=2))
-    ENDIF
-
-    IF (ZSMAX < 1E-8) THEN
-      WRITE(*,*) ' MAX(Snow content (kg/m2)): ', ZSMAX
-      WRITE(*,*) ' LSWEMAX not activated'
-    ELSE
-      WRITE(*,*) ' MAX(Snow content (kg/m2)): ', ZSMAX
-      WRITE(*,*) ' Set MAX to', XSWEMAX, '(kg/m2)'
-      WRITE(*,*) ' Total SWE BEFORE',MINVAL(SUM(NPE%AL(JP)%TSNOW%WSNOW,DIM=2)),MAXVAL(SUM(NPE%AL(JP)%TSNOW%WSNOW,DIM=2))
-      IF ( NPE%AL(JP)%TSNOW%NLAYER == 1 ) THEN
-        NPE%AL(JP)%TSNOW%WSNOW(:,1) = MIN(NPE%AL(JP)%TSNOW%WSNOW(:,1),XSWEMAX)
-      ELSE
-        DO JL=1,NPE%AL(JP)%TSNOW%NLAYER
-          IF (NPROC>1) THEN
-#ifdef SFX_MPI
-            IF (LSFX_MPI) CALL MPI_ALLREDUCE(MAXVAL(NPE%AL(JP)%TSNOW%WSNOW(:,JL)), ZSMAXJL, 1, MPI_SFX_REAL, MPI_MAX, NCOMM, INFOMPI)
-#endif
-          ELSE
-            ZSMAXJL = MAXVAL(NPE%AL(JP)%TSNOW%WSNOW(:,JL))
-          ENDIF
-          WRITE(*,*) ' layer, MAX(Snow content(kg/m2)),weight:',JL,ZSMAXJL,(ZSMAXJL/ZSMAX)*XSWEMAX
-          NPE%AL(JP)%TSNOW%WSNOW(:,JL) =MIN(NPE%AL(JP)%TSNOW%WSNOW(:,JL),(ZSMAXJL/ZSMAX)*XSWEMAX)
-        ENDDO
-      ENDIF
-      WRITE(*,*) ' Total SWE AFTER',MINVAL(SUM(NPE%AL(JP)%TSNOW%WSNOW,DIM=2)),MAXVAL(SUM(NPE%AL(JP)%TSNOW%WSNOW,DIM=2))
-
-      ZSMAX = MAXVAL(SUM(NPE%AL(JP)%TSNOW%WSNOW,DIM=2))
-      WRITE(*,*) ' MAX(Snow content (kg/m2)): ', ZSMAX
-    ENDIF
-   ENDDO 
+  ELSE
+     ZSMAX = MAXVAL(SUM(NPE%AL(JP)%TSNOW%WSNOW,DIM=2))
   ENDIF
+
+  IF (ZSMAX < 1E-8) THEN
+    WRITE(*,*) ' MAX(Snow content (kg/m2)): ', ZSMAX
+    WRITE(*,*) ' LSWEMAX not activated'
+  ELSE
+    WRITE(*,*) ' MAX(Snow content (kg/m2)): ', ZSMAX
+    WRITE(*,*) ' Set MAX to', XSWEMAX, '(kg/m2)'
+    WRITE(*,*) ' Total SWE BEFORE',MINVAL(SUM(NPE%AL(JP)%TSNOW%WSNOW,DIM=2)),MAXVAL(SUM(NPE%AL(JP)%TSNOW%WSNOW,DIM=2))
+    IF ( NPE%AL(JP)%TSNOW%NLAYER == 1 ) THEN
+      NPE%AL(JP)%TSNOW%WSNOW(:,1) = MIN(NPE%AL(JP)%TSNOW%WSNOW(:,1),XSWEMAX)
+    ELSE
+      DO JL=1,NPE%AL(JP)%TSNOW%NLAYER
+        IF (NPROC>1) THEN
+#ifdef SFX_MPI
+          IF (LSFX_MPI) CALL MPI_ALLREDUCE(MAXVAL(NPE%AL(JP)%TSNOW%WSNOW(:,JL)), ZSMAXJL, 1, MPI_SFX_REAL, MPI_MAX, NCOMM, INFOMPI)
+#endif
+        ELSE
+          ZSMAXJL = MAXVAL(NPE%AL(JP)%TSNOW%WSNOW(:,JL))
+        ENDIF
+        WRITE(*,*) ' layer, MAX(Snow content(kg/m2)),weight:',JL,ZSMAXJL,(ZSMAXJL/ZSMAX)*XSWEMAX
+        NPE%AL(JP)%TSNOW%WSNOW(:,JL) =MIN(NPE%AL(JP)%TSNOW%WSNOW(:,JL),(ZSMAXJL/ZSMAX)*XSWEMAX)
+      ENDDO
+    ENDIF
+    WRITE(*,*) ' Total SWE AFTER',MINVAL(SUM(NPE%AL(JP)%TSNOW%WSNOW,DIM=2)),MAXVAL(SUM(NPE%AL(JP)%TSNOW%WSNOW,DIM=2))
+
+    ZSMAX = MAXVAL(SUM(NPE%AL(JP)%TSNOW%WSNOW,DIM=2))
+    WRITE(*,*) ' MAX(Snow content (kg/m2)): ', ZSMAX
+  ENDIF
+ ENDDO 
+ENDIF
 !
 !-------------------------------------------------------------------------------------
 !
 !*      5.     coherence between soil temperature and liquid/solid water
 !
-  GTEMP2WGI=(GWG.OR.GWGI.OR.GTG)
+GTEMP2WGI=(GWG.OR.GWGI.OR.GTG)
 !
-  IF (IO%CISBA == 'DIF'.AND.GTEMP2WGI) THEN
-    DO JP=1,IO%NPATCH
-      PEK => NPE%AL(JP)
-      PK => NP%AL(JP)
-      KK => NK%AL(JP)
+IF (IO%CISBA == 'DIF'.AND.GTEMP2WGI) THEN
+  DO JP=1,IO%NPATCH
+    PEK => NPE%AL(JP)
+    PK => NP%AL(JP)
+    KK => NK%AL(JP)
+    !
+    DO JL=1,IO%NGROUND_LAYER
       !
-      DO JL=1,IO%NGROUND_LAYER
+      DO JJ=1,PK%NSIZE_P
         !
-        DO JJ=1,PK%NSIZE_P
-          !
-          IF(PEK%XWG(JJ,JL)/=XUNDEF)THEN
+        IF(PEK%XWG(JJ,JL)/=XUNDEF)THEN
 !     
 !         total soil moisture
-            ZWTOT = PEK%XWG(JJ,JL)+PEK%XWGI(JJ,JL)
-            ZWTOT = MIN(ZWTOT,KK%XWSAT(JJ,JL))
+          ZWTOT = PEK%XWG(JJ,JL)+PEK%XWGI(JJ,JL)
+          ZWTOT = MIN(ZWTOT,KK%XWSAT(JJ,JL))
 !                
 !           total matric potential
 !           psi=mpotsat*(w/wsat)**(-bcoef)
-            ZWORK   = ZWTOT/KK%XWSAT(JJ,JL)
-            ZLOG    = KK%XBCOEF(JJ,JL)*LOG(ZWORK)
-            ZMATPOT = KK%XMPOTSAT(JJ,JL)*EXP(-ZLOG)
+          ZWORK   = ZWTOT/KK%XWSAT(JJ,JL)
+          ZLOG    = KK%XBCOEF(JJ,JL)*LOG(ZWORK)
+          ZMATPOT = KK%XMPOTSAT(JJ,JL)*EXP(-ZLOG)
 !
 !         soil liquid water content computation
 !         w=wsat*(psi/mpotsat)**(-1/bcoef)
-            ZMATPOT       = MIN(KK%XMPOTSAT(JJ,JL),XLMTT*(PEK%XTG(JJ,JL)-XTT)/(XG*PEK%XTG(JJ,JL)))
-            ZWORK         = MAX(1.0,ZMATPOT/KK%XMPOTSAT(JJ,JL))
-            ZLOG          = LOG(ZWORK)
-            ZWL           = KK%XWSAT(JJ,JL)*EXP(-ZLOG/KK%XBCOEF(JJ,JL))
-            ZWL           = MAX(ZWL,XWGMIN)
-            PEK%XWG(JJ,JL) = MIN(ZWL,ZWTOT )
+          ZMATPOT       = MIN(KK%XMPOTSAT(JJ,JL),XLMTT*(PEK%XTG(JJ,JL)-XTT)/(XG*PEK%XTG(JJ,JL)))
+          ZWORK         = MAX(1.0,ZMATPOT/KK%XMPOTSAT(JJ,JL))
+          ZLOG          = LOG(ZWORK)
+          ZWL           = KK%XWSAT(JJ,JL)*EXP(-ZLOG/KK%XBCOEF(JJ,JL))
+          ZWL           = MAX(ZWL,XWGMIN)
+          PEK%XWG(JJ,JL) = MIN(ZWL,ZWTOT )
 !        
 !         soil ice computation    
-            PEK%XWGI(JJ,JL) = MAX(0.0,ZWTOT-PEK%XWG(JJ,JL))
+          PEK%XWGI(JJ,JL) = MAX(0.0,ZWTOT-PEK%XWG(JJ,JL))
 ! 
 !         supress numerical artefact
-            IF(PEK%XTG(JJ,JL)>=XTT)THEN
-              PEK%XWG (JJ,JL) = MIN(PEK%XWG(JJ,JL)+PEK%XWGI(JJ,JL),KK%XWSAT(JJ,JL))
-              PEK%XWGI(JJ,JL) = 0.0
-            ENDIF
-!
+          IF(PEK%XTG(JJ,JL)>=XTT)THEN
+            PEK%XWG (JJ,JL) = MIN(PEK%XWG(JJ,JL)+PEK%XWGI(JJ,JL),KK%XWSAT(JJ,JL))
+            PEK%XWGI(JJ,JL) = 0.0
           ENDIF
-        ENDDO        
+!
+        ENDIF
       ENDDO        
-    ENDDO
-  ENDIF
+    ENDDO        
+  ENDDO
+ENDIF
 !
 !-------------------------------------------------------------------------------------
 !
@@ -434,112 +429,110 @@ IF (YDCTL%LPART6) THEN
 !              The only variable used from the AVERAGED_ALBEDO_EMIS_ISBA call
 !              is XTSRAD_NAT. All other variables are treated as dummies.
 !
-  DO JP = 1,IO%NPATCH
+DO JP = 1,IO%NPATCH
+!
+  PEK => NPE%AL(JP)
+  PK => NP%AL(JP)
+  KK => NK%AL(JP)
   !
+  ALLOCATE(PEK%XRESA(PK%NSIZE_P))
+  PEK%XRESA = 100.
+  !
+  ALLOCATE(PEK%XALBNIR(PK%NSIZE_P))
+  ALLOCATE(PEK%XALBVIS(PK%NSIZE_P))
+  ALLOCATE(PEK%XALBUV(PK%NSIZE_P))
+  PEK%XALBNIR = 0.0
+  PEK%XALBVIS = 0.0
+  PEK%XALBUV = 0.0
+  !
+  ALLOCATE(PEK%XALBNIR_SOIL(PK%NSIZE_P))
+  ALLOCATE(PEK%XALBVIS_SOIL(PK%NSIZE_P))
+  ALLOCATE(PEK%XALBUV_SOIL (PK%NSIZE_P))
+  CALL SOIL_ALBEDO (IO%CALBEDO, KK%XWSAT(:,1),PEK%XWG(:,1), KK, PEK, "ALL" )
+  !
+  ALLOCATE(PEK%XPSN   (PK%NSIZE_P))
+  ALLOCATE(PEK%XPSNG  (PK%NSIZE_P))
+  ALLOCATE(PEK%XPSNV  (PK%NSIZE_P))
+  ALLOCATE(PEK%XPSNV_A(PK%NSIZE_P))
+  PEK%XPSN    = 0.0
+  PEK%XPSNG   = 0.0
+  PEK%XPSNV   = 0.0
+  PEK%XPSNV_A = 0.0
+  ALLOCATE(KK%XDIR_ALB_WITH_SNOW(PK%NSIZE_P,1))
+  ALLOCATE(KK%XSCA_ALB_WITH_SNOW(PK%NSIZE_P,1))
+  !
+  ZTG1(1:PK%NSIZE_P,JP) = PEK%XTG(:,1)
+  !
+ENDDO
+!
+ALLOCATE(S%XTSRAD_NAT(U%NSIZE_NATURE))
+ZZENITH(:)=0.
+ZSW_BANDS(:)=0.
+!
+CALL AVERAGED_ALBEDO_EMIS_ISBA(IO, S, NK, NP, NPE, &
+                               ZZENITH, ZTG1, ZSW_BANDS, ZDIR_ALB, ZSCA_ALB,   &
+                               ZEMIS, S%XTSRAD_NAT, ZTSURF              )
+!
+DO JP = 1,IO%NPATCH
+  DEALLOCATE(NPE%AL(JP)%XPSN)
+  DEALLOCATE(NPE%AL(JP)%XPSNG)
+  DEALLOCATE(NPE%AL(JP)%XPSNV)
+  DEALLOCATE(NPE%AL(JP)%XPSNV_A)
+  DEALLOCATE(NK%AL(JP)%XDIR_ALB_WITH_SNOW)
+  DEALLOCATE(NK%AL(JP)%XSCA_ALB_WITH_SNOW)
+ENDDO
+!
+!-------------------------------------------------------------------------------------
+!
+!*      7.     Isba-Ags prognostic fields
+!
+IF (IO%CPHOTO /= 'NON') THEN
+!
+  DO JP = 1,IO%NPATCH
+    !
     PEK => NPE%AL(JP)
     PK => NP%AL(JP)
-    KK => NK%AL(JP)
     !
-    ALLOCATE(PEK%XRESA(PK%NSIZE_P))
-    PEK%XRESA = 100.
+    ALLOCATE(PEK%XAN(PK%NSIZE_P))
+    PEK%XAN = 0.
     !
-    ALLOCATE(PEK%XALBNIR(PK%NSIZE_P))
-    ALLOCATE(PEK%XALBVIS(PK%NSIZE_P))
-    ALLOCATE(PEK%XALBUV(PK%NSIZE_P))
-    PEK%XALBNIR = 0.0
-    PEK%XALBVIS = 0.0
-    PEK%XALBUV = 0.0
+    ALLOCATE(PEK%XANDAY(PK%NSIZE_P))
+    PEK%XANDAY = 0.
     !
-    ALLOCATE(PEK%XALBNIR_SOIL(PK%NSIZE_P))
-    ALLOCATE(PEK%XALBVIS_SOIL(PK%NSIZE_P))
-    ALLOCATE(PEK%XALBUV_SOIL (PK%NSIZE_P))
-    CALL SOIL_ALBEDO (IO%CALBEDO, KK%XWSAT(:,1),PEK%XWG(:,1), KK, PEK, "ALL" )
+    ALLOCATE(PEK%XANFM(PK%NSIZE_P))
+    PEK%XANFM = XANFMINIT
     !
-    ALLOCATE(PEK%XPSN   (PK%NSIZE_P))
-    ALLOCATE(PEK%XPSNG  (PK%NSIZE_P))
-    ALLOCATE(PEK%XPSNV  (PK%NSIZE_P))
-    ALLOCATE(PEK%XPSNV_A(PK%NSIZE_P))
-    PEK%XPSN    = 0.0
-    PEK%XPSNG   = 0.0
-    PEK%XPSNV   = 0.0
-    PEK%XPSNV_A = 0.0
-    ALLOCATE(KK%XDIR_ALB_WITH_SNOW(PK%NSIZE_P,1))
-    ALLOCATE(KK%XSCA_ALB_WITH_SNOW(PK%NSIZE_P,1))
+    ALLOCATE(PEK%XLE(PK%NSIZE_P))
+    PEK%XLE = 0.
     !
-    ZTG1(1:PK%NSIZE_P,JP) = PEK%XTG(:,1)
+    ALLOCATE(PEK%XRESP_BIOMASS(PK%NSIZE_P,IO%NNBIOMASS))
+    PEK%XRESP_BIOMASS(:,:) = 0.
     !
   ENDDO
   !
-  ALLOCATE(S%XTSRAD_NAT(U%NSIZE_NATURE))
-  ZZENITH(:)=0.
-  ZSW_BANDS(:)=0.
-  !
-  CALL AVERAGED_ALBEDO_EMIS_ISBA(IO, S, NK, NP, NPE, &
-                                 ZZENITH, ZTG1, ZSW_BANDS, ZDIR_ALB, ZSCA_ALB,   &
-                                 ZEMIS, S%XTSRAD_NAT, ZTSURF              )
-  !
+ENDIF
+!
+IF (IO%CPHOTO == 'AST') THEN
+!
   DO JP = 1,IO%NPATCH
-    DEALLOCATE(NPE%AL(JP)%XPSN)
-    DEALLOCATE(NPE%AL(JP)%XPSNG)
-    DEALLOCATE(NPE%AL(JP)%XPSNV)
-    DEALLOCATE(NPE%AL(JP)%XPSNV_A)
-    DEALLOCATE(NK%AL(JP)%XDIR_ALB_WITH_SNOW)
-    DEALLOCATE(NK%AL(JP)%XSCA_ALB_WITH_SNOW)
-  ENDDO
-  !
-  !-------------------------------------------------------------------------------------
-  !
-  !*      7.     Isba-Ags prognostic fields
-  !
-  IF (IO%CPHOTO /= 'NON') THEN
-  !
-    DO JP = 1,IO%NPATCH
-      !
-      PEK => NPE%AL(JP)
-      PK => NP%AL(JP)
-      !
-      ALLOCATE(PEK%XAN(PK%NSIZE_P))
-      PEK%XAN = 0.
-      !
-      ALLOCATE(PEK%XANDAY(PK%NSIZE_P))
-      PEK%XANDAY = 0.
-      !
-      ALLOCATE(PEK%XANFM(PK%NSIZE_P))
-      PEK%XANFM = XANFMINIT
-      !
-      ALLOCATE(PEK%XLE(PK%NSIZE_P))
-      PEK%XLE = 0.
-      !
-      ALLOCATE(PEK%XRESP_BIOMASS(PK%NSIZE_P,IO%NNBIOMASS))
-      PEK%XRESP_BIOMASS(:,:) = 0.
-      !
-    ENDDO
     !
-  ENDIF
-  !
-  IF (IO%CPHOTO == 'AST') THEN
-  !
-    DO JP = 1,IO%NPATCH
-      !
-      PEK => NPE%AL(JP)
-      PK => NP%AL(JP)
-      !
-      ALLOCATE(PEK%XBIOMASS(PK%NSIZE_P,IO%NNBIOMASS))
-      PEK%XBIOMASS(:,:) = 0.
-      !
-    ENDDO
-  !
-  ENDIF
+    PEK => NPE%AL(JP)
+    PK => NP%AL(JP)
+    !
+    ALLOCATE(PEK%XBIOMASS(PK%NSIZE_P,IO%NNBIOMASS))
+    PEK%XBIOMASS(:,:) = 0.
+    !
+  ENDDO
+!
+ENDIF
 !
 !-------------------------------------------------------------------------------------
 !
 !*      10.     Preparation of canopy air variables
 !
 !
-  IO%LCANOPY = LISBA_CANOPY
-  IF (IO%LCANOPY) CALL PREP_SBL(IG%NDIM, SB)
-!
-ENDIF
+IO%LCANOPY = LISBA_CANOPY
+IF (IO%LCANOPY) CALL PREP_SBL(IG%NDIM, SB)
 !
 IF (LHOOK) CALL DR_HOOK('PREP_ISBA',1,ZHOOK_HANDLE)
 !

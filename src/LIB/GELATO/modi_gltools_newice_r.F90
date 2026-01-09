@@ -82,8 +82,8 @@
 ! ------------------------- SUBROUTINE gltools_newice_r -------------------------
 !
 SUBROUTINE gltools_newice_r  &
-  ( nl,np,nt,pfsi,phsi,tpmxl,tpsit,tpsil,  &
-    ptsf,pssi,phsn,prsn,pasn,pent )
+  & ( nl,np,nt,pfsi,phsi,tpmxl,tpsit,tpsil,  &
+    & ptsf,pssi,phsn,prsn,pasn,pent ) 
 !
 !
 !
@@ -94,6 +94,7 @@ SUBROUTINE gltools_newice_r  &
 ! ------------------------
 !
   USE modd_types_glt
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_thm
   USE mode_gltools_enthalpy
   USE mode_glt_info_r
@@ -109,34 +110,35 @@ SUBROUTINE gltools_newice_r  &
 !
   INTEGER,INTENT(IN) :: nl,nt,np
   REAL, DIMENSION(nt,np), INTENT(in) ::  &
-        pfsi,phsi
+        & pfsi,phsi 
   TYPE(t_mxl), DIMENSION(np), INTENT(inout) ::  &
-        tpmxl
+        & tpmxl 
 !
 ! .. INTENT(inout) arguments.
 !
   TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
-        tpsit
+        & tpsit 
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(inout) ::  &
-        tpsil
+        & tpsil 
 !
 ! .. OPTIONAL, INTENT(in) arguments
 !
   REAL, DIMENSION(nt,np), OPTIONAL, INTENT(inout) ::  &
-        ptsf,pssi,phsn,prsn,pasn
+        & ptsf,pssi,phsn,prsn,pasn 
   REAL, DIMENSION(nl,nt,np), OPTIONAL, INTENT(inout) ::  &
-        pent
+        & pent 
 !
 !
 ! 1.3. Local variables declarations
 ! ---------------------------------
 !
   INTEGER ::  &
-        jl,jk,jp
+        & jl,jk,jp 
   REAL, DIMENSION(nt,np) ::  &
-        ztsf,zssi,zhsn,zrsn,zasn
+        & ztsf,zssi,zhsn,zrsn,zasn 
   REAL, DIMENSION(nl,nt,np) ::  &
-        zent
+        & zent 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -146,6 +148,7 @@ SUBROUTINE gltools_newice_r  &
 ! 2.1. Handle missing arguments
 ! ------------------------------
 !
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_NEWICE_R',0,ZHOOK_HANDLE)
   IF ( PRESENT(ptsf) ) THEN
     ztsf(:,:) = ptsf(:,:)
   ELSE
@@ -211,6 +214,7 @@ SUBROUTINE gltools_newice_r  &
       tpsil(jl,:,:)%ent = zent(jl,:,:)
     ENDWHERE
   END DO
+IF (LHOOK) CALL DR_HOOK('GLTOOLS_NEWICE_R',1,ZHOOK_HANDLE)
 ! 
 END SUBROUTINE gltools_newice_r
 !

@@ -152,13 +152,14 @@ IF (.NOT. S%LSBL) THEN
     ZH(:)=2.          
     IF (DGO%N2M==2) THEN
       CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, PCD, PCH, PRI, &
-                S%XSST, PHU, PQSAT, PZ0H, ZH,D%XT2M, D%XQ2M, D%XHU2M)
+                S%XSST, PHU, PQSAT, PZ0H, ZH, DGO%LHU2M_QSAT, &
+                D%XT2M, D%XQ2M, D%XHU2M )
 
     ELSE IF (DGO%N2M==3.or.DGO%N2M==4) THEN
       CALL CLS_TQ_DIAN(PZONA, PMERA, PTA, PQA, PPA, &
                   PPS, PHT, PCD, PCH, PRI,          &
-                  S%XSST, PHU, PQSAT, PZ0H, ZH,            &
-                  D%XT2M, D%XQ2M, D%XHU2M,DGO%N2M)
+                  S%XSST, PHU, PQSAT, PZ0H, ZH, DGO%LHU2M_QSAT,   &
+                  D%XT2M, D%XQ2M, D%XHU2M, DGO%N2M )
     ENDIF
 
     ZH(:)=10.                
@@ -169,13 +170,14 @@ IF (.NOT. S%LSBL) THEN
        IF (DGO%N2M==2) THEN
          CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, &
             PCD_ICE, PCH_ICE, PRI_ICE,       &
-            S%XTICE, PHU, PQSAT_ICE, PZ0H_ICE, ZH, DI%XT2M, DI%XQ2M, DI%XHU2M)  
+            S%XTICE, PHU, PQSAT_ICE, PZ0H_ICE, ZH, DGO%LHU2M_QSAT, &
+            DI%XT2M, DI%XQ2M, DI%XHU2M )
 
        ELSE IF (DGO%N2M==3.or.DGO%N2M==4) THEN
          CALL CLS_TQ_DIAN(PZONA, PMERA, PTA,      &
             PQA, PPA, PPS, PHT, PCD_ICE, PCH_ICE, &
             PRI_ICE, S%XTICE, PHU, PQSAT_ICE, PZ0H_ICE, ZH,  &
-            DI%XT2M, DI%XQ2M, DI%XHU2M,DGO%N2M)
+            DGO%LHU2M_QSAT, DI%XT2M, DI%XQ2M, DI%XHU2M, DGO%N2M )
        ENDIF
        ZH(:)=10.                
        CALL CLS_WIND(PZONA, PMERA, PHW, PCD_ICE, PCDN_ICE, PRI_ICE, ZH,  &

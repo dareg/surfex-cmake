@@ -122,14 +122,15 @@ IF (.NOT. W%LSBL) THEN
     IF (DGO%N2M==2) THEN
       ZH(:)=2.          
       CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, PCD, PCH, PRI, &
-                W%XTS, PHU, PQSAT, PZ0H, ZH, D%XT2M, D%XQ2M, D%XHU2M )  
+                W%XTS, PHU, PQSAT, PZ0H, ZH, DGO%LHU2M_QSAT, &
+                D%XT2M, D%XQ2M, D%XHU2M )
 
     ELSE IF (DGO%N2M==3.or.DGO%N2M==4) THEN
       ZH(:)=2.
       CALL CLS_TQ_DIAN(PZONA, PMERA,PTA, PQA, PPA, PPS, PHT,    &
                   PCD, PCH, PRI,                   &
-                  W%XTS, PHU, PQSAT, PZ0H, ZH,              &
-                  D%XT2M, D%XQ2M, D%XHU2M,DGO%N2M      )
+                  W%XTS, PHU, PQSAT, PZ0H, ZH, DGO%LHU2M_QSAT,   &
+                  D%XT2M, D%XQ2M, D%XHU2M, DGO%N2M   )
     ENDIF
     ZH(:)=10.                
     CALL CLS_WIND(PZONA, PMERA, PHW, PCD, PCDN, PRI, ZH, D%XZON10M, D%XMER10M )  

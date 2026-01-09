@@ -102,11 +102,11 @@
 ! --------------------- SUBROUTINE glt_thermo_lead_r ------------------------
 !
 SUBROUTINE glt_thermo_lead_r  &
-  (ncdlssh,nextqoc,niceage,nicesal,nl,nleviti,nmponds,noutlu,np,nprinto,nsalflx,nsnwrad,nt,&
-  dtt,rn_htopoc,xhsimin,lp1,lp2,lp3,lwg,thick,&
-  tpdom,pustar,tpmxl,tpatm,tpblkw,  &
-  tpdia,tptfl,tpsit,tpsil,  &
-  tpldsit,tpldsil)
+  & (ncdlssh,nextqoc,niceage,nicesal,nl,nleviti,nmponds,noutlu,np,nprinto,nsalflx,nsnwrad,nt,&
+  & dtt,rn_htopoc,xhsimin,lp1,lp2,lp3,lwg,thick,&
+  & tpdom,pustar,tpmxl,tpatm,tpblkw,  &
+  & tpdia,tptfl,tpsit,tpsil,  &
+  & tpldsit,tpldsil) 
 !
 !
 !
@@ -117,6 +117,7 @@ SUBROUTINE glt_thermo_lead_r  &
 ! ------------------------
 !
   USE modd_types_glt
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_thm
   USE mode_glt_info_r
   USE modi_gltools_chkglo_r
@@ -138,54 +139,56 @@ SUBROUTINE glt_thermo_lead_r  &
   REAL,DIMENSION(:), INTENT(IN) ::thick
   LOGICAL,INTENT(IN) :: lp1,lp2,lp3,lwg
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
-        tpdom
+        & tpdom 
   REAL, DIMENSION(np), INTENT(in) ::  &
-        pustar
+        & pustar 
   TYPE(t_mxl), DIMENSION(np), INTENT(inout) ::  &
-        tpmxl
+        & tpmxl 
   TYPE(t_atm), DIMENSION(np), INTENT(in) ::   &
-        tpatm
+        & tpatm 
 !
 ! .. INTENT(inout) arguments.
 !
   TYPE(t_blk), DIMENSION(np), INTENT(inout) ::  &
-        tpblkw
+        & tpblkw 
   TYPE(t_dia), DIMENSION(np), INTENT(inout) ::  &
-        tpdia
+        & tpdia 
   TYPE(t_tfl), DIMENSION(np), INTENT(inout) ::  &
-        tptfl
+        & tptfl 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
-        tpsit
+        & tpsit 
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(inout) ::  &
-        tpsil
+        & tpsil 
 !
 ! .. INTENT(out) arguments.
 !
   TYPE(t_sit), DIMENSION(nt,np), INTENT(out) ::  &
-        tpldsit
+        & tpldsit 
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(out) ::  &
-        tpldsil
+        & tpldsil 
 !
 !
 ! 1.3. Local variables declarations
 ! ---------------------------------
 !
   INTEGER ::  &
-        jk,jp,jt
+        & jk,jp,jt 
   LOGICAL, DIMENSION(np) ::  &
-        yfreeze
+        & yfreeze 
   REAL ::  &
-        zibflx0,zlat0,zsst0,zfac0
+        & zibflx0,zlat0,zsst0,zfac0 
   REAL, DIMENSION(np) ::  &
-        zfld,zfldsi,zhldsi,ztldsi,zdhldsi,za,zdtml,zhef,zsnflx,  &
-        zdmsi,zfsit,zent0,zsalt0,ztem0
+        & zfld,zfldsi,zhldsi,ztldsi,zdhldsi,za,zdtml,zhef,zsnflx,  &
+        & zdmsi,zfsit,zent0,zsalt0,ztem0 
   REAL, DIMENSION(nt,np) ::  &
-        zdmsi2,zent,zsalt
+        & zdmsi2,zent,zsalt 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 ! 1.4. Array initializations
 ! -------------------------
 !
+IF (LHOOK) CALL DR_HOOK('GLT_THERMO_LEAD_R',0,ZHOOK_HANDLE)
   zfldsi(:) = 0.
   zhldsi(:) = 0.
   ztldsi(:) = 0.
@@ -266,7 +269,7 @@ SUBROUTINE glt_thermo_lead_r  &
 ! .. Note : evaporation and precipitations on leads (water in m.s-1).
 !
   tptfl(:)%wlo = tptfl(:)%wlo +  &
-    zfld(:)*( tpatm(:)%lip + tpatm(:)%sop + tpblkw(:)%eva )
+    & zfld(:)*( tpatm(:)%lip + tpatm(:)%sop + tpblkw(:)%eva ) 
   tpdia(:)%l_pr = zfld(:) * tpatm(:)%lip
   tpdia(:)%l_prsn = zfld(:) * tpatm(:)%sop
   tpdia(:)%sul  = zfld(:) * tpblkw(:)%eva
@@ -440,7 +443,7 @@ SUBROUTINE glt_thermo_lead_r  &
 !
   DO jk = 1,nt
     WHERE ( thick(jk)<zhldsi(:) .AND. zhldsi(:)<=thick(jk+1)  &
-    .AND. zhldsi(:)>0. )
+    & .AND. zhldsi(:)>0. ) 
         tpldsit(jk,:)%esi = .TRUE.
 !        tpldsit(jk,:)%asn =  &
 !          albyngi*AMIN1( albi,xalf1*zhldsi(:)**xpow+albw ) +  &
@@ -489,8 +492,8 @@ SUBROUTINE glt_thermo_lead_r  &
 !
   zent(:,:) = 0.
   CALL glt_updtfl_r( 'I2O',tpmxl,tptfl,zdmsi2,&
-      ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc,&
-      pent=zent,psalt=zsalt )
+      & ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc,&
+      & pent=zent,psalt=zsalt ) 
 !
 !  print*,'(5) gltools_enthalpy =',tptfl%llo+tptfl%tlo
 !
@@ -503,6 +506,7 @@ SUBROUTINE glt_thermo_lead_r  &
     WRITE(noutlu,*) '**** LEVEL 4 - END SUBROUTINE THERMO_LEAD_R'
     WRITE(noutlu,*) ' '
   ENDIF
+IF (LHOOK) CALL DR_HOOK('GLT_THERMO_LEAD_R',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE glt_thermo_lead_r
 !

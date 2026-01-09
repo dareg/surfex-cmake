@@ -90,10 +90,11 @@ CONTAINS
 ! every time step.
 
 SUBROUTINE wridiag_glt  &
-  ( tpind,tpdom,tpml,tptfl,tpblkw,tpblki,tpsit,tpbud,tpdia,pcumdia,& 
-  ndiamax,noutlu,nt,nxglo,nyglo)
+  & ( tpind,tpdom,tpml,tptfl,tpblkw,tpblki,tpsit,tpbud,tpdia,pcumdia, &
+  & ndiamax,noutlu,nt,nxglo,nyglo) 
 !
   USE modd_types_glt
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_thm
   USE modi_gltools_avevai
   USE mode_gltools_wrivais
@@ -105,47 +106,48 @@ SUBROUTINE wridiag_glt  &
 ! 
   INTEGER,INTENT(IN) :: noutlu,nxglo,nyglo,nt,ndiamax
   TYPE(t_ind), INTENT(inout) ::  &
-        tpind
+        & tpind 
   TYPE(t_dom), DIMENSION(nxglo,nyglo), INTENT(in) ::  &
-        tpdom
+        & tpdom 
   TYPE(t_mxl), DIMENSION(nxglo,nyglo), INTENT(in) ::  &
-        tpml
+        & tpml 
   TYPE(t_tfl), DIMENSION(nxglo,nyglo), INTENT(in) ::  &
-        tptfl 
+        & tptfl  
   TYPE(t_blk), DIMENSION(nxglo,nyglo), INTENT(in) ::  &
-        tpblkw
+        & tpblkw 
   TYPE(t_blk), DIMENSION(nt,nxglo,nyglo), INTENT(in) ::  &
-        tpblki
+        & tpblki 
   TYPE(t_sit), DIMENSION(nt,nxglo,nyglo), INTENT(in) ::  &
-        tpsit
+        & tpsit 
   TYPE(t_bud), DIMENSION(nxglo,nyglo), INTENT(in) ::  &
-        tpbud
+        & tpbud 
   TYPE(t_dia), DIMENSION(nxglo,nyglo), INTENT(inout) ::  &
-        tpdia
+        & tpdia 
   REAL, DIMENSION(ndiamax,nxglo,nyglo), INTENT(inout) ::  &
-        pcumdia
+        & pcumdia 
 !
   CHARACTER(8) ::  &
-        yword
+        & yword 
   CHARACTER(80) ::  &
-        yfname,ymess
+        & yfname,ymess 
   INTEGER ::  &
-        ji,jt,ii,ij,ii0,ij0
+        & ji,jt,ii,ij,ii0,ij0 
   LOGICAL, DIMENSION(nxglo,nyglo) ::  &
-        ynhemis,yshemis
+        & ynhemis,yshemis 
   REAL ::  &
-        zai,zaj,zcslat,zdilat,zdilon,zdjlat,zdjlon
+        & zai,zaj,zcslat,zdilat,zdilon,zdjlat,zdjlon 
   REAL(KIND=4) ::  &
-        zehn,zehs,zshn,zshs,zvhn,zvhs,zwhn,zwhs,  &
-        zfram,zbering,zncwest,znceast,znorthb
+        & zehn,zehs,zshn,zshs,zvhn,zvhs,zwhn,zwhs,  &
+        & zfram,zbering,zncwest,znceast,znorthb 
   REAL, DIMENSION(nxglo,nyglo) ::  &
-        zfsit,zhsit,zhsnt,zmsnt
+        & zfsit,zhsit,zhsnt,zmsnt 
   REAL, DIMENSION(nxglo,nyglo) ::  &
-        zwork2
+        & zwork2 
   REAL, DIMENSION(nt,nxglo,nyglo) ::  &
-        zwork3
+        & zwork3 
   TYPE(t_def) ::  &
-        tznam
+        & tznam 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 #if ! defined in_surfex
@@ -155,6 +157,7 @@ SUBROUTINE wridiag_glt  &
 !
 ! .. Arrays
 !
+IF (LHOOK) CALL DR_HOOK('MODE_GLT_DIA_GLT:WRIDIAG_GLT',0,ZHOOK_HANDLE)
   zwork2(:,:) = 0.
   zwork3(:,:,:) = 0.
 ! 
@@ -204,12 +207,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'SIUVLSIT'
       tznam = t_def( " ", " ", yword, " ", "U", "VECTOR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 
 !
 ! >>> Write sea ice v-velocity field [m.s-1]
@@ -218,12 +221,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'SIVVLSIT'
       tznam = t_def( " ", " ", yword, " ", "V", "VECTOR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 ! 
 ! >>> Write sea ice average thickness field [m]
 !
@@ -231,12 +234,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'SIHHHSIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write snow average thickness field [m]
 !
@@ -244,12 +247,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'SIHHHSNW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write snow average density field [kg.m-3]
 !
@@ -257,12 +260,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'SIMMMSNW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write total ice concentration field [0-1]
 !
@@ -270,12 +273,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'SIFRCSIS'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >> Write fraction of time during which sea ice is present [0-1]
 !
@@ -285,12 +288,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'SICETIME'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >> Write average fraction of the marine surface that melts [0-1]
 !
@@ -298,83 +301,83 @@ SUBROUTINE wridiag_glt  &
           zwork3(:,:,:) = tpsit(:,:,:)%fsi
       ENDWHERE
       zwork2(:,:) =  &
-        SUM( zwork3(:,:,:),DIM=1 )*FLOAT( tpdom(:,:)%tmk )
+        & SUM( zwork3(:,:,:),DIM=1 )*FLOAT( tpdom(:,:)%tmk ) 
       yword = 'SIMELTFR'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write average surface temperature field [deg C]
 !
       zwork2(:,:) =  &
-        ( SUM( tpsit(:,:,:)%fsi*tpsit(:,:,:)%tsf,DIM=1 ) +  &
-        ( 1.-zfsit(:,:) )*tpml(:,:)%tml )*FLOAT( tpdom(:,:)%tmk )
+        & ( SUM( tpsit(:,:,:)%fsi*tpsit(:,:,:)%tsf,DIM=1 ) +  &
+        & ( 1.-zfsit(:,:) )*tpml(:,:)%tml )*FLOAT( tpdom(:,:)%tmk ) 
       yword = 'SITEMSMW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write average surface albedo field (all marine surface) [0-1]
 !
       zwork2(:,:) =  &
-        ( SUM( tpsit(:,:,:)%fsi*tpsit(:,:,:)%asn,DIM=1 ) +  &
-        ( 1.-zfsit(:,:) )*albw )*FLOAT( tpdom(:,:)%tmk )
+        & ( SUM( tpsit(:,:,:)%fsi*tpsit(:,:,:)%asn,DIM=1 ) +  &
+        & ( 1.-zfsit(:,:) )*albw )*FLOAT( tpdom(:,:)%tmk ) 
       yword = 'SIALBSMW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write average surface albedo field (ice only) [0-1]
 !
       WHERE( tpdom(:,:)%tmk==1 .AND. zfsit(:,:)>=xiok )
           zwork2(:,:) =  &
-            SUM( tpsit(:,:,:)%fsi*tpsit(:,:,:)%asn, DIM=1 ) / zfsit(:,:)
+            & SUM( tpsit(:,:,:)%fsi*tpsit(:,:,:)%asn, DIM=1 ) / zfsit(:,:) 
         ELSEWHERE
           zwork2(:,:) = 0.
       ENDWHERE
       yword = 'SIALBSIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld,pwgt=tpdia%sic)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld,pwgt=tpdia%sic) 
 !
 ! >>> Write average ice salinity [psu]
 !
       IF ( nicesal==1 ) THEN
           WHERE( tpdom(:,:)%tmk==1 .AND. zfsit(:,:)>=xiok )
               zwork2(:,:) =  &
-                SUM( tpsit(:,:,:)%fsi*tpsit(:,:,:)%hsi*tpsit(:,:,:)%ssi, DIM=1 )
+                & SUM( tpsit(:,:,:)%fsi*tpsit(:,:,:)%hsi*tpsit(:,:,:)%ssi, DIM=1 ) 
             ELSEWHERE
               zwork2(:,:) = 0.
           ENDWHERE
           yword = 'SISALSIW'
           tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld,pwgt=tpdia%sit)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld,pwgt=tpdia%sit) 
       ENDIF
 !
 ! >>> Write average surface ice age [years]
@@ -382,20 +385,20 @@ SUBROUTINE wridiag_glt  &
       IF ( niceage==1 ) THEN
           WHERE( tpdom(:,:)%tmk==1 .AND. zfsit(:,:)>=xiok )
               zwork2(:,:) =  &
-                SUM( tpsit(:,:,:)%fsi*tpsit(:,:,:)%age, DIM=1 ) /  &
-                  ( xyear2day*xday2sec )
+                & SUM( tpsit(:,:,:)%fsi*tpsit(:,:,:)%age, DIM=1 ) /  &
+                  & ( xyear2day*xday2sec ) 
             ELSEWHERE
               zwork2(:,:) = 0.
           ENDWHERE
           yword = 'SIAGESIW'
           tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld,pwgt=tpdia%sic)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld,pwgt=tpdia%sic) 
       ENDIF
 !
 ! >>> Write average surface ice age [years]
@@ -403,19 +406,19 @@ SUBROUTINE wridiag_glt  &
       IF ( nmponds==1 ) THEN
           WHERE( tpdom(:,:)%tmk==1 .AND. zfsit(:,:)>=xiok )
               zwork2(:,:) =  &
-                SUM( tpsit(:,:,:)%fsi*tpsit(:,:,:)%vmp, DIM=1 )
+                & SUM( tpsit(:,:,:)%fsi*tpsit(:,:,:)%vmp, DIM=1 ) 
             ELSEWHERE
               zwork2(:,:) = 0.
           ENDWHERE
           yword = 'SIVMPSIW'
           tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld,pwgt=tpdia%sic)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld,pwgt=tpdia%sic) 
       ENDIF
 !
   ENDIF
@@ -468,12 +471,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'OIHFLUIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write equivalent heat flux due to snow melting in the ocean [W.m-2]
 !
@@ -481,12 +484,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'AWSNWFWW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write equivalent heat flux due to snowfalls on sea ice [W.m-2]
 !
@@ -494,12 +497,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'AISNWFIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write net heat flux on the ice surface only - weighed [W.m-2]
 !     (without the effect of snow)
@@ -508,12 +511,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'AIHFLUIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write net heat flux on the water surface only - weighed [W.m-2]
 !     (without the effect of snow)
@@ -522,12 +525,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'AWHFLUWW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write solar energy absorbed by the water surface [W.m-2]
 !
@@ -535,12 +538,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'AWSFLUWW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write weighed sea ice gltools_enthalpy variation due to thermodynamics [W.m-2]
 !
@@ -548,26 +551,26 @@ SUBROUTINE wridiag_glt  &
       yword = 'SITDENIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write weighed sea ice gltools_enthalpy variation due to advection [W.m-2]
 !
       zwork2(:,:) =  &
-        ( tpbud(:,:)%enn-tpbud(:,:)%eni ) / dtt - tpdia(:,:)%the
+        & ( tpbud(:,:)%enn-tpbud(:,:)%eni ) / dtt - tpdia(:,:)%the 
       yword = 'SIDDENIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write weighted net FW flux sent by sea ice to the ocean [W.m-2]
 !
@@ -575,12 +578,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'IOWFLUIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write weighted net FW flux sent by leads to the ocean [kg.m-2.s-1]
 !
@@ -588,12 +591,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'LOWFLUIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write weighted virtual FW flux sent by sea ice to the ocean [kg.m-2.s-1]
 !
@@ -601,12 +604,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'IOVFLUIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write weighted salt flux sent by sea ice to the ocean
 !
@@ -614,12 +617,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'IOSFLUIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write weighted solar heat flux sent by sea ice to the ocean
 !
@@ -627,12 +630,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'IOLFLUIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write weighted non-solar heat flux sent by sea ice to the ocean
 !
@@ -640,12 +643,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'IOTFLUIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write weighted solar heat flux sent by leads to the ocean
 !
@@ -653,12 +656,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'LOLFLUIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write weighted non-solar heat flux sent by leads to the ocean
 !
@@ -666,12 +669,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'LOTFLUIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write weighted salt mass change field - glt_thermo only [ kg.m-2.s-1 ]
 !
@@ -679,12 +682,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'SITDSAIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write weighted snow mass change field - glt_thermo only [ kg.m-2.s-1 ]
 !
@@ -692,12 +695,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'SITDSNIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write weighted sea ice mass change field - glt_thermo only [ kg.m-2.s-1 ]
 !
@@ -705,12 +708,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'SITDSIIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write weighted salt mass change field - dynamics only [ kg.m-2.s-1 ]
 !
@@ -718,12 +721,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'SIDDSAIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write weighted snow mass change field - dynamics only [ kg.m-2.s-1 ]
 !
@@ -731,12 +734,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'SIDDSNIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write weighted sea ice mass change field - dynamics only [ kg.m-2.s-1 ]
 !
@@ -744,12 +747,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'SIDDSIIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write weighted ice FW content change field - glt_thermo only [ kg.m-2.s-1 ]
 !
@@ -757,12 +760,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'SIDMWIIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write total input water to the snow-ice leads system [kg.m-2.s-1]
 !
@@ -770,12 +773,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'ALLFWTOT'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write ice production in leads [ kg.m-2.s-1 ]
 !
@@ -783,12 +786,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'SILDSIIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write weighted ice top mass balance - positive if melting [ kg.m-2.s-1 ]
 !
@@ -796,12 +799,12 @@ SUBROUTINE wridiag_glt  &
       yword = 'SIMRTIIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write weighted ice lateral ablation [ kg.m-2.s-1 ]
 !
@@ -809,56 +812,56 @@ SUBROUTINE wridiag_glt  &
       yword = 'SIMRLIIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write weighted ice bottom mass balance [ kg.m-2.s-1 ]
 !
       zwork2(:,:) =   &
-        ( tpdia(:,:)%dsi-tpdia(:,:)%lsi-tpdia(:,:)%mrt-tpdia(:,:)%mrl )*  &
-          FLOAT( tpdom(:,:)%tmk )
+        & ( tpdia(:,:)%dsi-tpdia(:,:)%lsi-tpdia(:,:)%mrt-tpdia(:,:)%mrl )*  &
+          & FLOAT( tpdom(:,:)%tmk ) 
       yword = 'SIMRBIIW'
       tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write spare fields 
 !
       IF ( ANY( ABS( tpdia(:,:)%sp1 ) > epsil2 ) ) THEN 
         zwork2(:,:) =   &
-          tpdia(:,:)%sp1*FLOAT( tpdom(:,:)%tmk )
+          & tpdia(:,:)%sp1*FLOAT( tpdom(:,:)%tmk ) 
         yword = 'FIELDSP1'
         tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
       ENDIF
 !
       IF ( ANY( ABS( tpdia(:,:)%sp2 ) > epsil2 ) ) THEN 
         zwork2(:,:) =   &
-          tpdia(:,:)%sp2*FLOAT( tpdom(:,:)%tmk )
+          & tpdia(:,:)%sp2*FLOAT( tpdom(:,:)%tmk ) 
         yword = 'FIELDSP2'
         tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
       ENDIF
 !
       DO jt=1,nt
@@ -869,12 +872,12 @@ SUBROUTINE wridiag_glt  &
         WRITE( yword,FMT='("SIFRCSI",I1.1)' ) jt
         tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write sea ice categories thickness fields
 !
@@ -882,12 +885,12 @@ SUBROUTINE wridiag_glt  &
         WRITE( yword,FMT='("SIHHHSI",I1.1)' ) jt
         tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write sea ice categories surface temperature
 !
@@ -895,12 +898,12 @@ SUBROUTINE wridiag_glt  &
         WRITE( yword,FMT='("SITEMSI",I1.1)' ) jt
         tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write melt pond volume over each ice category
 !
@@ -908,12 +911,12 @@ SUBROUTINE wridiag_glt  &
         WRITE( yword,FMT='("SIVMPSI",I1.1)' ) jt
         tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write sea ice category albedo
 !
@@ -921,12 +924,12 @@ SUBROUTINE wridiag_glt  &
         WRITE( yword,FMT='("SIALBSI",I1.1)' ) jt
         tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write solar energy absorbed by sea ice categories
 !
@@ -934,12 +937,12 @@ SUBROUTINE wridiag_glt  &
         WRITE( yword,FMT='("AISWASI",I1.1)' ) jt
         tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
 ! >>> Write non-solar energy absorbed by sea ice categories
 !
@@ -947,12 +950,12 @@ SUBROUTINE wridiag_glt  &
         WRITE( yword,FMT='("SINSFSI",I1.1)' ) jt
         tznam = t_def( " ", " ", yword, " ", "T", "SCALAR" )
       CALL gltools_outdia( tpind,tznam,tpdom,zwork2,pcumdia &
-                                     gelato_leadproc,gelato_myrank,&
-          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
-          nt,nx,nxglo,ny,nyglo,&
-          dtt,dttave,                                               &
-          lp1,lwg,                                                  &
-          cdiafmt,cinsfld)
+                                     & gelato_leadproc,gelato_myrank,&
+          & n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          & nt,nx,nxglo,ny,nyglo,&
+          & dtt,dttave,                                               &
+          & lp1,lwg,                                                  &
+          & cdiafmt,cinsfld) 
 !
       END DO
 !
@@ -964,14 +967,14 @@ SUBROUTINE wridiag_glt  &
   IF ( tpind%cur==tpind%beg ) THEN
       IF ( tpind%i2d>ndiamax ) THEN 
           WRITE( ymess,  &
-            FMT='("Number of 2d diagnostic fields=", &
-            &  I3,"> ndiamax=",I3,"\n")' ) tpind%i2d,ndiamax
+            & FMT='("Number of 2d diagnostic fields=", &
+              & I3,"> ndiamax=",I3,"\n")' ) tpind%i2d,ndiamax 
            CALL ABOR1_SFX('imod_results :Check ndiamax in gltpar')
       ENDIF 
       IF ( tpind%i0d>ndiamax ) THEN 
           WRITE( ymess,  &
-            FMT='("Number of 0d diagnostic fields=", &
-            &  I3,"> ndiamax=",I3,"\n")' ) tpind%i0d,ndiamax
+            & FMT='("Number of 0d diagnostic fields=", &
+              & I3,"> ndiamax=",I3,"\n")' ) tpind%i0d,ndiamax 
            CALL ABOR1_SFX('imod_results :Check ndiamax in gltpar')
       ENDIF 
   ENDIF
@@ -1032,7 +1035,7 @@ SUBROUTINE wridiag_glt  &
         ii = ii0+ji-1
         ij = ij0
         zfram = zfram +  &
-          iceflx( tpdom,zhsit,tpdia,ii,ij,ii,ij+1 )
+          & iceflx( tpdom,zhsit,tpdia,ii,ij,ii,ij+1 ) 
       END DO
       zfram = -zfram
 !
@@ -1044,7 +1047,7 @@ SUBROUTINE wridiag_glt  &
         ii = ii0+ji-1
         ij = ij0
         zbering = zbering +  &
-          iceflx( tpdom,zhsit,tpdia,ii,ij,ii,ij+1 )
+          & iceflx( tpdom,zhsit,tpdia,ii,ij,ii,ij+1 ) 
       END DO
       zbering = -zbering
 !
@@ -1056,7 +1059,7 @@ SUBROUTINE wridiag_glt  &
         ii = ii0
         ij = ij0+ji-1
         zncwest = zncwest +  &
-          iceflx( tpdom,zhsit,tpdia,ii,ij,ii+1,ij )  
+          & iceflx( tpdom,zhsit,tpdia,ii,ij,ii+1,ij )   
       END DO
       zncwest = -zncwest
 !
@@ -1070,7 +1073,7 @@ SUBROUTINE wridiag_glt  &
         ii = ii0
         ij = ij0+ji-1
         znceast = znceast +  &
-          iceflx( tpdom,zhsit,tpdia,ii,ij,ii+1,ij )  
+          & iceflx( tpdom,zhsit,tpdia,ii,ij,ii+1,ij )   
       END DO
       znceast = -znceast
 !
@@ -1083,8 +1086,8 @@ SUBROUTINE wridiag_glt  &
         ii = ii0+ji-1
         ij = ij0+ji-1
         znorthb = znorthb -  &
-          iceflx( tpdom,zhsit,tpdia,ii,ij,ii,ij+1 ) +  &
-          iceflx( tpdom,zhsit,tpdia,ii-1,ij,ii,ij )  
+          & iceflx( tpdom,zhsit,tpdia,ii,ij,ii,ij+1 ) +  &
+          & iceflx( tpdom,zhsit,tpdia,ii-1,ij,ii,ij )   
       END DO
       znorthb = -znorthb
 !
@@ -1193,11 +1196,11 @@ SUBROUTINE wridiag_glt  &
 !
   IF (lwg) THEN
     WRITE(noutlu,*)  &
-      '                ************************************'
+      & '                ************************************' 
     WRITE(noutlu,*)  &
-      '                 END OF glt_gelato TIME STEP Nr =',tpind%cur
+      & '                 END OF glt_gelato TIME STEP Nr =',tpind%cur 
     WRITE(noutlu,*)  &
-      '                ************************************'
+      & '                ************************************' 
 !
 ! .. Farewell message
 !
@@ -1207,6 +1210,7 @@ SUBROUTINE wridiag_glt  &
   ENDIF
 #else
  WRITE(noutlu,*) ' wri_dia_glt doesn t work in Surfex'
+IF (LHOOK) CALL DR_HOOK('MODE_GLT_DIA_GLT:WRIDIAG_GLT',1,ZHOOK_HANDLE)
 #endif
 !
 END SUBROUTINE wridiag_glt 

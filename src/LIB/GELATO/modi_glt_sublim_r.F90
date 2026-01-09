@@ -95,8 +95,9 @@
 ! ------------------------ SUBROUTINE glt_sublim_r --------------------------
 !
 SUBROUTINE glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia,&
-        ncdlssh,nilay,nslay,nl,nleviti,np,nsalflx,nt,dtt,rn_htopoc,sf3tinv)
+        & ncdlssh,nilay,nslay,nl,nleviti,np,nsalflx,nt,dtt,rn_htopoc,sf3tinv) 
   USE modd_types_glt
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_thm
   USE modi_glt_updtfl_r
   USE mode_gltools_enthalpy
@@ -107,22 +108,23 @@ SUBROUTINE glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia,&
   REAL,INTENT(IN) :: dtt,rn_htopoc
   REAL,DIMENSION(:),INTENT(IN) :: sf3tinv
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::   &
-        tpmxl
+        & tpmxl 
   TYPE(t_blk), DIMENSION(nt,np), INTENT(in) ::  &
-        tpblki
+        & tpblki 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
-        tpsit
+        & tpsit 
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(inout) ::  &
-        tpsil
+        & tpsil 
   TYPE(t_tfl), DIMENSION(np), INTENT(inout) ::  &
-        tptfl
+        & tptfl 
   TYPE(t_dia), DIMENSION(np), INTENT(inout) ::  &
-        tpdia
+        & tpdia 
 !
   REAL, DIMENSION(np) ::  &
-        zei1,zei2,zes1,zes2
+        & zei1,zei2,zes1,zes2 
   REAL, DIMENSION(nt,np) ::  &
-        zhsn,zhsi,zwork,zsus,zsui,zsuw
+        & zhsn,zhsi,zwork,zsus,zsui,zsuw 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -130,6 +132,7 @@ SUBROUTINE glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia,&
 ! ==============================
 !
 ! Initial snow and ice thickness
+IF (LHOOK) CALL DR_HOOK('GLT_SUBLIM_R',0,ZHOOK_HANDLE)
   zhsn(:,:) = tpsit(:,:)%hsn
   zhsi(:,:) = tpsit(:,:)%hsi
 !
@@ -154,7 +157,7 @@ SUBROUTINE glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia,&
   zwork(:,:) = 0.
   WHERE( tpsit(:,:)%hsi>epsil1 )
     tpsit(:,:)%hsn = tpsit(:,:)%hsn +  &
-      dtt*tpblki(:,:)%eva/tpsit(:,:)%rsn
+      & dtt*tpblki(:,:)%eva/tpsit(:,:)%rsn 
     zwork(:,:) = tpblki(:,:)%eva*tpsit(:,:)%fsi
   ENDWHERE
   zsus(:,:) = zwork(:,:) * dtt
@@ -169,7 +172,7 @@ SUBROUTINE glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia,&
   zwork(:,:) = 0.
   WHERE ( tpsit(:,:)%hsn<0. ) 
     tpsit(:,:)%hsi = tpsit(:,:)%hsi +  &
-      tpsit(:,:)%hsn*tpsit(:,:)%rsn/rhoice
+      & tpsit(:,:)%hsn*tpsit(:,:)%rsn/rhoice 
 !      tpsit(:,:)%hsn*tpsit(:,:)%rsn/rhoice/  &
 !        ( 1.-1.e-3*tpsit(:,:)%ssi )
     zwork(:,:) = tpsit(:,:)%hsn*tpsit(:,:)%rsn*tpsit(:,:)%fsi
@@ -189,16 +192,16 @@ SUBROUTINE glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia,&
 !
 !
   tptfl(:)%sio = tptfl(:)%sio -  &
-    1.e-3*rhoice*  &
-    SUM( tpsit(:,:)%fsi*tpsit(:,:)%ssi*( tpsit(:,:)%hsi ),  &
-         MASK=(tpsit(:,:)%hsi<0.), DIM=1 ) / dtt
+    & 1.e-3*rhoice*  &
+    & SUM( tpsit(:,:)%fsi*tpsit(:,:)%ssi*( tpsit(:,:)%hsi ),  &
+         & MASK=(tpsit(:,:)%hsi<0.), DIM=1 ) / dtt 
 !
   zwork(:,:) = 0.
   WHERE( tpsit(:,:)%hsi<0. )
     tpsit(:,:)%hsi = 0.
     tpsit(:,:)%esi = .FALSE.
     zwork(:,:) = rhoice*tpsit(:,:)%fsi*tpsit(:,:)%hsi* &
-                 (1.-1.e-3*tpsit(:,:)%ssi)
+                 & (1.-1.e-3*tpsit(:,:)%ssi) 
   ENDWHERE
   zsuw(:,:) = zwork(:,:)
   zsui(:,:) = zsui(:,:) - zsuw(:,:)
@@ -209,9 +212,9 @@ SUBROUTINE glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia,&
 ! Ice sublimated has to be put in wlo and the inverse in cio => water flux
 ! impacted but not the salt flux (???? Aurore)
   CALL glt_updtfl_r('FW2I',tpmxl,tptfl,zsui,&
-      ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc)
+      & ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc) 
   CALL glt_updtfl_r('FW2O',tpmxl,tptfl,zsuw,&
-      ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc)
+      & ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc) 
 !print*,'hsi (4) =',tpsit(:,:)%hsi
 !print*,'hsn (4) =',tpsit(:,:)%hsn
 !
@@ -238,6 +241,7 @@ SUBROUTINE glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia,&
 !
   CALL glt_aventh( tpsit,tpsil,zei2,zes2,nilay,nslay,nl,np,nt,sf3tinv )
   tptfl(:)%tio = tptfl(:)%tio - (zei2+zes2-zei1-zes1)/dtt
+IF (LHOOK) CALL DR_HOOK('GLT_SUBLIM_R',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE glt_sublim_r
 

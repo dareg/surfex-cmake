@@ -34,9 +34,7 @@ USE MODE_READ_CDF
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 !
-#ifdef AIX64
 !$ USE OMP_LIB
-#endif
 !
 USE NETCDF
 !
@@ -45,10 +43,6 @@ IMPLICIT NONE
 !
 #ifdef SFX_MPI
 INCLUDE 'mpif.h'
-#endif
-!
-#ifndef AIX64
-!$ INCLUDE 'omp_lib.h'
 #endif
 !
 CONTAINS

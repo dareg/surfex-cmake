@@ -106,8 +106,8 @@ D%XTS(:) = PTS(:)
     ZH(:)=2.          
     CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT,         &
                 PCD, PCH, PRI,                 &
-                PTS, PHU, PQSAT, PZ0H, ZH,            &
-                D%XT2M, D%XQ2M, D%XHU2M  )  
+                PTS, PHU, PQSAT, PZ0H, ZH, DGO%LHU2M_QSAT,   &
+                D%XT2M, D%XQ2M, D%XHU2M   )  
     ZH(:)=10.                
     CALL CLS_WIND(PZONA, PMERA, PHW,        &
                   PCD, PCDN, PRI, ZH,       &
@@ -116,7 +116,7 @@ D%XTS(:) = PTS(:)
     ZH(:)=2.
     CALL CLS_TQ_DIAN(PZONA, PMERA, PTA, PQA, PPA, &
                   PPS, PHT, PCD, PCH, PRI,        &
-                 PTS, PHU, PQSAT, PZ0H, ZH,            &
+                 PTS, PHU, PQSAT, PZ0H, ZH, DGO%LHU2M_QSAT,  &
                  D%XT2M, D%XQ2M, D%XHU2M,DGO%N2M )
     ZH(:)=10.
     CALL CLS_WIND(PZONA, PMERA, PHW,        &

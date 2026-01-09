@@ -72,6 +72,7 @@
 
 SUBROUTINE glt_sndatmf(tpglt,nnflxin,alblc,xtmlf)
   USE modd_types_glt
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_thm
 !USE MODI_ABOR1_SFX
 #if ! defined in_surfex
@@ -85,23 +86,24 @@ SUBROUTINE glt_sndatmf(tpglt,nnflxin,alblc,xtmlf)
   INTEGER,INTENT(in) :: nnflxin
   REAL   ,INTENT(in) :: alblc
   TYPE(t_glt), INTENT(inout)  ::  &
-    tpglt
+    & tpglt 
   ! Useful in Surfex init phase, when SST+SSS are not yet known, and hence 
   ! tml%mlf not yet filled in, but one wants a sensible value for TICE everywhere:
   REAL, OPTIONAL, INTENT(IN)  ::  &
-    xtmlf
+    & xtmlf 
 !
   INTEGER, PARAMETER ::  &
-    jporder=5 
+    & jporder=5  
   INTEGER, DIMENSION(jporder,SIZE(tpglt%dom,1),SIZE(tpglt%dom,2)) ::  &
-    iadvmsk
+    & iadvmsk 
   REAL, DIMENSION(SIZE(tpglt%dom,1),SIZE(tpglt%dom,2)) ::  &
-    zalbc
+    & zalbc 
   REAL, DIMENSION(SIZE(tpglt%dom,1),SIZE(tpglt%dom,2)) ::  &
-    zalbm,ztsfm,zfsit
+    & zalbm,ztsfm,zfsit 
   TYPE(t_sit),  &
-    DIMENSION(SIZE(tpglt%sit,1),SIZE(tpglt%sit,2),SIZE(tpglt%sit,3)) ::  &
-    tzsit
+    & DIMENSION(SIZE(tpglt%sit,1),SIZE(tpglt%sit,2),SIZE(tpglt%sit,3)) ::  &
+    & tzsit 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -110,11 +112,12 @@ SUBROUTINE glt_sndatmf(tpglt,nnflxin,alblc,xtmlf)
 !
 ! Get ice state from super-type
 !
+IF (LHOOK) CALL DR_HOOK('GLT_SNDATMF',0,ZHOOK_HANDLE)
   tzsit = tpglt%sit
 !
 ! Total sea ice cover (fraction of unity)
   zfsit(:,:) =  &
-    SUM( tzsit(:,:,:)%fsi,DIM=1 )*FLOAT( tpglt%dom(:,:)%tmk )
+    & SUM( tzsit(:,:,:)%fsi,DIM=1 )*FLOAT( tpglt%dom(:,:)%tmk ) 
 #if ! defined in_surfex
   CALL gltools_bound( 'T','scalar',zfsit ) 
 #endif
@@ -144,9 +147,9 @@ SUBROUTINE glt_sndatmf(tpglt,nnflxin,alblc,xtmlf)
 ! Ice average temperature and albedo (without stratus clouds)
           WHERE( zfsit(:,:)>epsil5 )
             ztsfm(:,:) =  &
-              SUM( tzsit(:,:,:)%fsi*tzsit(:,:,:)%tsf,DIM=1 ) / zfsit(:,:)
+              & SUM( tzsit(:,:,:)%fsi*tzsit(:,:,:)%tsf,DIM=1 ) / zfsit(:,:) 
             zalbm(:,:) =  &
-              SUM( tzsit(:,:,:)%fsi*tzsit(:,:,:)%asn,DIM=1 ) / zfsit(:,:)
+              & SUM( tzsit(:,:,:)%fsi*tzsit(:,:,:)%asn,DIM=1 ) / zfsit(:,:) 
           ENDWHERE
           IF (PRESENT(XTMLF)) THEN 
              WHERE( zfsit(:,:)<=epsil5 )
@@ -218,15 +221,15 @@ SUBROUTINE glt_sndatmf(tpglt,nnflxin,alblc,xtmlf)
 !
 ! Weighted (ice+ocean) temperature and albedo (without stratus clouds) 
       zalbm(:,:) =  &
-        SUM( tzsit(:,:,:)%fsi*tzsit(:,:,:)%asn,DIM=1 ) +  &
-        ( 1.-zfsit(:,:) )*albw
+        & SUM( tzsit(:,:,:)%fsi*tzsit(:,:,:)%asn,DIM=1 ) +  &
+        & ( 1.-zfsit(:,:) )*albw 
 ! Add stratus (no effect if alblc = 0 in gltpar)
       zalbm(:,:) = 1.-( 1.-zalbm(:,:) )*( 1.-zalbc(:,:) )
 !
 ! Weighted surface temperature
       ztsfm(:,:) =  &
-        SUM( tzsit(:,:,:)%fsi*tzsit(:,:,:)%tsf,DIM=1 ) +  &
-        ( 1.-zfsit(:,:) )*tpglt%tml(:,:)%tml + t0deg
+        & SUM( tzsit(:,:,:)%fsi*tzsit(:,:,:)%tsf,DIM=1 ) +  &
+        & ( 1.-zfsit(:,:) )*tpglt%tml(:,:)%tml + t0deg 
 !
 ! Apply boundary conditions
 #if ! defined in_surfex
@@ -246,6 +249,7 @@ SUBROUTINE glt_sndatmf(tpglt,nnflxin,alblc,xtmlf)
       tpglt%mix_atm(1,:,:)%tsf = ztsfm(:,:) 
 !
   ENDIF
+IF (LHOOK) CALL DR_HOOK('GLT_SNDATMF',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE glt_sndatmf
 !

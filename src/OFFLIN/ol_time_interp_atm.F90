@@ -8,7 +8,7 @@ SUBROUTINE OL_TIME_INTERP_ATM (KSURF_STEP,KNB_ATM,                       &
                                PDIR_SW1,PDIR_SW2,PSCA_SW1,PSCA_SW2,      &
                                PLW1,PLW2,PSNOW2,PRAIN2,                  &
                                PPS1,PPS2,PCO21,PCO22,PDIR1,PDIR2,        &
-			       									 PO31,PO32,PAE1,PAE2,PIMPWET2,PIMPDRY2,    &
+                               PO31,PO32,PAE1,PAE2,PIMPWET2,PIMPDRY2,    &
                                PZEN,PSUMZEN )  
 !**************************************************************************
 !
@@ -72,16 +72,10 @@ USE MODI_ABOR1_SFX
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
-#ifdef AIX64
 !$ USE OMP_LIB
-#endif
 !
 IMPLICIT NONE
 !
-!
-#ifndef AIX64
-!$ INCLUDE 'omp_lib.h'
-#endif
 !
 ! global variables
 INTEGER,INTENT(IN) :: KSURF_STEP, KNB_ATM

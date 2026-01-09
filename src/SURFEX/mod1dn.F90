@@ -64,6 +64,7 @@ USE MODI_GET_LUOUT
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
+USE MODI_ABOR1_SFX
 !
 IMPLICIT NONE
 !
@@ -104,10 +105,12 @@ REAL, DIMENSION(SIZE(PDIR_ALB,1),SIZE(PDIR_ALB,2)) :: ZSWU
                                              !shortwave upward fluxes (W/m2)
 !
 REAL, DIMENSION(SIZE(PSFTH)) :: ZSEATEMP     !surface temperature (K)
+REAL, DIMENSION(SIZE(PSFTH)) :: ZSEASALI     !surface salinity
 !
 LOGICAL         :: GCALLMIXT, GTIMEOK
 INTEGER         :: ILUOUT              ! output listing logical unit
 REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
+REAL :: ZCOEF
 !
 !-------------------------------------------------------------------------------
 !
@@ -121,6 +124,8 @@ NOCEAN_STEP=INT(O%XOCEAN_TSTEP)
 GTIMEOK=(MOD(ITIME,NOCEAN_STEP)==0)
 GCALLMIXT=((MOD(ITIME,NOCEAN_STEP)==0).AND.(O%NOCTCOUNT>0))
 !
+ZCOEF=O%XCMO_COEF
+!
 !Call 1D model if ptime proportional to the oceanic model time step
 !
 IF (GCALLMIXT) THEN
@@ -130,11 +135,11 @@ IF (GCALLMIXT) THEN
 !Computation of solar, non solar and fresh water fluxes
   DO JPT=1,SIZE(PSFTH)
  !SW Flux up
-    ZSWU(JPT,:)= PDIR_SW(JPT,:) * PDIR_ALB(JPT,:) + PSCA_SW(JPT,:)*PSCA_ALB(JPT,:)
+    ZSWU(JPT,:)= ZCOEF * ( PDIR_SW(JPT,:) * PDIR_ALB(JPT,:) + PSCA_SW(JPT,:)*PSCA_ALB(JPT,:) )
  !Net solar flux  
     ZFSOL(JPT)=(SUM(PDIR_SW(JPT,:))+SUM(PSCA_SW(JPT,:))-SUM(ZSWU(JPT,:)))/(XRHOSW*XCPSW)
  !Calcul flux LW UP
-    ZLWU(JPT)= PEMIS(JPT)*XSTEFAN*S%XSST(JPT)**4 + (1-PEMIS(JPT))*PLW(JPT)
+    ZLWU(JPT)= ZCOEF * PEMIS(JPT)*XSTEFAN*S%XSST(JPT)**4 + (1-PEMIS(JPT))*PLW(JPT)
    
     IF (S%XSST(JPT)<=(XTT-2)) THEN
       ZFNSOL(JPT)=(PLW(JPT)-ZLWU(JPT)-PSFTH(JPT)-(XLSTT*PSFTQ(JPT)))/(XRHOSW*XCPSW)
@@ -156,15 +161,16 @@ IF (GCALLMIXT) THEN
      ZFNSOL(:)  = 0.
      ZSFTEAU(:) = 0.
   END IF
+  ZSEATEMP(:)=S%XSST(:)
 
-  CALL MIXTL_n(O, OR, PLAT, ZFSOL,ZFNSOL,ZSFTEAU,PSFU,PSFV,ZSEATEMP)
+  CALL MIXTL_n(O, OR, PLAT, ZFSOL,ZFNSOL,ZSFTEAU,PSFU,PSFV,ZSEATEMP,ZSEASALI)
 !
 !---------------------------------------------------------------------------
 !        3. Coupling with SURFEX by SST (and relative wind) evolution
 !
   IF (O%LPROGSST) THEN 
-    S%XSST(:)=ZSEATEMP(:)
-    !WRITE(ILUOUT,*) '**SST CHANGED FOR THE ',NOCTCOUNT,'TIME BY FIRST LEVEL OCEANIC MODEL TEMPERATURE AT ', ITIME,' s **'
+    S%XSST(:)=MAX(ZSEATEMP(:),XTTSI)
+    S%XSSS(:)=ZSEASALI(:)
   ENDIF
   !
 ENDIF
