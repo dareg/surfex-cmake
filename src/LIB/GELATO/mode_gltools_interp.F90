@@ -64,6 +64,7 @@ CONTAINS
 !
 SUBROUTINE glt_c2b(pcu,pcv,pbu,pbv,nx,ny)
 !
+USE YOMHOOK, ONLY : JPHOOK, DR_HOOK
 !
 IMPLICIT NONE
 !
@@ -128,13 +129,13 @@ END SUBROUTINE glt_c2b
 !
 SUBROUTINE glt_b2c(pbu,pbv,pcu,pcv,nx,ny)
 !
+USE YOMHOOK, ONLY : JPHOOK, DR_HOOK
 USE mode_gltools_bound
 !
 IMPLICIT NONE
 !
 INTEGER,INTENT(in) :: nx,ny    
 REAL, DIMENSION(nx,ny),INTENT(in) ::  &
-& REAL, DIMENSION(nx,ny),INTENT(in) ::  &
   & pbu,pbv 
 REAL, DIMENSION(ilo:ihi,jlo:jhi), INTENT(out) ::  &
   & pcu,pcv 
