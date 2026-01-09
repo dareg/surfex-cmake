@@ -76,6 +76,12 @@ foreach(PRECISION ${PRECISIONS})
     $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/module/${LIBNAME}>
   )
 
+  if( CMAKE_Fortran_COMPILER_ID MATCHES "GNU" )   # TODO: CLEAN 
+    if( CMAKE_Fortran_COMPILER_VERSION GREATER_EQUAL 10 )
+          ecbuild_add_fortran_flags( -fallow-argument-mismatch NO_FAIL )
+    endif()
+  endif()
+
   target_compile_definitions(${LIBNAME} PRIVATE in_surfex)
   target_compile_definitions(${LIBNAME} PRIVATE SFX_ARO)
   target_compile_definitions(${LIBNAME} PRIVATE SFX_ASC)
