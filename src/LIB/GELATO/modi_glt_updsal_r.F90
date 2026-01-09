@@ -88,7 +88,7 @@ SUBROUTINE glt_updsal_r( gsmelt,tpmxl,tpsit,tptfl,&
 !
   USE modd_glt_const_thm
   USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
-  USE modd_types_glt
+  USE modd_types_glt, only: t_mxl, t_sit, t_tfl
   USE modi_glt_salflx_r
   USE mode_glt_stats_r
 !

@@ -84,7 +84,7 @@ SUBROUTINE glt_updsnow_r  &
   & noutlu,np,nt,dtt,xdomsrf_r,lwg,&
   & paddterm,paddterm2) 
 !
-  USE modd_types_glt
+  USE modd_types_glt, only: t_dom, t_tfl, t_sit
   USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_thm
   USE mode_glt_stats_r

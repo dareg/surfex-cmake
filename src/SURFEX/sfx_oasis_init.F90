@@ -78,6 +78,7 @@ USE XIOS, ONLY : XIOS_INITIALIZE
 #ifdef CPLOASIS
 USE MOD_OASIS
 #endif
+USE MODD_SURFEX_HOST
 !
 IMPLICIT NONE
 !
@@ -143,10 +144,10 @@ IF(LEN_TRIM(HNAMELIST)/=0)THEN
     WRITE(*,'(2A)')'SFX_OASIS_INIT: SFX NAMELIST FILE NOT FOUND: ',TRIM(HNAMELIST)
     WRITE(*,'(A)' )'-------------------------------------------  '     
     WRITE(*,'(A)' )'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-#ifndef SFX_ARO
+    IF (ASSOCIATED (YRSURFEX_HOST)) THEN
+      CALL YRSURFEX_HOST%ABORT ('SFX_OASIS_INIT: SFX NAMELIST FILE NOT FOUND')
+    ENDIF
     CALL ABORT
-    STOP
-#endif
   ELSE
     READ (UNIT=11,NML=NAM_OASIS,IOSTAT=IERR)
     CLOSE(UNIT=11)
@@ -374,3 +375,4 @@ END SUBROUTINE FOUND_TIMERUN
 !-------------------------------------------------------------------------------
 !
 END SUBROUTINE SFX_OASIS_INIT
+

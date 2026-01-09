@@ -60,7 +60,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_TYPE_DATE_SURF
+USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME
 !
 USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 !

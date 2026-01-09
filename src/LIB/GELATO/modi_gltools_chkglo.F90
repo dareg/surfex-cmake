@@ -86,7 +86,7 @@ SUBROUTINE gltools_chkglo(omsg,tpdom,tpsit,&
 !
   USE modd_glt_const_thm
   USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
-  USE modd_types_glt
+  USE modd_types_glt, only: t_dom, t_sit
 #if ! defined in_arpege
   USE lib_mpp
 #endif

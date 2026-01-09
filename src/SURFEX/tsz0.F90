@@ -44,6 +44,7 @@
 !!      V.Masson     15/03/99 some computations are now done in GROUND_PARAMn
 !!      V.Masson     04/01/00 all computations are now done in ISBA
 !!      P. Le Moigne 03/2015  tsz0 time management
+!!      E. Bazile and P. Le Moigne 09/2023 GABLS1 and GABLS4 for MUSC
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -55,6 +56,7 @@ USE MODD_DATA_TSZ0_n, ONLY : DATA_TSZ0_t
 !
 USE MODD_CSTS,       ONLY : XPI
 USE MODD_SURF_PAR,   ONLY : XUNDEF
+USE MODI_ABOR1_SFX
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
@@ -100,6 +102,61 @@ REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !               ----------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('TSZ0',0,ZHOOK_HANDLE)
+
+IF (DTZ%NTIME==10) THEN
+! ---------------------------- GABLS1-------------------------
+DTZ%XDATA_DTS( 1)=  -0.25
+DTZ%XDATA_DTS( 2)=  -0.25
+DTZ%XDATA_DTS( 3)=  -0.25
+DTZ%XDATA_DTS( 4)=  -0.25
+DTZ%XDATA_DTS( 5)=  -0.25
+DTZ%XDATA_DTS( 6)=  -0.25
+DTZ%XDATA_DTS( 7)=  -0.25
+DTZ%XDATA_DTS( 8)=  -0.25
+DTZ%XDATA_DTS( 9)=  -0.25
+DTZ%XDATA_DTS( 10)= -0.25
+ELSEIF (DTZ%NTIME==36) THEN
+! ------------------------------GABLS4------------------------
+DTZ%XDATA_DTS( 1)=  1.7900
+DTZ%XDATA_DTS( 2)=  1.7100
+DTZ%XDATA_DTS( 3)=  1.3500
+DTZ%XDATA_DTS( 4)=  0.7200
+DTZ%XDATA_DTS( 5)=  0.3700
+DTZ%XDATA_DTS( 6)= -0.0100
+DTZ%XDATA_DTS( 7)= -0.3800
+DTZ%XDATA_DTS( 8)= -0.6500
+DTZ%XDATA_DTS( 9)= -1.3000
+DTZ%XDATA_DTS(10)= -1.7900
+DTZ%XDATA_DTS(11)= -2.1000
+DTZ%XDATA_DTS(12)= -2.3500
+DTZ%XDATA_DTS(13)= -2.1900
+DTZ%XDATA_DTS(14)= -2.2400
+DTZ%XDATA_DTS(15)= -1.3900
+DTZ%XDATA_DTS(16)= -1.1200
+DTZ%XDATA_DTS(17)= -0.6800
+DTZ%XDATA_DTS(18)= -0.0900
+DTZ%XDATA_DTS(19)=  0.5600
+DTZ%XDATA_DTS(20)=  1.0800
+DTZ%XDATA_DTS(21)=  1.7900
+DTZ%XDATA_DTS(22)=  1.9200
+DTZ%XDATA_DTS(23)=  2.3200
+DTZ%XDATA_DTS(24)=  2.4300
+DTZ%XDATA_DTS(25)=  1.9800
+DTZ%XDATA_DTS(26)=  1.6500
+DTZ%XDATA_DTS(27)=  1.2900
+DTZ%XDATA_DTS(28)=  0.8300
+DTZ%XDATA_DTS(29)=  0.4600
+DTZ%XDATA_DTS(30)= -0.1000
+DTZ%XDATA_DTS(31)= -0.6900
+DTZ%XDATA_DTS(32)= -0.8700
+DTZ%XDATA_DTS(33)= -1.4200
+DTZ%XDATA_DTS(34)= -1.6700
+DTZ%XDATA_DTS(35)= -2.1700
+DTZ%XDATA_DTS(36)= -2.8500
+ELSE
+   CALL ABOR1_SFX('Cas pas prevu')
+ENDIF
+!-------------------------------------------------------------------------------
 !
 IF (DTZ%NTIME==25) THEN
    ZTIMEP = MOD(PTIME+PTSTEP,86400.)  ! recover the time from O HTU

@@ -37,7 +37,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-#if defined(SFX_ASC) || defined(SFX_ARO) || defined(SFX_MNH) || defined(SFX_NC)
+#if defined(SFX_ASC) || defined(SFX_MNH) || defined(SFX_NC)
 USE MODI_OPEN_FILE_ASC
 #endif
 #ifdef SFX_FA
@@ -113,7 +113,7 @@ ELSE IF (HPROGRAM=='OFFLIN') THEN
   CALL OPEN_FILE_OL(KUNIT,YFILE,YFORM,YACTION,YACCESS,IRECL)
 #endif
 ELSE IF (HPROGRAM=='ASCII ' .OR. HPROGRAM=='AROME ') THEN
-#if defined(SFX_ASC) || defined(SFX_ARO) || defined(SFX_MNH) || defined(SFX_NC)
+#if defined(SFX_ASC) || defined(SFX_MNH) || defined(SFX_NC)
   CALL OPEN_FILE_ASC(KUNIT,YFILE,YFORM,YACTION,YACCESS,IRECL)
 #endif
 ELSE IF (HPROGRAM=='FA    ') THEN

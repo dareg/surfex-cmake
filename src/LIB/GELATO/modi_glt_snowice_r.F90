@@ -95,7 +95,7 @@ SUBROUTINE glt_snowice_r( tpmxl,tpsil,tptfl,tpsit,tpdia,&
 !
   USE modd_glt_const_thm
   USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
-  USE modd_types_glt
+  USE modd_types_glt, only: t_mxl, t_vtp, t_tfl, t_sit, t_dia
   USE mode_gltools_enthalpy
   USE modi_glt_updtfl_r
 !

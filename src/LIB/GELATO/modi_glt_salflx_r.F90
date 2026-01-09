@@ -101,7 +101,7 @@ SUBROUTINE glt_salflx_r(pqsalt,tpmxl,tptfl,ncdlssh,np,nsalflx,nt,dtt,rn_htopoc,p
 !
   USE modd_glt_const_thm
   USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
-  USE modd_types_glt
+  USE modd_types_glt, only: t_mxl, t_tfl
 !
   IMPLICIT NONE
 !

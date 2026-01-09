@@ -99,7 +99,7 @@ SUBROUTINE glt_frzvtp_r( tpmxl,tpsit,pqfac,phsi,pssi,tpsil,&
 !
   USE modd_glt_const_thm
   USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
-  USE modd_types_glt
+  USE modd_types_glt, only: t_mxl, t_sit, t_vtp
   USE mode_gltools_enthalpy
   USE mode_gltools_interp
   USE modi_glt_saltrap_r

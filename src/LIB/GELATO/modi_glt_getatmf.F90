@@ -76,7 +76,7 @@
 ! ----------------------- SUBROUTINE glt_getatmf ----------------------------
 
 SUBROUTINE glt_getatmf( tpglt,nnflxin,noutlu,nt,nx,ny,lp1,lwg )
-  USE modd_types_glt
+  USE modd_types_glt, only: t_glt, t_sit
   USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_thm
 #if ! defined in_surfex

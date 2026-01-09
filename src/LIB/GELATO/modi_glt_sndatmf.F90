@@ -71,7 +71,7 @@
 ! ----------------------- SUBROUTINE glt_sndatmf ----------------------------
 
 SUBROUTINE glt_sndatmf(tpglt,nnflxin,alblc,xtmlf)
-  USE modd_types_glt
+  USE modd_types_glt, only: t_glt, t_sit
   USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_thm
 !USE MODI_ABOR1_SFX

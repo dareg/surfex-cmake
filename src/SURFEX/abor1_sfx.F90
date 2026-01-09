@@ -45,6 +45,7 @@ USE MODI_GET_LUOUT
 USE MODI_CLOSE_FILE
 !      
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
+USE MODD_SURFEX_HOST
 !
 IMPLICIT NONE
 !
@@ -61,9 +62,6 @@ IMPLICIT NONE
 INTEGER           :: ILUOUT         ! logical unit of output file      
 REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
-#ifdef SFX_ARO
-#include "abor1.intfb.h"
-#endif
 !-------------------------------------------------------------------------------
 !
 !* get output listing file logical unit
@@ -95,13 +93,13 @@ WRITE(ILUOUT,*) '---------------------------------------------------------------
 WRITE(ILUOUT,*) '---------------------------------------------------------------------------'
  CALL CLOSE_FILE(YPROGRAM,ILUOUT)
 !
-#ifdef SFX_ARO
-call abor1('abort by abor1_sfx')
-#else
+ IF (ASSOCIATED (YRSURFEX_HOST)) THEN
+   CALL YRSURFEX_HOST%ABORT ('abort by abor1_sfx') 
+ ENDIF
+
  write(0,*) "aborted with text:",trim(ytext),"|"
  CALL ABORT
-STOP
-#endif
+
 IF (LHOOK) CALL DR_HOOK('ABOR1_SFX',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE ABOR1_SFX

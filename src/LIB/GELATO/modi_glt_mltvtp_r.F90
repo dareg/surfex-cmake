@@ -87,7 +87,7 @@ SUBROUTINE glt_mltvtp_r( pdhi,phsi,tpsil,&
 !
   USE modd_glt_const_thm
   USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
-  USE modd_types_glt
+  USE modd_types_glt, only: t_vtp
   USE mode_glt_stats_r
   USE mode_gltools_interp
 !

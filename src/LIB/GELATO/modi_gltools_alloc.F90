@@ -77,7 +77,7 @@
 !
 SUBROUTINE gltools_alloc(tpglt,ndiamax,ndynami,nl,nnflxin,noutlu,nt,ntd,nx,ny,lp1)
 !
-USE modd_types_glt 
+USE modd_types_glt, only: t_glt
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
 #if ! defined in_surfex
 USE modd_CB_DynVariables

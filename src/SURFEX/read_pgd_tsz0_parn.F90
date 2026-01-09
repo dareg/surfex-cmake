@@ -34,6 +34,7 @@
 !!    -------------
 !!      Original     09/2007 
 !!      P. Le Moigne 03/2015 tsz0 time management
+!!      E. Bazile and P. Le Moigne 09/2023 GABLS1 and GABLS4 for MUSC
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -90,22 +91,22 @@ ENDIF
 ALLOCATE(DTZ%XDATA_DTS   (DTZ%NTIME))
 ALLOCATE(DTZ%XDATA_DHUGRD(DTZ%NTIME))
 !
-IF (IVERSION.GT.7 .OR. (IVERSION==7 .AND. IBUGFIX.GT.1)) THEN
-  !
-  YRECFM = 'D_DTS'
-  YCOMMENT = 'X_Y_DATA_DTS'
-  CALL READ_SURF(HPROGRAM,YRECFM,DTZ%XDATA_DTS(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
-  !
-  YRECFM='D_DHUGRD'
-  YCOMMENT = 'X_Y_DATA_DHUGRD'
-  CALL READ_SURF(HPROGRAM,YRECFM,DTZ%XDATA_DHUGRD(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
-  !
-ELSE
+!IF (IVERSION.GT.7 .OR. (IVERSION==7 .AND. IBUGFIX.GT.1)) THEN
+!  !
+!  YRECFM = 'D_DTS'
+!  YCOMMENT = 'X_Y_DATA_DTS'
+!  CALL READ_SURF(HPROGRAM,YRECFM,DTZ%XDATA_DTS(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
+!  !
+!  YRECFM='D_DHUGRD'
+!  YCOMMENT = 'X_Y_DATA_DHUGRD'
+!  CALL READ_SURF(HPROGRAM,YRECFM,DTZ%XDATA_DHUGRD(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
+!  !
+!ELSE
   !
   DTZ%XDATA_DTS   (:) = 0.0
   DTZ%XDATA_DHUGRD(:) = 0.0
   !
-ENDIF
+!ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('READ_PGD_TSZ0_PAR_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

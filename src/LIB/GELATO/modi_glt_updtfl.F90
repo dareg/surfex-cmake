@@ -116,7 +116,7 @@ SUBROUTINE glt_updtfl( hflag,tpmxl,tptfl,pdmass,ncdlssh,nleviti,nsalflx,nt,nx,ny
 !
   USE modd_glt_const_thm
   USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
-  USE modd_types_glt
+  USE modd_types_glt, only: t_mxl, t_tfl
   USE modi_glt_salflx
 !
   IMPLICIT NONE

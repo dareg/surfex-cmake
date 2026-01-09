@@ -106,7 +106,7 @@ SUBROUTINE glt_thermo_end_r(tpdom,tpml,tpldsit,tpldsil,tpsit,tpsil,&
 ! 1.1. Module declarations
 ! -------------------------
 !
-  USE modd_types_glt
+  USE modd_types_glt, only: t_dom, t_mxl, t_sit, t_vtp
   USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_thm
   USE modi_gltools_mixice_r

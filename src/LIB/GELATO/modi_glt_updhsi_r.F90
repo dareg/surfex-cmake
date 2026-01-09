@@ -97,7 +97,7 @@ SUBROUTINE glt_updhsi_r  &
 !
   USE modd_glt_const_thm
   USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
-  USE modd_types_glt
+  USE modd_types_glt, only: t_mxl, t_dia, t_tfl, t_sit, t_vtp
   USE modi_glt_updtfl_r
   USE modi_glt_saltrap_r
   USE modi_glt_frzvtp_r

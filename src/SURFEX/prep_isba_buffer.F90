@@ -35,7 +35,7 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODE_READ_BUFFER
 !
-USE MODD_TYPE_DATE_SURF
+USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME
 !
 USE MODI_PREP_BUFFER_GRID
 USE MODI_INTERP_GRID_NAT
@@ -45,12 +45,10 @@ USE MODD_PREP_ISBA,      ONLY : XGRID_SOIL, XWR_DEF
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_GRID_BUFFER,    ONLY : NNI
 USE MODN_PREP_ISBA,      ONLY : LEXTRAP_TG,LEXTRAP_WG,LEXTRAP_WGI
-#ifdef SFX_ARO
-USE MODI_OI_HOR_EXTRAPOL_SURF
-#endif
 USE MODI_PACK_SAME_RANK
 USE MODI_UNPACK_SAME_RANK
 USE MODI_ABOR1_SFX
+USE MODD_SURFEX_HOST
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
@@ -144,10 +142,9 @@ SELECT CASE(HSURF)
               ENDDO
 
               ZFIELD_EP_IN(:) = ZFIELD_EP(:)
-#ifdef SFX_ARO
-              CALL OI_HOR_EXTRAPOL_SURF(U%NSIZE_NATURE,G%XLAT,G%XLON,ZFIELD_EP_IN(:), &
-                                        G%XLAT,G%XLON,ZFIELD_EP(:),OINTERP,PZS=ZALT,NDIM2=10)
-#endif
+
+              CALL YRSURFEX_HOST%OI_HOR_EXTRAPOL_SURF(U%NSIZE_NATURE,G%XLAT,G%XLON,ZFIELD_EP_IN(:), &
+                                                      G%XLAT,G%XLON,ZFIELD_EP(:),OINTERP,PZS=ZALT,NDIM2=10)
 
               ! Unpack to full rank
               CALL UNPACK_SAME_RANK(U%NR_NATURE,ZFIELD_EP(:),ZFIELD(:,ILAYER))
@@ -201,10 +198,9 @@ SELECT CASE(HSURF)
               ENDDO
 
               ZFIELD_EP_IN(:) = ZFIELD_EP
-#ifdef SFX_ARO
-              CALL OI_HOR_EXTRAPOL_SURF(U%NSIZE_NATURE,G%XLAT,G%XLON,ZFIELD_EP_IN(:), &
-                                        G%XLAT,G%XLON,ZFIELD_EP(:),OINTERP,NDIM2=10)
-#endif
+
+              CALL YRSURFEX_HOST%OI_HOR_EXTRAPOL_SURF(U%NSIZE_NATURE,G%XLAT,G%XLON,ZFIELD_EP_IN(:), &
+                                                      G%XLAT,G%XLON,ZFIELD_EP(:),OINTERP,NDIM2=10)
 
               ! Unpack to full rank
               CALL UNPACK_SAME_RANK(U%NR_NATURE,ZFIELD_EP(:),ZFIELD(:,ILAYER))
@@ -261,10 +257,9 @@ SELECT CASE(HSURF)
               ENDDO
           
               ZFIELD_EP_IN(:) = ZFIELD_EP
-#ifdef SFX_ARO
-              CALL OI_HOR_EXTRAPOL_SURF(U%NSIZE_NATURE,G%XLAT,G%XLON,ZFIELD_EP_IN(:), &
-                                        G%XLAT,G%XLON,ZFIELD_EP(:),OINTERP,NDIM2=10)
-#endif
+
+              CALL YRSURFEX_HOST%OI_HOR_EXTRAPOL_SURF(U%NSIZE_NATURE,G%XLAT,G%XLON,ZFIELD_EP_IN(:), &
+                                                      G%XLAT,G%XLON,ZFIELD_EP(:),OINTERP,NDIM2=10)
 
               ! Unpack to full rank
               CALL UNPACK_SAME_RANK(U%NR_NATURE,ZFIELD_EP(:),ZFIELD(:,ILAYER))

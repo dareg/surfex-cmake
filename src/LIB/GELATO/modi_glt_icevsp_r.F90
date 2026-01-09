@@ -84,7 +84,7 @@ SUBROUTINE glt_icevsp_r( tpsit,pvsp,&
 !
   USE modd_glt_const_thm
   USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
-  USE modd_types_glt
+  USE modd_types_glt, only: t_sit
 !
   IMPLICIT NONE
 !

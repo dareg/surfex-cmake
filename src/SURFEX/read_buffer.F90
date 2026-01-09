@@ -84,12 +84,9 @@ USE MODI_GET_LUOUT
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
+USE MODD_SURFEX_HOST
 !
 IMPLICIT NONE
-!
-#ifdef SFX_ARO
-#include "get_bufc0.h"
-#endif
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
@@ -110,9 +107,7 @@ REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('MODI_READ_BUFFER:READ_BUFC0',0,ZHOOK_HANDLE)
  CALL GET_LUOUT('AROME ',ILUOUT)
 !
-#ifdef SFX_ARO
- CALL GET_BUFC0(HNAME,HFIELD,LEN(HFIELD),KRET)
-#endif
+ CALL YRSURFEX_HOST%GET_BUFC0(HNAME,HFIELD,LEN(HFIELD),KRET)
 !
 IF (KRET /=0) THEN
   WRITE(ILUOUT,*) ' '
@@ -165,12 +160,9 @@ USE MODI_GET_LUOUT
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
+USE MODD_SURFEX_HOST
 !
 IMPLICIT NONE
-!
-#ifdef SFX_ARO
-#include "get_bufn0.h"
-#endif
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
@@ -191,9 +183,7 @@ REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('MODI_READ_BUFFER:READ_BUFN0',0,ZHOOK_HANDLE)
  CALL GET_LUOUT('AROME ',ILUOUT)
 !
-#ifdef SFX_ARO
- CALL GET_BUFN0(HNAME,KFIELD,KRET)
-#endif
+ CALL YRSURFEX_HOST%GET_BUFN0(HNAME,KFIELD,KRET)
 !
 IF (KRET /=0) THEN
   WRITE(ILUOUT,*) ' '
@@ -244,21 +234,18 @@ END SUBROUTINE READ_BUFN0
 !
 USE MODI_GET_LUOUT
 !
-!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
+USE MODD_SURFEX_HOST
 !
 IMPLICIT NONE
 !
-#ifdef SFX_ARO
-#include "get_bufn1.h"
-#endif
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
- CHARACTER(LEN=*),             INTENT(IN)   :: HNAME        ! name of field
+CHARACTER(LEN=*),             INTENT(IN)   :: HNAME  ! name of field
 INTEGER, DIMENSION(:),        INTENT(OUT)  :: KFIELD ! array containing the data field
-INTEGER,                      INTENT(OUT)  :: KRET      !  error code
+INTEGER,                      INTENT(OUT)  :: KRET   !  error code
 !
 !
 !*       0.2   Declarations of local variables
@@ -272,9 +259,7 @@ REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('MODI_READ_BUFFER:READ_BUFN1',0,ZHOOK_HANDLE)
  CALL GET_LUOUT('AROME ',ILUOUT)
 !
-#ifdef SFX_ARO
- CALL GET_BUFN1(HNAME,SIZE(KFIELD),KFIELD,KRET)
-#endif
+ CALL YRSURFEX_HOST%GET_BUFN1(HNAME,SIZE(KFIELD),KFIELD,KRET)
 !
 IF (KRET /=0) THEN
   WRITE(ILUOUT,*) ' '
@@ -327,12 +312,9 @@ USE MODI_GET_LUOUT
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
+USE MODD_SURFEX_HOST
 !
 IMPLICIT NONE
-!
-#ifdef SFX_ARO
-#include "get_bufx0.h"
-#endif
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
@@ -353,9 +335,7 @@ REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('MODI_READ_BUFFER:READ_BUFX0',0,ZHOOK_HANDLE)
  CALL GET_LUOUT('AROME ',ILUOUT)
 !
-#ifdef SFX_ARO
- CALL GET_BUFX0(HNAME,PFIELD,KRET)
-#endif
+ CALL YRSURFEX_HOST%GET_BUFX0(HNAME,PFIELD,KRET)
 !
 IF (KRET /=0) THEN
   WRITE(ILUOUT,*) ' '
@@ -408,12 +388,9 @@ USE MODI_GET_LUOUT
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
+USE MODD_SURFEX_HOST
 !
 IMPLICIT NONE
-!
-#ifdef SFX_ARO
-#include "get_bufx1.h"
-#endif
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
@@ -434,9 +411,7 @@ REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('MODI_READ_BUFFER:READ_BUFX1',0,ZHOOK_HANDLE)
  CALL GET_LUOUT('AROME ',ILUOUT)
 !
-#ifdef SFX_ARO
- CALL GET_BUFX1(HNAME,SIZE(PFIELD),PFIELD,KRET)
-#endif
+ CALL YRSURFEX_HOST%GET_BUFX1(HNAME,SIZE(PFIELD),PFIELD,KRET)
 !
 IF (KRET /=0) THEN
   WRITE(ILUOUT,*) ' '
@@ -449,3 +424,4 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('MODI_READ_BUFFER:READ_BUFX1',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE READ_BUFX1
+

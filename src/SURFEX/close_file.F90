@@ -37,7 +37,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-#if defined(SFX_ASC) || defined(SFX_ARO) || defined(SFX_MNH) || defined(SFX_NC)
+#if defined(SFX_ASC) || defined(SFX_MNH) || defined(SFX_NC)
 USE MODI_CLOSE_FILE_ASC
 #endif
 #ifdef SFX_FA
@@ -88,7 +88,7 @@ ELSE IF (HPROGRAM=='LFI   ') THEN
   CALL CLOSE_FILE_LFI(HPROGRAM,KUNIT)
 #endif
 ELSE 
-#if defined(SFX_ASC) || defined(SFX_ARO) || defined(SFX_MNH) || defined(SFX_NC)
+#if defined(SFX_ASC) || defined(SFX_MNH) || defined(SFX_NC)
   CALL CLOSE_FILE_ASC(HPROGRAM,KUNIT)
 #endif
 END IF

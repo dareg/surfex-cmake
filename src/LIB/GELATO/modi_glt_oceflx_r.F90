@@ -108,7 +108,7 @@ SUBROUTINE glt_oceflx_r( tpdom,pustar,tpmxl,np )
   USE modd_glt_const_thm
   USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
   USE modd_glt_const_evp     ! omega
-  USE modd_types_glt
+  USE modd_types_glt, only: t_dom, t_mxl
   USE modi_glt_salflx_r
 !
   IMPLICIT NONE

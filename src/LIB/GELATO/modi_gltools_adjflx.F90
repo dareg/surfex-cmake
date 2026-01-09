@@ -82,9 +82,9 @@
 !
 FUNCTION gltools_adjflx(tpdom,ocrit,pfield,nx,ny,dtt)
 !
-  USE modd_glt_const_thm
+  USE MODD_TYPES_GLT, ONLY: T_DOM
   USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK,  JPHOOK
-  USE modd_types_glt
+  USE MODD_GLT_CONST_THM, ONLY : EPSIL1
 !
   IMPLICIT NONE
 !

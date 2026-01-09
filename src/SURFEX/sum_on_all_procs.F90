@@ -48,6 +48,7 @@ USE MODI_SUM_ON_ALL_PROCS_OL
 USE MODI_SUM_ON_ALL_PROCS_MNH
 USE MODI_SUM_ON_ALL_PROCS_MNH_HAL
 #endif
+USE MODD_SURFEX_HOST
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
@@ -57,10 +58,10 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
- CHARACTER(LEN=6),      INTENT(IN) :: HPROGRAM ! program calling SURFEX
- CHARACTER(LEN=10),     INTENT(IN) :: HGRID    ! grid type
+CHARACTER(LEN=6),      INTENT(IN) :: HPROGRAM ! program calling SURFEX
+CHARACTER(LEN=10),     INTENT(IN) :: HGRID    ! grid type
 LOGICAL, DIMENSION(:), INTENT(IN) :: OIN
- CHARACTER(LEN=3),      INTENT(IN), OPTIONAL :: HNAME ! pour la maquette offline
+CHARACTER(LEN=3),      INTENT(IN), OPTIONAL :: HNAME ! pour la maquette offline
 INTEGER                           :: KOUT
 !
 !*       0.2   Declarations of local variables
@@ -90,10 +91,10 @@ IF (HPROGRAM=='MESONH') THEN
     CALL SUM_ON_ALL_PROCS_MNH(ISIZE,IIN,KOUT)
   ENDIF
 #endif
-ELSE IF (HPROGRAM=='AROME ' .OR. (HPROGRAM=='XIOS  '.AND.TRIM(CSOFTWARE)/="OFFLINE")) THEN
-#ifdef SFX_ARO
-  KOUT = MAX(COUNT(OIN),1)   ! to be coded properly in AROME
-#endif
+ELSE IF (HPROGRAM=='AROME ') THEN
+  KOUT = YRSURFEX_HOST%SUM_ON_ALL_PROCS (HGRID,OIN,YNAME)
+ELSE IF (HPROGRAM=='XIOS  '.AND.TRIM(CSOFTWARE)/="OFFLINE") THEN
+  KOUT = MAX(COUNT(OIN),1)   
 ELSE
 #ifdef SFX_OL
   ! to be coded properly once Offline version is parallelized
@@ -108,3 +109,4 @@ IF (LHOOK) CALL DR_HOOK('SUM_ON_ALL_PROCS',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 END FUNCTION SUM_ON_ALL_PROCS
+
