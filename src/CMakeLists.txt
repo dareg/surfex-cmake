@@ -24,6 +24,9 @@ ecbuild_add_option( FEATURE DOUBLE_PRECISION
 ecbuild_add_option( FEATURE SINGLE_PRECISION
   DEFAULT OFF
   DESCRIPTION "Support for single precision" )
+ecbuild_add_option( FEATURE SFX_MPI
+  DEFAULT OFF
+  DESCRIPTION "Activate the SFX_MPI preprocessor macro" )
 
 if(${HAVE_DOUBLE_PRECISION})
   list(APPEND PRECISIONS "dp")
@@ -85,7 +88,10 @@ foreach(PRECISION ${PRECISIONS})
   target_compile_definitions(${LIBNAME} PRIVATE ASC)
   target_compile_definitions(${LIBNAME} PRIVATE TXT)
   target_compile_definitions(${LIBNAME} PRIVATE FA)
-  #target_compile_definitions(${LIBNAME} PUBLIC LFI)
+  target_compile_definitions(${LIBNAME} PRIVATE LFI)
+  if(${HAVE_SFX_MPI})
+    target_compile_definitions(${LIBNAME} PRIVATE SFX_MPI)
+  endif()
 endforeach()
 
 if(${HAVE_DOUBLE_PRECISION})
@@ -124,6 +130,12 @@ foreach(FILEPATH ${SRC_PROGRAMS})
       target_compile_options(${EXENAME} PUBLIC $<$<COMPILE_LANGUAGE:Fortran>:${ECBUILD_Fortran_COMPILE_OPTIONS_REAL4}>)
       target_compile_definitions(${EXENAME} PUBLIC PARKIND1_SINGLE)
     endif()
+
+  target_compile_definitions(${EXENAME} PRIVATE SFX_FA)
+  if(${HAVE_SFX_MPI})
+    target_compile_definitions(${EXENAME} PRIVATE SFX_MPI)
+  endif()
+
   endforeach()
 endforeach()
 

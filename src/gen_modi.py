@@ -10,6 +10,9 @@ reg_func_result = re.compile(r"RESULT\s*\(([\w\s]+)\)", re.IGNORECASE)
 reg_use_module_only = re.compile(r"(?:^\s*use\s+\w+\s*,\s*only\s*:)(.*)", re.IGNORECASE)
 reg_variable_name_simple = re.compile(r"::\s*(\w+)", re.IGNORECASE)
 
+# Macro directives and Fortran include statements are case-sensitive so they must never be uppercased
+reg_case_is_important = re.compile(r"\s*#|\s*INCLUDE", re.IGNORECASE)
+
 reg_all_decl_variable = [
     r"^\s*INTEGER\s*[\(*,:\s]",
     r"^\s*REAL\s*[\(*,:\s]",
@@ -56,7 +59,7 @@ def simplify_code(src):
             continue
         while "  " in line:
             line = line.replace("  ", " ")
-        if not line.startswith("#") and not line.startswith("INCLUDE "):
+        if not reg_case_is_important.match(line):
             line = line.upper()
         if "!" in line and not line.startswith("#"):
             # When '!' is in the middle of a line, most of the time what follow it is comment.
