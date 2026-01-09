@@ -39,6 +39,8 @@ SUBROUTINE WRITE_HEADER_FA (GCP, HGRID, PGRID_PAR, CFILETYPE, HWRITE)
 !!         A. Mary      06/2019 : absolute value of RPK
 !!         S. Riette    01/2021 : add cartesian support
 !!         O. Vignes    12/2022 : spectral truncation factor
+!!         A.NApoly     08/2024 : impose ITRONC to 0 as it is meaningless for Surfex grid point files 
+!!                                 and it causes issues for cubic grids                            
 !!
 !----------------------------------------------------------------------------
 !
@@ -193,7 +195,8 @@ IF (HGRID=="CONF PROJ ") THEN
 !
   INLATI = ILAT+ILATE
   INXLON = ILON+ILONE
-  ITRONC = INT(REAL(INLATI-2)/ZTRUNC)
+  !ITRONC = INT(REAL(INLATI-2)/ZTRUNC)
+  ITRONC=0 !ANTMPTEST : impose ITRONC to 0 as it is meaningless for Surfex grid point files
   ITYPTR = -INT(REAL(INXLON-2)/ZTRUNC)
 
   IF (ILONE == 0 .AND. ILATE == 0) THEN
@@ -250,7 +253,8 @@ ELSEIF (HGRID=="CARTESIAN ") THEN
   INLOPA  (8)  = 0
 !
   ITYPTR = -INT(REAL(ILON-1)/2.)
-  ITRONC = INT(REAL(ILAT-1)/2.)
+  !ITRONC = INT(REAL(ILAT-1)/2.)
+  ITRONC=0 !ANTMPTEST : impose ITRONC to 0 as it is meaningless for Surfex grid point files
 !
   INLATI = ILAT
   INXLON = ILON
@@ -279,7 +283,8 @@ ELSEIF (HGRID=="LONLAT REG") THEN
   ALLOCATE(INLOPA(8))
   ALLOCATE(INOZPA((1+ILAT)/2))
 !
-  ITRONC= MIN(INT((REAL(ILAT-2)/2.0)),21)
+  !ITRONC= MIN(INT((REAL(ILAT-2)/2.0)),21)
+  ITRONC=0 !ANTMPTEST : impose ITRONC to 0 as it is meaningless for Surfex grid point files
   ITYPTR=-MIN(INT((REAL(ILON-2)/2.0)),21)
   INLATI=ILAT
   INXLON=ILON
@@ -337,12 +342,13 @@ ELSEIF (HGRID=="GAUSS     ") THEN
   IWORK = INT(REAL(INLATI)/2.0)
   INXLON=INLOPA(IWORK)
 !
-  IF (ITYPTR==1) THEN
-    ITRONC=INT(REAL(INXLON-1)/2.)
-  ELSE
-    ITRONC=INT(REAL(INXLON-3)/2.)
-  ENDIF
+  !IF (ITYPTR==1) THEN
+  !  ITRONC=INT(REAL(INXLON-1)/2.)
+  !ELSE
+  !  ITRONC=INT(REAL(INXLON-3)/2.)
+  !ENDIF
 !
+  ITRONC=0 !ANTMPTEST : impose ITRONC to 0 as it is meaningless for Surfex grid point files
   INOZPA(:)=0
   DO JLAT = 1,INLATI
     INOZPA(JLAT) = INT(FLOOR(REAL(INLOPA(JLAT) - 1) / 2.)) ! 2:linear truncation

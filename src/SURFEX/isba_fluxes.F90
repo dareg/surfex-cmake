@@ -94,6 +94,8 @@ USE MODE_THERMOS
 !
 USE MODE_SURF_SNOW_FRAC
 !
+USE MODD_SNOW_PAR,ONLY : LMODSNOWMELT
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
@@ -363,8 +365,7 @@ IF( (PEK%TSNOW%SCHEME == 'D95' .OR. PEK%TSNOW%SCHEME == 'EBA') .AND. IO%CISBA /=
 !                                            there is melting only if T > T0 and
 !                                            of course when SNOWSWE > 0.
 !
-      GMODSNOWMELT=.TRUE.
-      IF(GMODSNOWMELT)THEN
+      IF(LMODSNOWMELT)THEN
         WHERE ( ZTN(:) > XTT .AND. PEK%TSNOW%WSNOW(:,1) > 0.0 )
 !         In the original formulation of PMELT below the last few centimeters of snow
 !         tend to stay too long before they melt away. The modification here helps with

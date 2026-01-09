@@ -222,6 +222,8 @@ YSC%U%NSIZE_FULL = ISIZE_FULL
 !* building of the header for the opening of the file in case of Arpege file
 IF (NRANK==NPIO) THEN
   IF (CSURF_FILETYPE=='FA    ') THEN
+    CALL FAREGI ('SURF', +1, 1)
+    CALL FAREGI ('ZEPS', -9, 1)
     LFANOCOMPACT = .TRUE.
     CALL WRITE_HEADER_FA(YSC%GCP, YSC%UG%G%CGRID, YSC%UG%XGRID_FULL_PAR, CSURF_FILETYPE,'PGD') 
   END IF

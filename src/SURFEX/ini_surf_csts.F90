@@ -65,7 +65,7 @@ USE MODD_SNOW_PAR,  ONLY : XEMISSN, XANSMIN, XANSMAX,          &
                            XPSR_SNOWMAK, XRHO_SNOWMAK,         &
                            XPTA_SEUIL, XTIMESNOWMAK,           &
                            XPROD_SCHEME, XSM_END, XFREQ_GRO,   & !Grooming and Snowmaking option by P.Spandre 20160211
-                           LESSOILSNOWFLUX
+                           LESSOILSNOWFLUX,LMODSNOWMELT 
 USE MODD_SNOW_METAMO, ONLY : XVVISC3
 !
 USE MODI_GET_LUOUT
@@ -106,7 +106,7 @@ NAMELIST/NAM_SURF_SNOW_CSTS/ XZ0ICEZ0SNOW, XRHOTHRESHOLD_ICE,          &
                              XIMPUR_INIT, XIMPUR_COEFF, XPSR_SNOWMAK,  &
                              XRHO_SNOWMAK, XPTA_SEUIL, XTIMESNOWMAK,   &
                              XPROD_SCHEME, XSM_END, XFREQ_GRO,         &
-                             LESSOILSNOWFLUX
+                             LESSOILSNOWFLUX,LMODSNOWMELT
 !
 NAMELIST/NAM_REPROD_OPER/ LREPROD_OPER, XEVERG_RSMIN, XEVERG_VEG, &
                           CDGAVG, CDGDIF, CIMPLICIT_WIND, CQSAT,  &
@@ -220,6 +220,10 @@ XZ0ICEZ0SNOW = 10.
 ! ISBA-ES logical switch to activate reduced soil-snow heat flux
 ! 
 LESSOILSNOWFLUX = .FALSE.
+!
+! D95 logical switch to increase snow melt for low snow fraction
+!
+LMODSNOWMELT    = .TRUE.
 !
 ! 3 bands spectral albedo for glacier ice (CROCUS)
 ! Default values from Lejeune et al 2009 (Zongo, Bolivia)

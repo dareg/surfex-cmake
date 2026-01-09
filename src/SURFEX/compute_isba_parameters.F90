@@ -878,8 +878,8 @@ K%XHCAPSOIL => NULL()
 K%XCONDDRY  => NULL()
 K%XCONDSLD  => NULL()
 !
-K%XWDRAIN  => NULL()
-K%XRUNOFFB => NULL()
+!K%XWDRAIN  => NULL()
+!K%XRUNOFFB => NULL()
 !
 !-------------------------------------------------------------------------------
 !

@@ -34,7 +34,7 @@ ZTEMP(:)=MAX(ZTEMP(:),0.)
 PTCLOUD55(:)=ZTEMP(:)
 
 IF (LHOOK) CALL DR_HOOK('TAU_CLOUD',1,ZHOOK_HANDLE)
-END SUBROUTINE 
+END SUBROUTINE TAU_CLOUD
 !**************************************************************************************************************
 ! compute direct and diffuse irradiance for a given atmospheric profile
 !**************************************************************************************************************
@@ -170,7 +170,7 @@ do JI=1,JPNBANDS_ATM
 END DO 
 
 IF (LHOOK) CALL DR_HOOK('IRRADIANCE',1,ZHOOK_HANDLE)
-END SUBROUTINE 
+END SUBROUTINE IRRADIANCE
 
 
 
@@ -237,7 +237,7 @@ END IF
 
 
 IF (LHOOK) CALL DR_HOOK('CLOUD_PROP',1,ZHOOK_HANDLE)
-END SUBROUTINE 
+END SUBROUTINE CLOUD_PROP
 !**************************************************************************************************************
 ! split optical depth in N layers at pressure ZP_CUT 
 !**************************************************************************************************************
@@ -301,7 +301,7 @@ DO JICOUNT=1, JPNLYR_CLEAR
 ENDDO 
 IF (LHOOK) CALL DR_HOOK('SPLIT_NLAYER',1,ZHOOK_HANDLE)
 
-END SUBROUTINE
+END SUBROUTINE SPLIT_NLAYER
 !**************************************************************************************************************
 ! calculate optical depth weigth of each layer 
 !**************************************************************************************************************
@@ -362,7 +362,7 @@ END DO
 PPOIDS(:,JPNLYR_CLEAR)=1.-SUM(PPOIDS(:,:),2)
 !WRITE(*,*) "res", PPOIDS
 IF (LHOOK) CALL DR_HOOK('WEIGHT',1,ZHOOK_HANDLE)
-END SUBROUTINE
+END SUBROUTINE WEIGHT
 
 !**************************************************************************************************************
 ! calculate integral of an array using trapezoidal rule  
@@ -392,7 +392,7 @@ END DO
 PRES=ABS(PRES)
 
 IF (LHOOK) CALL DR_HOOK('TRAPZ',1,ZHOOK_HANDLE)
-END SUBROUTINE
+END SUBROUTINE TRAPZ
 !*************************************************************************************************************
 
 
@@ -535,7 +535,7 @@ PTAUAER(:)=PAE*ZEXT_AER(:)/ZEXT_AER_55(:)
 ! no stratospheric aerosols
 IF (LHOOK) CALL DR_HOOK('OPTICS_CLEAR',1,ZHOOK_HANDLE)
 
-END SUBROUTINE
+END SUBROUTINE OPTICS_CLEAR
 
 
 !**************************************************************************************************************
@@ -617,7 +617,7 @@ PGAER(JP)=ZG1*(ZG2/ZG1)**ZWT(JP)
 
 END DO
 IF (LHOOK) CALL DR_HOOK('AER_HUMID',1,ZHOOK_HANDLE)
-END SUBROUTINE
+END SUBROUTINE AER_HUMID
 
 !**************************************************************************************************************
 ! computation of saturation vapor pressure 
@@ -651,7 +651,7 @@ ELSE
 END IF
 END DO
 IF (LHOOK) CALL DR_HOOK('VAPSAT',1,ZHOOK_HANDLE)
-END SUBROUTINE
+END SUBROUTINE VAPSAT
 
 !**************************************************************************************************************
 ! computation of pressure as a function of elevation  
@@ -676,7 +676,7 @@ IF (LHOOK) CALL DR_HOOK('PRESSURE',0,ZHOOK_HANDLE)
   ZHB(:)=0.00
   PZP(:) = PPPZERO*( PPATMOS_T0/(PPATMOS_T0+PPSTLAPSE*(ZH1(:)-ZHB(:))) )**( (PPEARTH_G*PPMD)/(PPATMOS_R*PPSTLAPSE*PPCONV) )
 IF (LHOOK) CALL DR_HOOK('PRESSURE',1,ZHOOK_HANDLE)
-END SUBROUTINE
+END SUBROUTINE PRESSURE
 
 
 !**************************************************************************************************************
@@ -726,7 +726,7 @@ END IF
 
 !
 IF (LHOOK) CALL DR_HOOK('LOCATE',1,ZHOOK_HANDLE)
-END SUBROUTINE 
+END SUBROUTINE LOCATE
 
 !**************************************************************************************************************
 ! Perform delta-eddington approximation
@@ -762,7 +762,7 @@ DO JLAYER=1,KJNLYR
 END DO
 
 IF (LHOOK) CALL DR_HOOK('DELTA',1,ZHOOK_HANDLE)
-END SUBROUTINE
+END SUBROUTINE DELTA
 
 !**************************************************************************************************************
 ! Solves the two-stream equation 
@@ -937,7 +937,7 @@ END DO
 
 IF (LHOOK) CALL DR_HOOK('TWO_STR',0,ZHOOK_HANDLE)
 
-END SUBROUTINE
+END SUBROUTINE TWO_STR
 
 
 

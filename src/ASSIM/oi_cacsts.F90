@@ -517,7 +517,7 @@ ELSE
   PWD = MAX(ZWD1,MIN(ZWD2,PWD))
 ENDIF
 
-END SUBROUTINE
+END SUBROUTINE GET_ZW
 !
 !**---------------------------------------------------------------------
 END SUBROUTINE OI_CACSTS

@@ -285,6 +285,10 @@ REAL, PARAMETER :: XSNOWTHRMCOND_C11_3 = 0.024    ! (W m-1 K-1)
 ! 
 LOGICAL,SAVE     :: LESSOILSNOWFLUX
 !
+! D95 logical switch to increase snow melt for low snow fraction
+!
+LOGICAL,SAVE     :: LMODSNOWMELT
+!
 !--------------------------------------------------------------------------------
 ! ISBA-ES CROCUS (Pahaut 1976): snowfall density coefficients:
 !

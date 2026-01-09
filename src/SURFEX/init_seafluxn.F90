@@ -46,6 +46,7 @@
 !!      S. Belamari 03/2014 : add NZ0 (to choose PZ0SEA formulation)
 !!      R. Séférian 01/2015 : introduce interactive ocean surface albedo
 !!      R. Brozkova 08/2023 : added missing allocations (crashing fullpos-prep)
+!!      A. Napoly & R. El Khatib 05/2024 move up the flag to use or not the SeaIce model 
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -156,6 +157,7 @@ CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 
 INTEGER           :: ILU    ! sizes of SEAFLUX arrays
 INTEGER           :: ILUOUT ! unit of output listing file
 INTEGER           :: IRESP  ! return code
+INTEGER           :: IVERSION  ! surface version
 REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -282,17 +284,21 @@ END SELECT
 !
 !         Initialisation for IO
 !
- CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
+CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
 !
 CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'SEA   ','SEAFLX','READ ')
 !
 !         Reading of the fields
 !
- CALL READ_PGD_SEAFLUX_n(DTCO, SM%DTS, SM%G, SM%S, U, UG, GCP, HPROGRAM)
+CALL READ_PGD_SEAFLUX_n(DTCO, SM%DTS, SM%G, SM%S, U, UG, GCP, HPROGRAM)
+CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
 !
- CALL END_IO_SURF_n(HPROGRAM)
+CALL END_IO_SURF_n(HPROGRAM)
 !
- CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
+CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
+
+!* flag to use or not the SeaIce model 
+!
 
 SELECT CASE (HINIT)
   CASE ('PGD')
@@ -303,7 +309,16 @@ SELECT CASE (HINIT)
   CASE DEFAULT
     CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP')
     CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'SEA   ','SEAFLX','READ ')
-    CALL READ_SURF(HPROGRAM,'SEAICE_SCHEM',SM%S%CSEAICE_SCHEME,IRESP)
+    IF (IVERSION <8) THEN
+      SM%S%LHANDLE_SIC=.FALSE.
+    ELSE
+      CALL READ_SURF(HPROGRAM,'HANDLE_SIC',SM%S%LHANDLE_SIC,IRESP)
+    ENDIF
+    IF (SM%S%LHANDLE_SIC) THEN
+      CALL READ_SURF(HPROGRAM,'SEAICE_SCHEM',SM%S%CSEAICE_SCHEME,IRESP)
+    ELSE
+      SM%S%CSEAICE_SCHEME='NONE '
+    ENDIF
     CALL END_IO_SURF_n(HPROGRAM)
 END SELECT
 
@@ -367,7 +382,7 @@ IF(SM%S%LINTERPOL_SST.OR.SM%S%LINTERPOL_SSS.OR.SM%S%LINTERPOL_SIC.OR.SM%S%LINTER
    SM%S%TZTIME%TIME        = SM%S%TTIME%TIME        
 ENDIF
 !
- CALL READ_SEAFLUX_n(DTCO, SM%G, SM%S, U, HPROGRAM,ILUOUT)
+ CALL READ_SEAFLUX_n(DTCO, SM%G, SM%S, U, HPROGRAM,ILUOUT,IVERSION)
 !
 IF (HINIT/='ALL') THEN
   CALL END_IO_SURF_n(HPROGRAM)

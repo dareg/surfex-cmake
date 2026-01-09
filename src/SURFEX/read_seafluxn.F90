@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE READ_SEAFLUX_n (DTCO, G, S, U, HPROGRAM,KLUOUT)
+      SUBROUTINE READ_SEAFLUX_n (DTCO, G, S, U, HPROGRAM,KLUOUT,KVERSION)
 !     #########################################
 !
 !!****  *READ_SEAFLUX_n* - read SEAFLUX varaibles
@@ -36,6 +36,7 @@
 !!      Modified    02/2008 Add oceanic variables initialisation
 !!      S. Belamari 04/2014 Suppress LMERCATOR
 !!      R. Séférian 01/2015 introduce new ocean surface albedo 
+!!      A. Napoly & R. El Khatib 05/2024 move up the flag to use or not the SeaIce model
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -72,6 +73,7 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 INTEGER,           INTENT(IN)  :: KLUOUT
+INTEGER,           INTENT(IN)  :: KVERSION ! surface version
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -85,7 +87,6 @@ INTEGER           :: IRESP          ! Error code after redding
 !
 CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 !
-INTEGER           :: IVERSION       ! surface version
 !
 REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
@@ -149,15 +150,6 @@ YRECFM='Z0SEA'
 S%XZ0(:) = 0.001
 CALL READ_SURF(HPROGRAM,YRECFM,S%XZ0(:),IRESP)
 !
-!* flag to use or not the SeaIce model 
-!
-CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
-IF (IVERSION <8) THEN
-   S%LHANDLE_SIC=.FALSE.
-ELSE
-   CALL READ_SURF(HPROGRAM,'HANDLE_SIC',S%LHANDLE_SIC,IRESP)
-ENDIF
-!
 !
 ! * sea surface salinity
 !
@@ -181,7 +173,7 @@ IF(S%LINTERPOL_SSS)THEN
    !
    CALL INTERPOL_SST_MTH(S,'S')
    !
-ELSEIF (IVERSION>=8) THEN
+ELSEIF (KVERSION>=8) THEN
    ! 
    ALLOCATE(S%XSSS_MTH(0,0))
    !
