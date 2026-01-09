@@ -37,8 +37,7 @@ USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 USE MODI_VEGTYPE_TO_PATCH
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -63,7 +62,7 @@ REAL, DIMENSION(SIZE(PW,1)) :: ZSUM
 INTEGER                       :: JP    ! loop on patches
 INTEGER                       :: JVEG  ! loop on vegtypes
 INTEGER                       :: JL, JI, IMASK    ! loop on layers
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !---------------------------------------------------------------------------
 !

@@ -51,8 +51,7 @@ USE MODI_TEMPORAL_DISTS
 USE MODI_TEMPORAL_LTS
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -75,7 +74,7 @@ INTEGER                                  :: JXP
 REAL, DIMENSION(SIZE(PSST))              :: ZSST
 REAL, SAVE                               :: ZSDTJX
 REAL                                     :: ZDT, ZALPHA
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-----------------------------------------------------------------
 !
 !

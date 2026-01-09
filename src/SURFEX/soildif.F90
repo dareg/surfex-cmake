@@ -72,8 +72,7 @@ USE MODD_ISBA_PAR,   ONLY : XCONDWTR, XWGMIN, XWTD_MAXDEPTH, &
                             XOMCONDSLD
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -123,7 +122,7 @@ REAL, DIMENSION(SIZE(PVEG)) :: ZWTD ! Water table depth if no coupling (m)
 !
 INTEGER :: INI, INL, JJ, JL, IDEPTH
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

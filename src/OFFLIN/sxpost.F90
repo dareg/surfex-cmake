@@ -21,8 +21,7 @@ USE MODD_OFF_SURFEX_n
         USE MODD_IO_SURF_OL, ONLY : XSTART,XCOUNT,XSTRIDE,LPARTR
         
 !
-        USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-        USE PARKIND1  ,ONLY : JPRB
+        USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
         USE MODI_ABOR1_SFX
 !
@@ -61,7 +60,7 @@ USE MODD_OFF_SURFEX_n
         INTEGER    ::   IFIELD, IWFIELD
         INTEGER    ::   IPATCH, JPATCH
         INTEGER    ::   IBEG, IEND
-        REAL(KIND=JPRB) :: ZHOOK_HANDLE
+        REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
         
         !=====================================================================
@@ -301,7 +300,7 @@ USE MODD_OFF_SURFEX_n
        CHARACTER(LEN=12)   ::   HREC
        CHARACTER(LEN=*)    ::   CFILEIN
        INTEGER             ::   NLUOUT
-       REAL(KIND=JPRB) :: ZHOOK_HANDLE
+       REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
        IF (LHOOK) CALL DR_HOOK('ERR_STOP',0,ZHOOK_HANDLE)
        WRITE(NLUOUT,*) ' '
        WRITE(NLUOUT,*) ' ARTICLE ',TRIM(HREC),' NOT FOUND IN FILE ', CFILEIN

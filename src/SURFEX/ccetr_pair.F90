@@ -44,8 +44,7 @@
 USE MODD_CSTS,       ONLY : XI0
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 !*       0.     DECLARATIONS
 !               ------------
@@ -85,7 +84,7 @@ REAL, DIMENSION(SIZE(PLAI)) :: ZSLAI_TRU, ZFD_VEG, ZTDF, ZIDR, &
 REAL    :: ZGT_SUP, ZGT_INF
 INTEGER :: I
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-----------------------------------------------------------------------
 !

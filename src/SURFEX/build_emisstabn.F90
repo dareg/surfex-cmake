@@ -45,8 +45,7 @@ USE MODD_CSTS,        ONLY : NDAYSEC, XMD, XAVOGADRO
 !*       0.   DECLARATIONS
 !        -----------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -81,7 +80,7 @@ INTEGER         :: JSPEC       ! loop index
 INTEGER         :: ITIME       ! loop index
 INTEGER         :: IWS_DEFAULT ! Default Memory window size for emission reading
  CHARACTER (LEN=16):: YRECFM    ! LFI article name
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !
 !------------------------------------------------------------------------------

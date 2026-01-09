@@ -41,8 +41,7 @@
 !
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_GRID_MODIF_CARTESIAN
 !
@@ -69,7 +68,7 @@ INTEGER,           INTENT(INOUT):: KL         ! number of points
 INTEGER                         :: IGRID_PAR ! modified grid vector size
 INTEGER                         :: IL        ! number of points in modified grid
 REAL, DIMENSION(:), ALLOCATABLE :: ZGRID_PAR ! modified grid vector
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GRID_MODIF',0,ZHOOK_HANDLE)
@@ -163,7 +162,7 @@ REAL, DIMENSION(:), OPTIONAL, INTENT(OUT)   :: PGRID_PAR2 ! parameters defining 
 !
 INTEGER                         :: IGRID_PAR2
 REAL, DIMENSION(:), ALLOCATABLE :: ZGRID_PAR2
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !

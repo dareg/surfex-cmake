@@ -53,8 +53,7 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_PACK_SAME_RANK
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_GET_SURF_MASK_n
 !
@@ -91,7 +90,7 @@ REAL,    DIMENSION(:),   INTENT(IN) :: PSSO_DIR
 INTEGER                        :: ILU    ! expected physical size of full surface array
 INTEGER                        :: ILUOUT ! output listing logical unit
 INTEGER, DIMENSION(:), POINTER :: IMASK  ! mask for packing from complete field to nature field
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

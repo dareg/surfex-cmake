@@ -39,8 +39,7 @@
 !            -----------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 #ifdef SFX_MNH
 USE MODI_DEFAULT_GRID_MNH
@@ -53,7 +52,7 @@ IMPLICIT NONE
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling READ_PGD
  CHARACTER(LEN=10), INTENT(OUT) :: HGRID    ! type of grid
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !*    0.2    Declaration of local variables

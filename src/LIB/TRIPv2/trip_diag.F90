@@ -39,8 +39,7 @@ USE MODN_TRIP,       ONLY : CGROUNDW, CVIT, LFLOOD
 USE MODD_TRIP_PAR,   ONLY : XRHOLW, XGWDZMAX
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -78,7 +77,7 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PDISCHARGE !Cumulated river discharges    [
 !
 REAL, DIMENSION(SIZE(PSOUT,1),SIZE(PSOUT,2)) :: ZGROUND_STO
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

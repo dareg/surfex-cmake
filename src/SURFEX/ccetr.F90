@@ -45,8 +45,7 @@ USE MODD_CO2V_PAR, ONLY : XDIFRACF, XXGT, XXBOMEGA
 !               ------------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -73,7 +72,7 @@ REAL, DIMENSION(SIZE(PIA,1)) :: ZXFD,ZXSLAI,ZXIDF,ZXIDR
 !                                ZXIDF  = interception of diffusion
 !                              ZXIDR  = direct interception
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------
 !

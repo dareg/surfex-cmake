@@ -46,8 +46,7 @@ USE MODD_CANOPY_TURB, ONLY : XCED, XTKEMIN
 USE MODD_CSTS,        ONLY : XG, XRD, XRV
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -89,7 +88,7 @@ REAL, DIMENSION(KI,SB%NLVL)   :: ZDEXTDV  ! derivative of external forcing as a
 !                                      ! function of vertical variable
 !                                      ! (at full levels)
 REAL, DIMENSION(KI,SB%NLVL)   :: ZTKE     ! TKE     at canopy levels (work var.)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

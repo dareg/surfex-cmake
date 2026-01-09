@@ -10,8 +10,7 @@
 !############################################################################
 !############################################################################
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 CONTAINS
 !############################################################################
@@ -52,7 +51,7 @@ REAL, DIMENSION(:), POINTER     :: PGRID_PAR! parameters defining this grid
 !              -------------------------------
 !
 INTEGER :: IL ! number of points
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_LONLATVAL:PUT_GRIDTYPE_LONLATVAL',0,ZHOOK_HANDLE)
 IL = SIZE(PX)
@@ -106,7 +105,7 @@ REAL, DIMENSION(:), INTENT(IN)            :: PGRID_PAR! parameters defining this
 !              -------------------------------
 !
 INTEGER :: IL
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_LONLATVAL:GET_GRIDTYPE_LONLATVAL',0,ZHOOK_HANDLE)
 IF (PRESENT(KL))        KL       = NINT(PGRID_PAR(1))
@@ -179,7 +178,7 @@ REAL, DIMENSION(:),   INTENT(IN) :: PX,PY
                                            ! given conformal coordinates of the 
                                            ! processed points (meters);
 REAL, DIMENSION(:),   INTENT(OUT):: PLAT,PLON    
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
                                            ! returned geographic latitudes and 
                                            ! longitudes of the processed points 
                                            ! (degrees).

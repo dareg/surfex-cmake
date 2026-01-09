@@ -73,8 +73,7 @@ USE modd_flake_parameters, ONLY : &
   H_Ice_max        ! Maximum ice tickness in  
 USE MODE_PREP_CTL, ONLY : PREP_CTL, PREP_CTL_CAN
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_CLEAN_PREP_OUTPUT_GRID
 !
@@ -124,7 +123,7 @@ LOGICAL :: GFILE      ! if file name exists in the namelist
 LOGICAL :: GUNIF_G    ! if in general we use unified fields
 LOGICAL :: GPROFILE   ! if there is possible to give a temperature profile for a stratified lake (.TRUE.) 
                       ! or just mixed lakes are possible 
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 !*      1.     Default of configuration

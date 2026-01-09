@@ -35,8 +35,7 @@ MODULE MODE_CONV_DOE
 !              ------------
 !
 !--------------------------------------------------------------------------------
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 CONTAINS
 !----------------------------
@@ -89,7 +88,7 @@ REAL, DIMENSION(:), INTENT(IN)                :: PTA     ! Air temperature (Kelv
 REAL, DIMENSION(SIZE(PTS))                    :: PCHTC   ! Convective heat transfer coefficient [W/(m2.K)]
 !
 INTEGER :: J
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_CONV_DOE:CHTC_VERT_DOE',0,ZHOOK_HANDLE)
 !
@@ -153,7 +152,7 @@ REAL, DIMENSION(:), INTENT(IN)                :: PTA     ! Air temperature (Kelv
 REAL, DIMENSION(SIZE(PTS))                    :: PCHTC   ! Convective heat transfer coefficient [W/(m2.K)]
 !
 INTEGER :: J
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_CONV_DOE:CHTC_UP_DOE',0,ZHOOK_HANDLE)
 !
@@ -218,7 +217,7 @@ REAL, DIMENSION(:), INTENT(IN)                :: PTA     ! Air temperature (Kelv
 REAL, DIMENSION(SIZE(PTS))                    :: PCHTC   ! Convective heat transfer coefficient [W/(m2.K)]
 !
 INTEGER :: J
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_CONV_DOE:CHTC_DOWN_DOE',0,ZHOOK_HANDLE)
 !
@@ -287,7 +286,7 @@ REAL, DIMENSION(SIZE(PCHTCN))                 :: PCHTC   ! Convective heat trans
 !*       0.2   Declarations of local variables
 !
 INTEGER :: J
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_CONV_DOE:CHTC_SMOOTH_LEE_DOE',0,ZHOOK_HANDLE)
 !
@@ -356,7 +355,7 @@ REAL, DIMENSION(SIZE(PCHTCN))                 :: PCHTC   ! Convective heat trans
 !*       0.2   Declarations of local variables
 !
 INTEGER :: J
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_CONV_DOE:CHTC_SMOOTH_WIND_DOE',0,ZHOOK_HANDLE)
 !
@@ -424,7 +423,7 @@ REAL, DIMENSION(SIZE(PCHTCN))                 :: PCHTC   ! Convective heat trans
 !*       0.2   Declarations of local variables
 !
 INTEGER :: J
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_CONV_DOE:CHTC_ROUGH_DOE',0,ZHOOK_HANDLE)
 !

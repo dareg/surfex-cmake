@@ -50,8 +50,7 @@ USE MODI_READ_PRE_SURFA_DAT_CONF
 USE MODI_READ_PREP_WATFLUX_CONF
 USE MODI_READ_PREP_FILE_DATE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -84,7 +83,7 @@ INTEGER,           INTENT(IN)  :: KLUOUT      ! logical unit of output listing
  CHARACTER(LEN=6)               :: YFILEPGDINTYPE   ! file type
 !
 LOGICAL                        :: GUNIF       ! flag for prescribed uniform field
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

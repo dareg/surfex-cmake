@@ -45,8 +45,7 @@ USE MODI_ABOR1_SFX
 !*       0.   DECLARATIONS
 !        -----------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 !
 IMPLICIT NONE
@@ -73,7 +72,7 @@ REAL,DIMENSION(SIZE(PSFSV,1),SIZE(PSFSV,2)) :: ZEMIS ! interpolated in time emis
 REAL,DIMENSION(SIZE(PSFSV,1)              ) :: ZFCO  ! CO emission flux
 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !

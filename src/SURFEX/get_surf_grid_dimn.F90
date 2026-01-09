@@ -38,8 +38,7 @@
 !
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_GET_GRID_DIM
 IMPLICIT NONE
@@ -61,7 +60,7 @@ REAL,    DIMENSION(:), OPTIONAL, INTENT(IN)  :: PGRID_PAR ! grid parameters
 !*    0.2    Declaration of other local variables
 !            ------------------------------------
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_SURF_GRID_DIM_N',0,ZHOOK_HANDLE)

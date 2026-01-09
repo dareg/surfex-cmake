@@ -48,8 +48,7 @@ USE MODI_WRITESURF_PGD_ISBA_n
 USE MODI_END_IO_SURF_n
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -66,7 +65,7 @@ TYPE(DATA_TSZ0_t), INTENT(INOUT) :: DTZ
 TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !                                             ! 'ALL' : all fields are written
 !
 !*       0.2   Declarations of local variables

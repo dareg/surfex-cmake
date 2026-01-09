@@ -41,8 +41,7 @@
 !
 USE MODD_SFX_GRID_n, ONLY : GRID_t
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -72,7 +71,7 @@ REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PDIR ! direction of main grid Y axi
 !              -------------------------------
 !
 REAL, DIMENSION(KL) :: ZDIR
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('LATLON_GRID',0,ZHOOK_HANDLE)

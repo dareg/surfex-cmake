@@ -66,8 +66,7 @@ USE MODI_TOWN_PRESENCE
 USE MODI_ALLOCATE_GR_SNOW
 USE MODI_READ_GR_SNOW
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_GET_TYPE_DIM_n
 !
@@ -100,7 +99,7 @@ REAL, DIMENSION(:),ALLOCATABLE  :: ZWORK      ! 2D array to write data in file
 INTEGER :: IWORK   ! Work integer
 !
 INTEGER :: JL, JNBIOMASS  ! loop counter on layers
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

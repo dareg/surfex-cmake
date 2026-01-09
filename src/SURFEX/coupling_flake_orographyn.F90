@@ -57,8 +57,7 @@ USE MODD_SURF_ATM, ONLY : LVERTSHIFT
 !
 USE MODI_FORCING_VERT_SHIFT
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_COUPLING_FLAKE_SBL_n
 !
@@ -154,7 +153,7 @@ REAL, DIMENSION(KI)  :: ZLW    ! LW rad      at forcing height above surface oro
 REAL, DIMENSION(KI)  :: ZRAIN  ! Rainfall    at forcing height above surface orography
 REAL, DIMENSION(KI)  :: ZSNOW  ! Snowfall    at forcing height above surface orography
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 ! Preliminaries:
 !-------------------------------------------------------------------------------------

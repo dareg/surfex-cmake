@@ -46,8 +46,7 @@ USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 !                              
 USE MODI_SPINUP_MAX
 !                              
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -56,7 +55,7 @@ TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 !
 !*      0.    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

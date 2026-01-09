@@ -53,8 +53,7 @@ USE MODN_EXTFORC
 !
 USE MODD_WRITE_SURF_ATM, ONLY : LNAM_ISBA_WRITTEN
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -75,7 +74,7 @@ TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 !              -------------------------------
 !
 INTEGER :: ILUDES
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

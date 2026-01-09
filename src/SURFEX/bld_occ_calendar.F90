@@ -29,8 +29,7 @@ USE MODD_CSTS,         ONLY : XTT
 !
 USE MODI_DAY_OF_WEEK
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -58,7 +57,7 @@ REAL, DIMENSION(SIZE(PQIN))       :: ZTOD_BEG      ! first Time Of Day that buil
 REAL, DIMENSION(SIZE(PQIN))       :: ZTOD_END      ! last Time Of Day that building unoccupied (UTC, s)
 REAL, DIMENSION(SIZE(PQIN))       :: ZDT           ! Target temperature change when unoccupied (K)
 
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('BLD_OCC_CALENDAR',0,ZHOOK_HANDLE)
 !

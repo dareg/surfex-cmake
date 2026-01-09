@@ -78,8 +78,7 @@ USE MODI_COTWO
 !               ------------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -120,7 +119,7 @@ REAL, DIMENSION(SIZE(PK%XDMAX))      :: ZDMAX
 REAL, DIMENSION(SIZE(PK%XDMAX))      :: ZWORK
 !                                    Local variable in order to initialise DMAX
 !                                    following Calvet, 2000 (AST or LST cases)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

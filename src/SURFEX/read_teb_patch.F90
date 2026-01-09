@@ -14,8 +14,7 @@ USE MODI_READ_SURF
 USE MODI_OPEN_AUX_IO_SURF
 USE MODI_CLOSE_AUX_IO_SURF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -37,7 +36,7 @@ INTEGER,            INTENT(OUT) :: KTEB_PATCH! number of TEB patches
  CHARACTER(LEN=12) :: YRECFM     ! Name of the article to be read
 INTEGER           :: IRESP      ! reading return code
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !------------------------------------------------------------------------------

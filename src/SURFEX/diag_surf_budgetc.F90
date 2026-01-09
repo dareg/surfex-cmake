@@ -29,8 +29,7 @@
 ! 
 USE MODD_DIAG_n, ONLY : DIAG_t
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -46,7 +45,7 @@ LOGICAL, INTENT(IN) :: ONOTICE
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

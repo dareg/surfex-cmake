@@ -45,8 +45,7 @@
 USE MODD_DEEPSOIL, ONLY : XTDEEP_CLI, XGAMMAT_CLI
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -61,7 +60,7 @@ INTEGER,              INTENT(IN)    :: KMONTH   ! current month
 !*      0.2    declarations of local variables
 !
 INTEGER                             :: IP
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-----------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DEEPSOIL_UPDATE',0,ZHOOK_HANDLE)

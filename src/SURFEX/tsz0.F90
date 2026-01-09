@@ -56,8 +56,7 @@ USE MODD_DATA_TSZ0_n, ONLY : DATA_TSZ0_t
 USE MODD_CSTS,       ONLY : XPI
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -94,7 +93,7 @@ INTEGER :: JPATCH       ! loop counter on patches
 REAL :: ZDTS_HOUR 
 ! prescribed values of the soil humidity increment at every hour (fraction)
 REAL :: ZDHUGRD_HOUR              
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*       1.     TEMPORAL INTERPOLATION OF THE SURFACE TEMPERATURES AT T+DT

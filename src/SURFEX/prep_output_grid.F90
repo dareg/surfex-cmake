@@ -45,8 +45,7 @@ USE MODI_GET_GRID_COORD
 USE MODD_PREP, ONLY : XLAT_OUT, XLON_OUT, XX_OUT, XY_OUT, LINTERP
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -63,7 +62,7 @@ INTEGER,           INTENT(IN)  :: KLUOUT     ! output listing logical unit
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PREP_OUTPUT_GRID',0,ZHOOK_HANDLE)

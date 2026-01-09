@@ -49,8 +49,7 @@ USE MODI_DETECT_FIELD_ARO
 #endif
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -62,7 +61,7 @@ IMPLICIT NONE
 REAL, DIMENSION(:,:), INTENT(IN)::PFIELD ! array containing the data field
 !
 LOGICAL    , INTENT(OUT)         :: OITSHERE  ! T --> PFIELD is non zero somewhere
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !*       0.2   declarations of local variables

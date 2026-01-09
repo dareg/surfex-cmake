@@ -76,8 +76,7 @@ USE MODI_FAPAIR
 !               ------------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -129,7 +128,7 @@ REAL                           :: ZTAU, ZRATIO
 !                               ZRATIO = clearness index K_t eq.1 from Carrer et al
 INTEGER                        :: JJ, I ! index for loops
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('RADIATIVE_TRANSFERT',0,ZHOOK_HANDLE)

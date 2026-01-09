@@ -20,8 +20,7 @@ MODULE MODE_SLTMBL
   !Alf Grini <alf.grini@cnrm.meteo.fr>
 
 !
-  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-  USE PARKIND1  ,ONLY : JPRB
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
   implicit none
   public
@@ -90,7 +89,7 @@ contains
     real, allocatable   :: ZCLAY(:)                       ![frc] dummy for fraction of clay
 
     integer             :: i                   !Counter for number of points (used in loops)
-    REAL(KIND=JPRB) :: ZHOOK_HANDLE
+    REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
     
     !Allocate the local variables
     IF (LHOOK) CALL DR_HOOK('MODE_SLTMBL:SALTFLUX_GET',0,ZHOOK_HANDLE)

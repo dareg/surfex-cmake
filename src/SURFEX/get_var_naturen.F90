@@ -52,8 +52,7 @@ USE MODD_SURF_PAR,    ONLY   : XUNDEF
 USE MODD_DATA_COVER_PAR,   ONLY   : NVT_NO
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -83,7 +82,7 @@ REAL, DIMENSION(KI),  INTENT(OUT)    :: PBARE   ! Bare soil fraction
 !              -------------------------------
 !
 INTEGER :: ILUOUT
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('GET_VAR_NATURE_N',0,ZHOOK_HANDLE)

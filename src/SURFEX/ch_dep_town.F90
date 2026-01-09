@@ -34,8 +34,7 @@
   USE MODD_CSTS
   !
 !
-  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-  USE PARKIND1  ,ONLY : JPRB
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
   IMPLICIT NONE
   !
@@ -76,7 +75,7 @@
   REAL, DIMENSION(SIZE(PTRAD,1))      :: ZTCOR
   REAL,DIMENSION(SIZE(PUSTAR_TOWN,1))      ::ZUSTAR_TOWN
   INTEGER :: JSV
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
   !
   !============================================================================
   !            Primilary

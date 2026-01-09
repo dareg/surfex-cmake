@@ -53,8 +53,7 @@ USE MODI_UNPACK_SAME_RANK
 USE MODI_ABOR1_SFX
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -84,7 +83,7 @@ REAL,ALLOCATABLE,DIMENSION(:)    :: ZLSM_NATURE
 REAL,ALLOCATABLE,DIMENSION(:)    :: ZALT_NATURE
 LOGICAL,ALLOCATABLE,DIMENSION(:) :: OINTERP
 INTEGER                          :: ILAYER,II
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !
@@ -326,7 +325,7 @@ SUBROUTINE SOIL_PROFILE_BUFFER
 !-------------------------------------------------------------------------------------
 !
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZOUT   ! work array
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

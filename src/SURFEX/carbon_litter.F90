@@ -51,8 +51,7 @@ SUBROUTINE CARBON_LITTER (PTSTEP, PTURNOVER, PLITTER, PLIGNIN_STRUC,          &
 USE MODD_CO2V_PAR,       ONLY : XLC, XTAU_LITTER, XFRAC_LITTER, XFRAC_SOILCARB
 USE MODD_CSTS,           ONLY : XDAY, XTT
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -102,7 +101,7 @@ INTEGER                                                          :: INLITTER,INL
 ! indices
 INTEGER                                                          :: INI,JI,JL
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 ! correspondence between array indices and biomass compartments
 ! LEAF = 1

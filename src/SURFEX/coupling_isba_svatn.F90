@@ -55,8 +55,7 @@ USE MODD_SLT_n, ONLY : SLT_t
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_SURF_ATM,   ONLY : XZ0_OFFSET
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_COUPLING_ISBA_OROGRAPHY_n
 !
@@ -167,7 +166,7 @@ INTEGER :: IT      ! total number of surface timesteps in one atmospheric timest
 REAL    :: ZT      ! total number of surface timesteps in one atmospheric timestep
 REAL    :: ZTSTEP  ! surface time step
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

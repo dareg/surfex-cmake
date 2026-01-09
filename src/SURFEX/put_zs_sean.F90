@@ -46,8 +46,7 @@ USE MODI_GET_LUOUT
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -66,7 +65,7 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PZS     ! orography
 !              -------------------------------
 !
 INTEGER :: ILUOUT
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 
 !-------------------------------------------------------------------------------

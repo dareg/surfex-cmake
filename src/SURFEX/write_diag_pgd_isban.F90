@@ -65,8 +65,7 @@ USE MODI_WRITE_FIELD_1D_PATCH
 USE MODI_WRITE_TFIELD_1D_PATCH
 USE MODI_UNPACK_SAME_RANK
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -113,7 +112,7 @@ CHARACTER(LEN=4)  :: YLVL
 !
 INTEGER         :: JI, JL, JP, ILAYER, ILU, IMASK
 INTEGER           :: ISIZE_LMEB_PATCH   ! Number of patches where multi-energy balance should be applied
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !         Initialisation for IO

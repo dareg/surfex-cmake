@@ -53,8 +53,7 @@ USE MODI_WRITESURF_TEB_n
 USE MODI_WRITESURF_TEB_CONF_n
 USE MODI_WRITESURF_SBL_n
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -77,7 +76,7 @@ TYPE(TEB_GREENROOF_MODEL_t), INTENT(INOUT) :: GRM
 !              -------------------------------
 !
 INTEGER :: JP
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !

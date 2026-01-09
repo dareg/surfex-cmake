@@ -73,8 +73,7 @@ USE MODD_SURF_ATM,    ONLY : XWNEW
 USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -105,7 +104,7 @@ REAL, DIMENSION(SIZE(PSR)) :: ZSNOWSWEM, ZWSX,  ZANSMIN, ZANSMAX
 !                                         snow reservoir
 !                             ZANSMIN = Minimum glacier albedo
 !                             ZANSMAX = Maximum glacier albedo
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('HYDRO_SNOW',0,ZHOOK_HANDLE)                                                        

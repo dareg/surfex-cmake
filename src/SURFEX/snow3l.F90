@@ -110,8 +110,7 @@ USE MODE_THERMOS,  ONLY : QSATI
 !
 USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -352,7 +351,7 @@ REAL, DIMENSION(SIZE(PSNOWRHO,1),NSPEC_BAND_SNOW)  :: ZSPECTRALALBEDO, ZSPECTRAL
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWHEAT0
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 ! - - ---------------------------------------------------
 !
@@ -865,7 +864,7 @@ INTEGER                             :: JJ, JI
 INTEGER                             :: INI
 INTEGER                             :: INLVLS
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -1068,7 +1067,7 @@ REAL, DIMENSION(SIZE(PSNOWRHO,1))    :: ZRADTOT
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZDSGRAIN, ZCOEF, ZSNOWDZ, ZAGE
 REAL, DIMENSION(SIZE(PSPECTRALALBEDO,1),SIZE(PSPECTRALALBEDO,2)) :: ZSPECTRALALBEDO
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 ! 0. Initialization:
@@ -1257,7 +1256,7 @@ REAL, DIMENSION(SIZE(PTS))        :: ZAC, ZRI, ZCOND1, ZCOND2,          &
                                        ZCDN, ZSNOWDZM1, ZSNOWDZM2,      &
                                        ZVMOD, ZUSTAR2, ZTS3, ZLVT,      &
                                        Z_CCOEF  
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -1499,7 +1498,7 @@ REAL, DIMENSION(SIZE(PSNOWDZ,1),SIZE(PSNOWDZ,2)) :: ZWORK1, ZWORK2, ZDZDIF,    &
 REAL, DIMENSION(SIZE(PSNOWDZ,1),SIZE(PSNOWDZ,2)-1) :: ZSNOWTEMP_M,             &
                                                       ZFRCV_M, ZAMTRX_M,         &
                                                       ZBMTRX_M, ZCMTRX_M  
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 ! 0. Initialize:
@@ -1738,7 +1737,7 @@ REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZPHASE, ZCMPRSFACT,   &
                                                         ZMELTXS  
 !
 INTEGER :: JWRK, JI ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 ! 0. Initialize:
@@ -1890,7 +1889,7 @@ REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) ::   ZFLOWLIQ, ZWORK,     &
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1),0:SIZE(PSNOWRHO,2)):: ZFLOWLIQT
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -2085,7 +2084,7 @@ LOGICAL, DIMENSION(:), INTENT(OUT)  :: OSFCMELT
 !
 REAL, DIMENSION(SIZE(PSNOWDZ))      :: ZEVAPC, ZLE, ZSNOWTEMP, ZSMSNOW, ZGFLUX,  &
                                          ZDELTAT, ZSNOWTO3  
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -2276,7 +2275,7 @@ REAL, PARAMETER                     :: ZTDIF      = 15.   ! K To prevent a possi
                                                           !   this max T-diff based on obs...
                                                           !   between Ta-Ts
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !-------------------------------------------------------------------------------
@@ -2471,7 +2470,7 @@ INTEGER                             :: INI
 INTEGER                             :: INLVLS
 !
 REAL, DIMENSION(SIZE(PLES3L))       :: ZSNOWHEATC, ZSNOWGONE_DELTA, ZSNOW
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -2571,7 +2570,7 @@ REAL, DIMENSION(SIZE(PSNOWDZ,1))      :: ZMASS        ! total mass
 !
 REAL, DIMENSION(SIZE(PSNOWDZ,1),SIZE(PSNOWDZ,2)) :: ZSCAP  ! Snow layer heat capacity          (J/K/m3)
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -2662,7 +2661,7 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PCT, PTSTERM1, PTSTERM2, PGFLUXSNOW
 REAL, DIMENSION(SIZE(PTS))        :: ZSCONDA, ZA, ZB, ZC,             &
                                      ZSNOWDZM1, ZSNOWDZM2
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('SNOW3LEBUDMEB',0,ZHOOK_HANDLE)

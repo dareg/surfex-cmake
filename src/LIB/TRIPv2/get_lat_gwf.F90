@@ -40,8 +40,7 @@ USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
 USE MODE_TRIP_GRID
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -54,7 +53,7 @@ TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 INTEGER,               INTENT(IN ) :: KLAT
 REAL,                  INTENT(OUT) :: PRES
 REAL, DIMENSION(KLAT), INTENT(OUT) :: PLAT
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------

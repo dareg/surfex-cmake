@@ -76,8 +76,7 @@ USE MODI_GET_VAR_TOWN_n
 USE MODI_GET_ZS_n
 USE MODI_GET_SERIES_n
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 USE MODI_GET_SSO_STDEV_n
@@ -172,7 +171,7 @@ INTEGER :: KI_TOWN   ! dimension of town tile
 !
 INTEGER                            :: JI           ! loop index over tiles
 INTEGER                            :: ILUOUT       ! unit number
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

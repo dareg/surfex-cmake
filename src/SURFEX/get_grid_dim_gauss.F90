@@ -35,8 +35,7 @@
 USE MODE_GRIDTYPE_GAUSS
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -52,7 +51,7 @@ INTEGER,                         INTENT(OUT)   :: KDIM2     ! 2nd dimension
 !*    0.2    Declaration of other local variables
 !            ------------------------------------
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_GRID_DIM_GAUSS',0,ZHOOK_HANDLE)

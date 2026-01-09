@@ -34,8 +34,7 @@ USE MODD_DST_SURF, ONLY :  XFLX_MSS_FDG_FCT
 USE MODD_DSTMBL,   ONLY : XRGH_MMN_SMT, XCST_SLT, XDMT_SLT_OPT
 USE MODE_DSTMBLUTL               !Dust mobilization subroutines
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -80,7 +79,7 @@ REAL,    DIMENSION(KSIZE) :: ZDST_SLT_FLX_RAT_TTL      ! [m-1] ratio of vertical
 !
 real  :: ZCLAY(KSIZE)
 INTEGER         :: I                    !Counter for number of points (used in loops)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
     
 !Allocate the local variables
 IF (LHOOK) CALL DR_HOOK('DUSTFLUX_GET',0,ZHOOK_HANDLE)

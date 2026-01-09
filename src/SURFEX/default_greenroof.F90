@@ -43,8 +43,7 @@
 USE MODD_SURF_PAR,           ONLY: XUNDEF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -57,7 +56,7 @@ IMPLICIT NONE
  CHARACTER(LEN=3),  INTENT(OUT) :: HKSAT_GR      ! soil hydraulic profile option ('DEF','SGH')
  CHARACTER(LEN=3),  INTENT(OUT) :: HHORT_GR      ! Horton runoff ('DEF','SGH')
 !                                           
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------

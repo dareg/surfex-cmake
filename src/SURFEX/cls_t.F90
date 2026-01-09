@@ -55,8 +55,7 @@ USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODE_THERMOS
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -83,7 +82,7 @@ REAL, DIMENSION(:), INTENT(OUT)      :: PTNM   ! temperature at n meters
 REAL, DIMENSION(SIZE(PTA)) :: ZBNH,ZBH,ZRS
 REAL, DIMENSION(SIZE(PTA)) :: ZLOGS,ZCORS,ZIV
  CHARACTER(LEN=2)           :: YHUMIDITY
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

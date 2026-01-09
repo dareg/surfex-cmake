@@ -43,8 +43,7 @@
 USE MODD_WATER_PAR,  ONLY : XALBCOEF_TA96
 USE MODD_CSTS     ,  ONLY : XPI
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -54,7 +53,7 @@ IMPLICIT NONE
 REAL, DIMENSION(:), INTENT(IN)  :: PZENITH     ! zenithal angle (radian)
 !
 REAL, DIMENSION(SIZE(PZENITH))  :: PDIR_ALB    ! direct albedo on water
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

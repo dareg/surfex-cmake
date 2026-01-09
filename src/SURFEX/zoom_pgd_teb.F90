@@ -73,8 +73,7 @@ USE MODI_READ_PGD_TEB_PAR_n
 USE MODI_CLOSE_AUX_IO_SURF
 USE MODI_CLEAN_PREP_OUTPUT_GRID
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 !
 IMPLICIT NONE
@@ -112,7 +111,7 @@ INTEGER :: INI     ! total 1D dimension (input grid)
 INTEGER :: JLAYER  ! loop counter
 INTEGER :: ILU     ! total 1D dimension (output grid, TOWN points only)
 INTEGER :: JPATCH  ! TEB patch
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 INTEGER           :: IVERSION
 INTEGER           :: IBUGFIX
 !------------------------------------------------------------------------------
@@ -234,7 +233,7 @@ REAL, DIMENSION(INI)              :: ZFIELD  ! field read
 REAL, DIMENSION(ILU,1)            :: ZOUT    ! final field
 CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 CHARACTER(LEN=4 ) :: YLVL
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_TEB:ZOOM_PGD_TEB_GARDEN',0,ZHOOK_HANDLE)
 !

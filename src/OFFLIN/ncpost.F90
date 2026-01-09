@@ -20,8 +20,7 @@ USE MODD_OFF_SURFEX_n
         USE MODI_READ_SURF
         USE MODE_POS_SURF
 !
-        USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-        USE PARKIND1  ,ONLY : JPRB
+        USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
         USE MODI_END_IO_SURF_n
         USE MODI_INIT_IO_SURF_n
@@ -61,7 +60,7 @@ USE MODD_OFF_SURFEX_n
         character (len=56) :: comlink
         integer    ::   inb_forc
         integer    ::   ji
-        REAL(KIND=JPRB) :: ZHOOK_HANDLE
+        REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
         !=====================================================================
 
         IF (LHOOK) CALL DR_HOOK('NCPOST',0,ZHOOK_HANDLE)
@@ -200,7 +199,7 @@ USE MODD_OFF_SURFEX_n
         CHARACTER(LEN=12)   ::   HREC
         CHARACTER(LEN=*)    ::   CFILEIN
         INTEGER             ::   NLUOUT
-        REAL(KIND=JPRB) :: ZHOOK_HANDLE
+        REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
         IF (LHOOK) CALL DR_HOOK('ERR_STOP',0,ZHOOK_HANDLE)
         WRITE(NLUOUT,*) ' '
         WRITE(NLUOUT,*) ' ARTICLE ',TRIM(HREC),' NOT FOUND IN FILE ', CFILEIN

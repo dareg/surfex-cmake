@@ -63,8 +63,7 @@ USE MODI_ABOR1_SFX
 USE MODE_POS_SURF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -133,7 +132,7 @@ REAL                                   :: XUNIF_H_HVEG     ! height of trees
  CHARACTER(LEN=28),DIMENSION(NTIME_MAX) :: CFTYP_LAI_LVEG   ! LAI       of low  vegetation
  CHARACTER(LEN=28)                      :: CFTYP_H_HVEG     ! height of trees
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_DATA_TEB_GARDEN/   NTIME_GD,                                          &
                                 CTYP_GARDEN_HVEG, CTYP_GARDEN_LVEG,                &

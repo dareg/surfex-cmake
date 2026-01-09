@@ -56,8 +56,7 @@ USE MODI_ALBEDO_FROM_NIR_VIS
 USE MODI_ISBA_SNOW_FRAC
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -91,7 +90,7 @@ REAL, DIMENSION(SIZE(PEK%XALBNIR_VEG(:))) :: ZALBNIR ! near-infra-red albedo wit
 REAL, DIMENSION(SIZE(PEK%XALBVIS_VEG(:))) :: ZALBVIS ! visible albedo with snow
 REAL, DIMENSION(SIZE(PEK%XALBUV_VEG(:) )) :: ZALBUV  ! UV albedo with snow
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !

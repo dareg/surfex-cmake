@@ -23,13 +23,14 @@ SUBROUTINE ORORAD(USS,PZENITH,PAZIM,PSCA_ALB,PTRAD,PEMIS,PDIR_SWL,PSCA_SWL,PLWL)
 !!    ------
 !!     A. Mary
 !!
+!!     22-Jan 2024 : Y. Seity, bf with EPSILON use in SCOS
+
 USE MODD_SSO_n, ONLY : SSO_t
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_CSTS,  ONLY : XPI, XSTEFAN
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -66,7 +67,7 @@ INTEGER :: INI,ISW
 !
 LOGICAL                          :: LFOUND                 !logical switch for definition of section
 !
-REAL(KIND=JPRB)                  :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK)                  :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ORORAD',0,ZHOOK_HANDLE)
 !
@@ -97,7 +98,7 @@ DO SL=1,INI                  !loop over grid points
         (PDIR_SWL(SL,SI) < XUNDEF) .AND. (PSCA_SWL(SL,SI) < XUNDEF))THEN
 
         !only if there is radiation (no default)
-        SCOS = MIN(MAX(COS(PZENITH(SL)),1.E-12),1.0-1.E-12)
+        SCOS = MIN(MAX(COS(PZENITH(SL)),100.*EPSILON(1.)),1.0-100.*EPSILON(1.))
         !cos of solar zenith angle
         SAZIM = XPI-PAZIM(SL)
         IF(SAZIM < 0.)SAZIM=SAZIM+2*XPI

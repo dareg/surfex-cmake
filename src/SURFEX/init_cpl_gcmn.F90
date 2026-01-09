@@ -57,8 +57,7 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_READ_SURF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -85,7 +84,7 @@ INTEGER           :: IVERSION   ! surface version
 LOGICAL           :: LREAD      ! work key
 LOGICAL           :: GCPL_GCM   ! work key
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('INIT_CPL_GCM_N',0,ZHOOK_HANDLE)

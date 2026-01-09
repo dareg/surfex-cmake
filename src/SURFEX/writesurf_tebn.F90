@@ -60,14 +60,10 @@ USE MODI_WRITESURF_TEB_GARDEN_n
 USE MODI_WRITESURF_TEB_GREENROOF_n
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
-!RJ #ifdef SFX_MPI
-!RJ INCLUDE "mpif.h"
-!RJ #endif
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
@@ -115,7 +111,7 @@ INTEGER           :: IRESP           ! IRESP  : return-code if a problem appears
  CHARACTER(LEN=100):: YSTRING        ! Comment string
 !
 INTEGER :: JLAYER, JI ! loop on surface layers
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

@@ -51,8 +51,7 @@
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -80,7 +79,7 @@ REAL, PARAMETER    :: ZEPSFR = 1.E-5
 INTEGER :: INI, INP, INSWB  ! dimenssion
 INTEGER :: JI, JP, JSWB     ! loop counter on tiles
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('AVERAGE_RAD',0,ZHOOK_HANDLE)

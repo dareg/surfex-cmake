@@ -51,8 +51,7 @@ USE MODD_CANOPY_n, ONLY : CANOPY_t
 !
 USE MODI_WRITE_SURF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -76,7 +75,7 @@ INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
  CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 !
 INTEGER :: JLAYER  ! loop counter on layers
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*       1.     Prognostic fields:

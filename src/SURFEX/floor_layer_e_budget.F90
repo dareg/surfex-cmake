@@ -80,8 +80,7 @@ USE MODI_LAYER_E_BUDGET_GET_COEF
 USE MODI_LAYER_E_BUDGET
 USE MODE_CONV_DOE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -119,7 +118,7 @@ REAL, DIMENSION(SIZE(B%XT_FLOOR,1)) :: ZTS_FL_CONV ! surf. floor temp. used for 
 REAL, DIMENSION(SIZE(B%XT_FLOOR,1)) :: ZCHTC_IN_FL   ! Indoor floor convec heat transfer coefficient
                                                     ! [W K-1 m-2(bld)]
 
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 INTEGER :: JJ
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('FLOOR_LAYER_E_BUDGET',0,ZHOOK_HANDLE)

@@ -53,8 +53,7 @@ USE MODI_CLOSE_NAMELIST
 USE MODE_POS_SURF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -118,7 +117,7 @@ REAL                     :: XHALORADIUS ! radius of the halo in which the horizo
 !                                         'MANNERS' = Manners et al. 2012
 LOGICAL                  :: LFSSOSVF    ! compute SVF on fractional slopes if possible
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_ZS/YZS, YZSFILETYPE, XUNIF_ZS, COROGTYPE, XENV, LIMP_ZS , & 
                 YSLOPE, YSLOPEFILETYPE, LEXPLICIT_SLOPE, &

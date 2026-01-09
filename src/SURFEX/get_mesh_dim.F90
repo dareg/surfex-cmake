@@ -34,8 +34,7 @@
 !            -----------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_GET_MESH_DIM_CONF_PROJ
 USE MODI_GET_MESH_DIM_GAUSS
@@ -55,7 +54,7 @@ REAL,    DIMENSION(KGRID_PAR),   INTENT(IN)    :: PGRID_PAR ! grid parameters
 REAL,    DIMENSION(KL),          INTENT(OUT)   :: PDX       ! dimension in x dir. (meters)
 REAL,    DIMENSION(KL),          INTENT(OUT)   :: PDY       ! dimension in y dir. (meters)
 REAL,    DIMENSION(KL),          INTENT(IN)    :: PMESHSIZE ! mesh size (m2)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*    0.2    Declaration of other local variables
 !            ------------------------------------

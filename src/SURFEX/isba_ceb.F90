@@ -68,8 +68,7 @@ USE MODI_ISBA_FLUXES
 !
 USE MODE_THERMOS
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -232,7 +231,7 @@ REAL, PARAMETER            :: ZTSPLIT  = 300. ! s Minimum time tstep required to
 INTEGER                    :: ITSPLIT, JSPLIT
 REAL                       :: ZTSTEP, ZNSPLIT
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

@@ -68,8 +68,7 @@ USE MODI_GET_SFX_SEA
 USE MODI_GET_LUOUT
 USE MODI_SFX_OASIS_SEND
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 #ifdef AIX64
 !$ USE OMP_LIB
@@ -134,7 +133,7 @@ LOGICAL               :: GSEND_LAND
 LOGICAL               :: GSEND_LAKE
 LOGICAL               :: GSEND_SEA
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

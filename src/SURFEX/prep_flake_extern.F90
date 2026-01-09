@@ -22,8 +22,7 @@ USE MODI_GET_LUOUT
 USE MODD_PREP,       ONLY : CINGRID_TYPE, CINTERP_TYPE
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -53,7 +52,7 @@ INTEGER           :: IVERSION       ! total 1D dimensio
 INTEGER           :: INI            ! total 1D dimension
  CHARACTER(LEN=6)  :: YWATER         ! lake scheme
 INTEGER           :: IDIM_WATER     ! number of water points
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

@@ -36,8 +36,7 @@ SUBROUTINE DSLT_INIT_NAMES (KLUOUT, HRC1, HSV, KPMODE, &
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -57,7 +56,7 @@ LOGICAL,                         INTENT(INOUT) :: ORGFIX    ! type of mean radiu
 !*      0.2    declarations of local variables
 INTEGER :: JSV  !! loop on scalar variables
  CHARACTER(LEN=4) :: YRC1
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 

@@ -60,8 +60,7 @@ USE MODD_SURF_ATM,        ONLY : LDRAG_COEF_ARP
 USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_FLXSURF3BX
 !
@@ -110,7 +109,7 @@ CHARACTER(LEN=3)  ::YSNOWRES ='RIL'!<Cluzet default value for HSNOWRES>
 !
 !* MASC95 case
 REAL,DIMENSION(SIZE(PTA)) :: ZDIRCOSZW     ! orography slope cosine
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*      1.     Mascart 1995 exchange coefficients

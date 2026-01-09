@@ -46,8 +46,7 @@ USE MODN_WRITE_SURF_ATM
 !
 USE MODI_WRITE_SURF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -75,7 +74,7 @@ INTEGER           :: JTIME          ! loop index
 INTEGER           :: JL         ! loop index
 INTEGER           :: JV         ! loop index
 REAL,    DIMENSION(:), ALLOCATABLE :: ZWORK
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

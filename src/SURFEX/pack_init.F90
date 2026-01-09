@@ -55,8 +55,7 @@ USE MODI_PACK_GRID
 USE MODI_LATLON_GRID
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_GET_SURF_MASK_n
 !
@@ -94,7 +93,7 @@ REAL,    DIMENSION(SIZE(G%XLAT)) :: ZDIR
 !
 REAL, DIMENSION(U%NSIZE_FULL)    :: ZCOVER ! cover  on all surface points
 REAL, DIMENSION(U%NSIZE_FULL)            :: ZZS    ! zs     on all surface points
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PACK_INIT',0,ZHOOK_HANDLE)

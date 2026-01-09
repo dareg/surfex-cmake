@@ -99,8 +99,7 @@ USE MODE_THERMOS
 USE MODI_SOIL_HEATDIF 
 USE MODI_SOIL_TEMP_ARP
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -223,7 +222,7 @@ REAL, DIMENSION(SIZE(PEK%XSNOWFREE_ALB)) :: ZCNHUMA, ZPEQA2, ZDKQB, ZCDQSAT, ZIN
                                 ZLVTT, ZLSTT
 REAL                        :: ZSNOW
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

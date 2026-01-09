@@ -66,8 +66,7 @@ USE MODI_PACK_SAME_RANK
 USE MODI_UNPACK_SAME_RANK
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -117,7 +116,7 @@ INTEGER :: JJ, JT, JTN
  CHARACTER(LEN=6)    :: YMASK
 INTEGER             :: INPTS     ! number of points used for interpolation
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZFIELD    ! physiographic field on full grid
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*    1.      Initializations

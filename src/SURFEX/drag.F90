@@ -94,8 +94,7 @@ USE MODI_WIND_THRESHOLD
 USE MODE_THERMOS
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -214,7 +213,7 @@ REAL, DIMENSION(SIZE(PTG)) :: ZQSAT,           &
                                  ZRRCOR
 !                                              ZRRCOR = correction of CD, CH, CDN due to moist-gustiness
 CHARACTER(LEN=3)  ::YSNOWRES ='RIL'!<Cluzet default value for HSNOWRES>
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*       0.     Initialization:
@@ -449,7 +448,7 @@ REAL, DIMENSION(SIZE(PDELTA)) ::  ZER
 REAL, DIMENSION(SIZE(PDELTA)) ::  ZRRVEG
 REAL, DIMENSION(SIZE(PDELTA)) ::  ZWR_DELTA
 !
-REAL(KIND=JPRB)   :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK)   :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DRAG:LIMIT_LER',0,ZHOOK_HANDLE)
 !

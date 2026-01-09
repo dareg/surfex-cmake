@@ -51,7 +51,7 @@ USE MODI_ASSIM_NATURE_n
 USE MODI_ASSIM_TOWN_n
 USE MODI_GET_LUOUT
 !
-USE YOMHOOK,             ONLY : LHOOK,   DR_HOOK
+USE YOMHOOK,             ONLY : LHOOK,   DR_HOOK, JPHOOK
 USE PARKIND1,            ONLY : JPRB
 !
 IMPLICIT NONE
@@ -96,7 +96,7 @@ LOGICAL, INTENT(IN) :: OLKEEPEXTZONE
 INTEGER :: JTILE                        ! loop on type of surface
 INTEGER :: ILUOUT
 LOGICAL :: GNATURE, GTOWN, GWATER, GSEA ! .T. if the corresponding surface is represented
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ASSIM_SURF_ATM_N',0,ZHOOK_HANDLE)

@@ -30,8 +30,7 @@ USE MODE_GRIDTYPE_IGN
 !
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -60,7 +59,7 @@ REAL, DIMENSION(KL)    :: ZDY   ! Y size of grid mesh
 REAL, DIMENSION(KL,KC) :: ZCX   ! Grid corner in X 
 REAL, DIMENSION(KL,KC) :: ZCY   ! Grid corner in Y
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------------
 !

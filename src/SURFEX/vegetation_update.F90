@@ -64,8 +64,7 @@ USE MODI_ALBEDO
 USE MODI_UPDATE_DATA_COVER
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -100,7 +99,7 @@ LOGICAL,DIMENSION(:), INTENT(IN), OPTIONAL :: OABSENT ! T where field is not def
 !*      0.2    declarations of local variables
 !
 INTEGER :: IDECADE, IDECADE2, JI, ISNOWPATCH  ! decade of simulation
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-----------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('VEGETATION_UPDATE',0,ZHOOK_HANDLE)

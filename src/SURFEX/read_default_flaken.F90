@@ -59,8 +59,7 @@ USE MODD_SURF_PAR,           ONLY : XUNDEF
 USE MODD_READ_NAMELIST, ONLY : LNAM_READ
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 IMPLICIT NONE
@@ -85,7 +84,7 @@ INTEGER           :: ILUOUT         ! output listing logical unit
 INTEGER           :: ILUDES         ! .des file logical unit
 INTEGER           :: ILU         ! 
 INTEGER           :: IMI
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

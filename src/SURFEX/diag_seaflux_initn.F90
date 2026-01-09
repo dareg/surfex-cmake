@@ -56,8 +56,7 @@ USE MODD_SFX_OASIS,      ONLY : LCPL_SEA,LCPL_SEAICE
 !  
 USE MODI_READ_SURF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -82,7 +81,7 @@ INTEGER           :: IVERSION
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
 CHARACTER(LEN=12) :: YREC           ! Name of the article to be read
 !
-REAL(KIND=JPRB)   :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK)   :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('DIAG_SEAFLUX_INIT_N',0,ZHOOK_HANDLE)

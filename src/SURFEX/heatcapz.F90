@@ -58,8 +58,7 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_ISBA_PAR,   ONLY : XDRYWGHT, XSPHSOIL
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -71,7 +70,7 @@ REAL,   DIMENSION(:,:), INTENT(OUT):: PHCAPSOIL  ! soil solid heat capacity (J K
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-----------------------------------------------------------------
 !

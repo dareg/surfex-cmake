@@ -57,8 +57,7 @@ USE MODD_SFX_OASIS,      ONLY : LCPL_LAKE
 !
 USE MODI_READ_SURF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -84,7 +83,7 @@ CHARACTER(LEN=6), INTENT(IN):: HPROGRAM  ! program calling
 INTEGER           :: IVERSION
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
 CHARACTER(LEN=12) :: YREC           ! Name of the article to be read
-REAL(KIND=JPRB)   :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK)   :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

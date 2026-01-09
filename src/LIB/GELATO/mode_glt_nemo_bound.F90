@@ -62,7 +62,7 @@ MODULE mode_glt_nemo_bound
 #else
 #ifdef SFX_MPI
    !!  define mpp_min, mpp_max, mpp_sum for Offline Surfex case with MPI
-   USE MODD_SURFEX_MPI, ONLY : mpi_comm_opa => NCOMM
+   USE MODD_SURFEX_MPI, ONLY : mpi_comm_opa => NCOMM, LSFX_MPI
 #else
    !! Case of Offline without MPI : no call to MPI, 
    !! mpp_min, mpp_max, mpp_sum are dummies (see below)

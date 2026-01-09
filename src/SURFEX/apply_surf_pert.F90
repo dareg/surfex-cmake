@@ -34,8 +34,7 @@ USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_NP_t, ISBA_NPE_t, &
                       & ISBA_P_t, ISBA_PE_t
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -65,7 +64,7 @@ INTEGER :: JKV, JKL, JKC, JKA, JKZ ! Perturbation field index
 ! logical units
 !
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 ! --------------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('APPLY_SURF_PERT',0,ZHOOK_HANDLE)

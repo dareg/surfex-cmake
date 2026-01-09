@@ -66,8 +66,7 @@ USE MODI_ABOR1_SFX
 !
 USE MODD_REPROD_OPER,    ONLY : XEVERG_RSMIN
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -114,7 +113,7 @@ REAL, DIMENSION(KDIM,3)               :: ZDATA_CNA_NITRO
 !
 LOGICAL :: GAGRI_TO_GRASS
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

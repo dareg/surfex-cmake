@@ -40,8 +40,7 @@
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -49,7 +48,7 @@ IMPLICIT NONE
 !              -------------------------
 !
  CHARACTER(LEN=6),  INTENT(OUT) :: HCH_DRY_DEP  ! deposition scheme
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !*       0.2   Declarations of local variables

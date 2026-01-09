@@ -49,8 +49,7 @@ USE MODD_SURF_ATM,  ONLY : LVSHIFT_LW, LVSHIFT_PRCP
 !
 USE MODE_THERMOS
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -93,7 +92,7 @@ REAL, DIMENSION(SIZE(PLW_ATM  )) :: ZVAP_SURF  ! approximated vapour pressure
 REAL, DIMENSION(SIZE(PLW_ATM  )) :: ZEMIS_ATM  ! approximated emissivity
 REAL, DIMENSION(SIZE(PLW_ATM  )) :: ZEMIS_SURF ! approximated emissivity
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 ! ---------------------------------------------------------------------------
 !

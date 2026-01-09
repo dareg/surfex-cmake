@@ -48,8 +48,7 @@ USE MODI_GET_LUOUT
 USE MODE_GRIDTYPE_LONLAT_REG
 USE MODI_READ_AND_SEND_MPI
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -88,7 +87,7 @@ REAL    :: XLATMIN  ! minimum latitude  (degrees)
 REAL    :: XLATMAX  ! maximum latitude  (degrees)
 INTEGER :: NLON     ! number of points in longitude
 INTEGER :: NLAT     ! number of points in latitude
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 NAMELIST/NAM_LONLAT_REG/XLONMIN, XLONMAX, XLATMIN, XLATMAX, NLON, NLAT
 !
 !------------------------------------------------------------------------------

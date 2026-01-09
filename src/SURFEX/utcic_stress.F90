@@ -42,8 +42,7 @@ SUBROUTINE UTCIC_STRESS(PTSTEP, PUTCI, PUTCIC )
 !
 USE MODD_UTCI
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -56,7 +55,7 @@ REAL, DIMENSION(:,:), INTENT(INOUT)  :: PUTCIC ! Time cumulated in each sheat-st
 !
 INTEGER :: JSTRESS ! Loop counter on stress ranges
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

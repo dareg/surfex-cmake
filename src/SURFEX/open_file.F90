@@ -56,8 +56,7 @@ USE MODI_OPEN_FILE_OL
 USE MODI_OPEN_FILE_MNH
 #endif
 !
-USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
-USE PARKIND1 ,ONLY : JPRB
+USE YOMHOOK ,ONLY : LHOOK, DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -81,7 +80,7 @@ INTEGER,           INTENT(IN), OPTIONAL :: KRECL    ! record length
  CHARACTER(LEN=9)  :: YACTION
  CHARACTER(LEN=6)  :: YACCESS
 INTEGER           :: IRECL
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

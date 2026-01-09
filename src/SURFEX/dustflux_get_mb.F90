@@ -22,8 +22,7 @@ USE MODD_DSTMBL, ONLY : XFLX_MSS_FDG_FCTM, NTEX, NMODE, NDP, NBIN, XCST_SLT, &
                         XDMT_SLT_OPT
 USE MODD_CSTS, only: XPI
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -71,14 +70,14 @@ REAL, DIMENSION(KSIZE,NBIN) :: ZDSBIN                    !
 REAL, DIMENSION(KSIZE,NBIN) :: ZGAMMA                    !
 INTEGER, DIMENSION(NBIN+1)   :: ISEUIL
 REAL, DIMENSION(NBIN,2)   :: ZPCEN
-REAL, DIMENSION(NTEX)     :: ZZS0                      ! rugosité de la surface lisse
-REAL, DIMENSION(NDP)      :: ZDP                       ! [µm] diamètre du particule
+REAL, DIMENSION(NTEX)     :: ZZS0                      ! rugositÃ© de la surface lisse
+REAL, DIMENSION(NDP)      :: ZDP                       ! [Âµm] diamÃ¨tre du particule
 REAL :: ZDLNDP, ZRGH_Z0
 INTEGER :: I                  !Counter for number of points (used in loops)
 INTEGER :: IDP                !Counter for number of particle
 INTEGER :: ITEX               !Counter for number of texture
 INTEGER :: IS
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DUSTFLUX_GET_MB',0,ZHOOK_HANDLE)
 !
@@ -87,7 +86,7 @@ GFLG_MBL(:) = .TRUE.
 !fxm: Get erodibility limitation factor, use something connected to amount of sand
 !Discuss with Valery Masson
 !ZMBL_BSN_FCT(:) = PSAND(:)
-! utilisé dans le calcul de l'effet Owen 
+! utilisÃ© dans le calcul de l'effet Owen 
 ZWND_RFR(:) = PWIND10M(:)
 !
 ! Initialize vertical dust flux
@@ -115,7 +114,7 @@ DO I = 1, KSIZE
   ZWPRM(I) = 3.0*PCLAY(I) * (0.17 + 0.0014 * PCLAY(I))
   ZWPRM(I) = MIN( 0.15, MAX(0.053, ZWPRM(I)) )
   ! 
-  !tous les cas CLAY >= 0.28 sont traités
+  !tous les cas CLAY >= 0.28 sont traitÃ©s
   IF ( PCLAY(I) >= 0.28 ) THEN
     IF ( PSAND(I) >= 0.45 ) THEN      
       IF (PCLAY(I) >= 0.36 ) THEN     ! Sandy Clay 
@@ -141,13 +140,13 @@ DO I = 1, KSIZE
       !ZWPRM(I) = 6.8E-2
     ENDIF
   ENDIF
-  ! les cas ZSILT >= 0.5 .AND. PCLAY < 0.28 sont traités
-  ! les cas ZSILT < 0.5 .AND. PCLAY >= 0.20 sont traités 
-  ! ne sont pas traités les cas PCLAY < 0.20 .AND. ZSILT < 0.5 => SAND >= 0.3
+  ! les cas ZSILT >= 0.5 .AND. PCLAY < 0.28 sont traitÃ©s
+  ! les cas ZSILT < 0.5 .AND. PCLAY >= 0.20 sont traitÃ©s 
+  ! ne sont pas traitÃ©s les cas PCLAY < 0.20 .AND. ZSILT < 0.5 => SAND >= 0.3
   IF ( ZSILT(I) >= 0.8 .AND. PCLAY(I) < 0.12 ) THEN ! Silt 
     ITEXT(I) = 12
     !ZWPRM(I) = 2.5E-2
-  ELSEIF ( PCLAY(I) < 0.28 ) THEN    ! ( clay est forcément < 0.28 )
+  ELSEIF ( PCLAY(I) < 0.28 ) THEN    ! ( clay est forcÃ©ment < 0.28 )
     IF ( ZSILT(I) >= 0.5 ) THEN      ! Silt Loam 
       ITEXT(I) = 4
       !ZWPRM(I) = 5.0E-2
@@ -161,10 +160,10 @@ DO I = 1, KSIZE
       ENDIF
     ENDIF
   ENDIF
-  ! les cas SAND >= 0.87 sont traités: silt < 0.13, clay < 0.1 => entrent dans les cas non encore traités
-  ! les cas SAND >= 0.7 => CLAY < 0.15 , SILT < 0.3 sont traités ) => ""
-  ! les cas SAND >=0.52 .AND. CLAY < 0.20 sont traités SILT < 0.48 => ""
-  ! les cas restants considèrement pclay < 0.20, sand >= 0.5 - pclay => sand >=  0.3
+  ! les cas SAND >= 0.87 sont traitÃ©s: silt < 0.13, clay < 0.1 => entrent dans les cas non encore traitÃ©s
+  ! les cas SAND >= 0.7 => CLAY < 0.15 , SILT < 0.3 sont traitÃ©s ) => ""
+  ! les cas SAND >=0.52 .AND. CLAY < 0.20 sont traitÃ©s SILT < 0.48 => ""
+  ! les cas restants considÃ¨rement pclay < 0.20, sand >= 0.5 - pclay => sand >=  0.3
   ! => clay + sand >= 0.5 => silt < 0.5
   IF ( PSAND(I) >= (0.3*PCLAY(I) + 0.87) ) THEN   ! Sand 
     ITEXT(I) = 1
@@ -187,7 +186,7 @@ DO I = 1, KSIZE
   !
 ENDDO
 !
-ZDLNDP = 0.1d0        ! [µm]  Dln(DP)
+ZDLNDP = 0.1d0        ! [Âµm]  Dln(DP)
  CALL DISTRIBUTION (NMODE, ZDLNDP, ITEXT, ZDP, ZDSRLV, ZZS0)
 !
 ISEUIL = (/0, 30, 40, 65, NDP/)

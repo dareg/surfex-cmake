@@ -51,8 +51,7 @@ USE MODI_WRITE_FILE_MAP
 USE MODI_UNPACK_SAME_RANK
 USE MODI_WRITE_FILE_ISBAMAP
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -71,7 +70,7 @@ INTEGER                        :: ILUOUT      ! unit of output listing file
 INTEGER                        :: JSTP, JJ    ! loop control indexes
 REAL, DIMENSION(:),ALLOCATABLE :: ZAS         ! Saturated area fraction for each Isba meshes
  CHARACTER(LEN=30)              :: YVAR        ! name of results file
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('PREP_RESTART_COUPL_TOPD',0,ZHOOK_HANDLE)
 !

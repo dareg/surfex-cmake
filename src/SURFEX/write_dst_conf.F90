@@ -39,8 +39,7 @@
 !
 USE MODN_DST
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -49,7 +48,7 @@ IMPLICIT NONE
 !
 INTEGER,          INTENT(IN) :: KLUDES     ! logical unit
  CHARACTER(LEN=5), INTENT(IN) :: HEMISPARAM ! Reference to paper where emission parameterization is proposed
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !
 !*       0.2   Declarations of local variables

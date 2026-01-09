@@ -43,8 +43,7 @@ USE MODI_GET_LUOUT
 !
 USE MODE_GRIDTYPE_CONF_PROJ
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -100,7 +99,7 @@ INTEGER                           :: IINFO
 INTEGER                           :: ILUOUT
 !---------------------------------------------------------------------------
 REAL, DIMENSION(:),   POINTER     :: ZGRID_PAR
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !
 !*       1.    Reading of projection parameters

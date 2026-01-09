@@ -23,8 +23,7 @@ USE MODI_GET_LUOUT
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -52,7 +51,7 @@ INTEGER           :: IDIM_WATER
 !
 INTEGER           :: IVERSION       ! total 1D dimension
 INTEGER           :: INI            ! total 1D dimension
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

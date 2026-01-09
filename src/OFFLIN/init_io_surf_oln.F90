@@ -54,8 +54,7 @@ USE MODD_SURFEX_MPI, ONLY : WLOG_MPI
 !
 USE NETCDF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -75,7 +74,7 @@ INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
  CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 INTEGER           :: ILU, IRET, IL, IFULL, JFILE
 INTEGER           :: ILUOUT
-REAL(KIND=JPRB)  :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK)  :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------ 
 IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_OL_N',0,ZHOOK_HANDLE)
 !

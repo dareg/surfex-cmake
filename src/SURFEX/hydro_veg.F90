@@ -68,8 +68,8 @@
 !
 USE MODD_SGH_PAR, ONLY : X001
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB, JPRD
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
+USE PARKIND1  ,ONLY : JPRD
 !
 IMPLICIT NONE
 !
@@ -133,7 +133,7 @@ REAL                        :: ZLIM
 REAL, DIMENSION(SIZE(PVEG)) :: PWR_DP, PPG_DP, PDRIP_DP, PRRVEG_DP
 #endif
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

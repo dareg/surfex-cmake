@@ -42,8 +42,7 @@ USE MODD_PREP_TEB,   ONLY : XGRID_ROAD, XGRID_WALL, XGRID_ROOF, XGRID_FLOOR, &
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -62,7 +61,7 @@ REAL, DIMENSION(:),   POINTER   :: ZFIELD1D ! 1D field read
 REAL, DIMENSION(:,:), POINTER   :: ZFIELD   ! field read
 REAL, DIMENSION(:,:), POINTER   :: ZD             ! depth of field in the soil
 REAL                            :: ZTI_BLD  ! internal building temperature
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !
@@ -233,7 +232,7 @@ SUBROUTINE TEB_PROFILE_BUFFER(PGRID)
 !-------------------------------------------------------------------------------------
 !
 REAL, DIMENSION(:),   INTENT(IN)  :: PGRID  ! destination grid
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

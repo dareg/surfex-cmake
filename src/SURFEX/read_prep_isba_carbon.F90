@@ -48,8 +48,7 @@ USE MODI_OPEN_NAMELIST
 USE MODI_CLOSE_NAMELIST
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -66,7 +65,7 @@ IMPLICIT NONE
 LOGICAL           :: GFOUND         ! Return code when searching namelist
 INTEGER           :: ILUOUT         ! output file logical unit
 INTEGER           :: ILUNAM         ! namelist file logical unit
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !*       0.3  Declaration of namelists

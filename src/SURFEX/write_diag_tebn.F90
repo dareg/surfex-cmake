@@ -43,8 +43,7 @@ USE MODI_WRITE_DIAG_MISC_TEB_n
 USE MODI_WRITE_DIAG_PGD_TEB_n
 USE MODI_WRITE_DIAG_PGD_GRDN_n
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -65,7 +64,7 @@ TYPE(TEB_GREENROOF_MODEL_t), INTENT(INOUT) :: GRM
 !*      0.2    declarations of local variables
 !
 INTEGER         :: JP
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_TEB_N',0,ZHOOK_HANDLE)

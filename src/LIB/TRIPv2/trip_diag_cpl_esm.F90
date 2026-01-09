@@ -33,8 +33,7 @@ USE MODD_TRIP_OASIS, ONLY : LCPL_SEA, LCPL_LAND, LCPL_GW,    &
                             LCPL_FLOOD, LCPL_CALVSEA
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -52,7 +51,7 @@ REAL, DIMENSION(:,:), INTENT(IN) :: PFWTD      !Fraction of Water table to rise
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

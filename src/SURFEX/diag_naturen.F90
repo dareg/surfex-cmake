@@ -41,8 +41,7 @@ USE MODD_SURFEX_n, ONLY : ISBA_DIAG_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -64,7 +63,7 @@ INTEGER, DIMENSION(:), INTENT(IN) :: KMASK
 !*      0.2    declarations of local variables
 !
 INTEGER :: ISIZE, JJ
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_NATURE_N',0,ZHOOK_HANDLE)

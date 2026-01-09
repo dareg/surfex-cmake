@@ -44,8 +44,7 @@ USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_ISBA_n, ONLY : ISBA_NP_t, ISBA_P_t
 !
 USE MODD_SURF_PAR,  ONLY : XUNDEF, NUNDEF
-USE YOMHOOK   ,     ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,     ONLY : JPRB
+USE YOMHOOK   ,     ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 !
 IMPLICIT NONE
@@ -64,7 +63,7 @@ TYPE(ISBA_P_t), POINTER :: PK
  INTEGER                         :: IMASK, JP
  REAL                            :: ZWORK 
  !
- REAL(KIND=JPRB) :: ZHOOK_HANDLE
+ REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('DG_DFTO3L',0,ZHOOK_HANDLE)
 !

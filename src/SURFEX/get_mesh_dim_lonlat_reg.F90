@@ -37,8 +37,7 @@ USE MODD_CSTS, ONLY : XPI, XRADIUS
 USE MODE_GRIDTYPE_LONLAT_REG
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -62,7 +61,7 @@ REAL    :: ZLATMIN ! minimum latitude  (degrees)
 REAL    :: ZLATMAX ! maximum latitude  (degrees)
 INTEGER :: ILON    ! number of points in longitude
 INTEGER :: ILAT    ! number of points in latitude
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !----------------------------------------------------------------------------
 !

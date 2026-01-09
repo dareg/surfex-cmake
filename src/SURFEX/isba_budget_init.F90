@@ -37,8 +37,7 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_CSTS,       ONLY : XRHOLW
 !    
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -65,7 +64,7 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PSWE_INI   ! total swe at t-1              
 !
 INTEGER :: INI, INL, INLS
 INTEGER :: JI, JL
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

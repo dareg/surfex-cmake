@@ -45,8 +45,7 @@ USE MODE_GRIDTYPE_CARTESIAN
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -65,7 +64,7 @@ REAL                              :: ZLAT0    ! reference latitude
 REAL                              :: ZLON0    ! reference longitude
 REAL, DIMENSION(:),   ALLOCATABLE :: ZDX      ! size in X conformal coordinate
 REAL, DIMENSION(:),   ALLOCATABLE :: ZDY      ! size in Y conformal coordinate
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !---------------------------------------------------------------------------
 !

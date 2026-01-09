@@ -54,8 +54,7 @@ USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODE_THERMOS
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -94,7 +93,7 @@ REAL, DIMENSION(SIZE(PTA)) :: ZQSATNM, ZPNM
 REAL :: ZEPS2
 REAL,    PARAMETER :: ZACLS_HS = 1.0   ! Tunable parameter a in mix of Geleyn and Kullmann solutions
 
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

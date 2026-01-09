@@ -47,8 +47,7 @@ USE MODI_CH_CONVERSION_FACTOR
 !*       0.   DECLARATIONS
 !        -----------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 !
 IMPLICIT NONE
@@ -84,7 +83,7 @@ INTEGER                  :: JSNAP ! Loop counter on snap categories
 INTEGER                  :: JI, JT    ! Loop counter on points
 REAL,DIMENSION(KSIZE,2)    :: ZE  ! Emissions at beginning and end of the hour
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -222,7 +221,7 @@ IMPLICIT NONE
 INTEGER, DIMENSION(:), INTENT(IN) :: DATE, MONTH, YEAR
 INTEGER, DIMENSION(:), INTENT(OUT):: DOW
 INTEGER, DIMENSION(SIZE(DOW))     :: DAY, YR, MN, N1, N2
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('CH_EMISSION_SNAP_N:DAY_OF_WEEK_CH',0,ZHOOK_HANDLE)
 !

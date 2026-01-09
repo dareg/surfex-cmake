@@ -50,8 +50,7 @@ USE MODI_SUM_ON_ALL_PROCS
 USE MODI_ABOR1_SFX
 USE MODI_GET_INTERP_HALO
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -92,7 +91,7 @@ INTEGER :: IERR0
 INTEGER                        :: IERR1          ! number of points interpolated
 INTEGER                        :: IERR2          ! number of points not interpolated in the end
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('INTERPOL_FIELD:INTERPOL_FIELD2D',0,ZHOOK_HANDLE)

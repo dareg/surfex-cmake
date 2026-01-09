@@ -59,7 +59,7 @@ USE MODD_SURF_ATM,       ONLY : LCPL_GCM, XCO2UNCPL
 USE MODD_DATA_COVER_PAR, ONLY : NTILESFC
 !
 !
-USE MODD_SURFEX_MPI, ONLY : XTIME_SEA, XTIME_WATER, XTIME_NATURE, XTIME_TOWN
+USE MODD_SURFEX_MPI, ONLY : XTIME_SEA, XTIME_WATER, XTIME_NATURE, XTIME_TOWN, LSFX_MPI
 !
 USE MODI_ADD_FORECAST_TO_DATE_SURF
 USE MODI_AVERAGE_FLUX
@@ -72,8 +72,7 @@ USE MODI_CH_EMISSION_TO_ATM_n
 USE MODI_SSO_Z0_FRICTION_n
 USE MODI_SSO_BE04_FRICTION_n
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -208,7 +207,7 @@ REAL :: XTIME0
 !
 INTEGER :: IINDEXEND
 INTEGER :: INBTS, JI , JIMP
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_ATM_N',0,ZHOOK_HANDLE)
@@ -289,7 +288,7 @@ END IF
 !--------------------------------------------------------------------------------------
 !
 #ifdef SFX_MPI
-XTIME0 = MPI_WTIME()
+IF (LSFX_MPI) XTIME0 = MPI_WTIME()
 #endif
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! - - - - 
@@ -320,8 +319,10 @@ IF(GSEA)THEN
 ENDIF
 !
 #ifdef SFX_MPI
-XTIME_SEA = XTIME_SEA + (MPI_WTIME() - XTIME0)*100./MAX(1,YSC%U%NSIZE_SEA)
-XTIME0 = MPI_WTIME()
+IF (LSFX_MPI) THEN
+  XTIME_SEA = XTIME_SEA + (MPI_WTIME() - XTIME0)*100./MAX(1,YSC%U%NSIZE_SEA)
+  XTIME0 = MPI_WTIME()
+ENDIF
 #endif
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -339,8 +340,10 @@ IF(GWATER)THEN
 ENDIF 
 !
 #ifdef SFX_MPI
-XTIME_WATER = XTIME_WATER + (MPI_WTIME() - XTIME0)*100./MAX(1,YSC%U%NSIZE_WATER)
-XTIME0 = MPI_WTIME()
+IF (LSFX_MPI) THEN
+  XTIME_WATER = XTIME_WATER + (MPI_WTIME() - XTIME0)*100./MAX(1,YSC%U%NSIZE_WATER)
+  XTIME0 = MPI_WTIME()
+ENDIF
 #endif
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -358,8 +361,10 @@ IF(GNATURE)THEN
 ENDIF 
 !
 #ifdef SFX_MPI
-XTIME_NATURE = XTIME_NATURE + (MPI_WTIME() - XTIME0)*100./MAX(1,YSC%U%NSIZE_NATURE)
-XTIME0 = MPI_WTIME()
+IF (LSFX_MPI) THEN
+  XTIME_NATURE = XTIME_NATURE + (MPI_WTIME() - XTIME0)*100./MAX(1,YSC%U%NSIZE_NATURE)
+  XTIME0 = MPI_WTIME()
+ENDIF
 #endif
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -377,7 +382,7 @@ IF(GTOWN)THEN
 ENDIF 
 !
 #ifdef SFX_MPI
-XTIME_TOWN = XTIME_TOWN + (MPI_WTIME() - XTIME0)*100./MAX(1,YSC%U%NSIZE_TOWN)
+IF (LSFX_MPI) XTIME_TOWN = XTIME_TOWN + (MPI_WTIME() - XTIME0)*100./MAX(1,YSC%U%NSIZE_TOWN)
 #endif
 !
 ! - - - - -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -532,7 +537,7 @@ REAL, DIMENSION(KSIZE) :: ZP_PEQ_A_COEF
 REAL, DIMENSION(KSIZE) :: ZP_PET_B_COEF
 REAL, DIMENSION(KSIZE) :: ZP_PEQ_B_COEF
 INTEGER :: JJ, JK
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_ATM_n:TREAT_SURF',0,ZHOOK_HANDLE)
 !
@@ -743,7 +748,7 @@ REAL                        :: ZVAR                   ! work variables
 REAL                        :: TOROTXS, TOROTYS       ! work variables
 REAL                        :: CSSO, VSSO2, CSSO1     ! tunable coefficients
 
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_ATM_n:OROTUR',0,ZHOOK_HANDLE)
 

@@ -42,8 +42,7 @@ USE MODD_SURf_PAR,   ONLY : NUNDEF
 USE MODI_CONVERT_COVER_FRAC
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -68,7 +67,7 @@ INTEGER, INTENT(IN)              :: KLUOUT   ! output listing logical unit
 !              -------------------------------
 !
 INTEGER           :: ILU    ! total horizontal size
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*       1.     Dimension initializations:
@@ -122,7 +121,7 @@ REAL, DIMENSION(KLU) :: ZWATER ! water cover
 REAL, DIMENSION(KLU) :: ZLAND  ! land cover
 REAL, DIMENSION(KLU) :: ZSURF
 INTEGER :: ILU2
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('GET_SURF_MASK_N:GET_MASK',0,ZHOOK_HANDLE)
 !

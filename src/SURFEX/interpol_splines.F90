@@ -61,8 +61,7 @@ USE MODD_SURF_PAR,    ONLY : XUNDEF
 !
 USE MODE_SPLINES
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -134,7 +133,7 @@ REAL,    DIMENSION(:,:,:), ALLOCATABLE :: ZC        ! coefficients of the spline
 REAL,    DIMENSION(IDATAMAX+3*IMMAX)   :: ZWE       ! work array
 !
 !INTEGER, DIMENSION(2,IM)   :: IW
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*    1.     Miscellaneous Initializations

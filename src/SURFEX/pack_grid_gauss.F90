@@ -36,8 +36,7 @@ USE MODI_PACK_SAME_RANK
 USE MODE_GRIDTYPE_GAUSS
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -86,7 +85,7 @@ REAL, DIMENSION(:), ALLOCATABLE    :: ZLONINF2    ! Grid corner Longitude  Inf
 INTEGER                            :: IL        ! total number of points
 
 REAL, DIMENSION(:), POINTER       :: ZGRID_PAR2 ! parameters of output grid
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PACK_GRID_GAUSS',0,ZHOOK_HANDLE)

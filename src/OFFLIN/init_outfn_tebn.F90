@@ -57,8 +57,7 @@ USE MODI_DEF_VAR_NETCDF
 USE MODI_OL_WRITE_COORD
 USE MODI_OL_WRITE_PROJ
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE NETCDF
 !
@@ -99,7 +98,7 @@ INTEGER                          :: JRET, JFILE
 REAL,DIMENSION(:), POINTER     :: ZX, ZY
 REAL,DIMENSION(:), POINTER    :: ZLAT,ZLON
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 

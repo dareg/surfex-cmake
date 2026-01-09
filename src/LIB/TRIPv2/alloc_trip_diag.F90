@@ -28,8 +28,7 @@
 !
 USE MODD_TRIP_DIAG, ONLY : TRIP_DIAG_t
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -42,7 +41,7 @@ INTEGER, INTENT(IN)          :: KLON, KLAT
 !
 !*      0.2    declarations of output variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
@@ -75,7 +74,7 @@ IMPLICIT NONE
 !
 TYPE(DIAG) :: TPDIAG
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ALLOC_TRIP_DIAG:ALLOC_DIAG',0,ZHOOK_HANDLE)
 !

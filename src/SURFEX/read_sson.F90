@@ -56,7 +56,7 @@ USE MODI_READ_SURF
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
@@ -88,7 +88,7 @@ REAL(KIND=JPRB)   :: ZEPS             ! Imposed minimum difference between Hmin 
 REAL(KIND=JPRB)   :: ZHMAXFRAC        ! Fraction of direct solar radiation seen if zenith == hmax
 REAL(KIND=JPRB), DIMENSION(:,:), ALLOCATABLE :: ZDIFF            ! Difference between Hmin and Hmax
 
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

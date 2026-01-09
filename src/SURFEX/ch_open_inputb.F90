@@ -51,8 +51,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -67,7 +66,7 @@ INTEGER,          INTENT(IN) :: KLUOUT           ! output listing logical unit
 !*      0.2    declarations of local variables
 !
  CHARACTER(LEN=79) :: YIN ! character string for line-by-line read
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

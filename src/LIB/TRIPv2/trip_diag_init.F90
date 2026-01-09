@@ -28,8 +28,7 @@ USE MODN_TRIP_RUN,  ONLY : LDIAG_MISC
 USE MODN_TRIP,      ONLY : CGROUNDW, CVIT, LFLOOD
 USE MODD_TRIP_PAR,  ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -61,7 +60,7 @@ REAL                , INTENT(OUT) :: PGOUT_ALL  !Global gw outflow              
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('TRIP_DIAG_INIT',0,ZHOOK_HANDLE)

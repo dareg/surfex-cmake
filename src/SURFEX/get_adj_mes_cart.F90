@@ -35,8 +35,7 @@
 USE MODE_GRIDTYPE_CARTESIAN
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -58,7 +57,7 @@ REAL, DIMENSION(KL) :: ZX, ZY
 INTEGER             :: IIMAX, IJMAX
 INTEGER             :: JI, JJ
 INTEGER             :: JL
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_ADJ_MES_CART',0,ZHOOK_HANDLE)

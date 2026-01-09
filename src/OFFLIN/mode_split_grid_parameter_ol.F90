@@ -15,8 +15,7 @@ CONTAINS
 !
 !!****  * - routine to split a real array on the splitted grid 
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -35,7 +34,7 @@ REAL, DIMENSION(KSIZE), INTENT(OUT):: PFIELD_SPLIT! real field for splitted grid
 !
 !*      0.2   Declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_SPLIT_GRID_PARAMETER_OL:SPLIT_GRID_PARAMETERX1_OL',0,ZHOOK_HANDLE)
@@ -59,8 +58,7 @@ END SUBROUTINE SPLIT_GRID_PARAMETERX1_OL
 !
 !!****  * - routine to define an integer related to splitted grid
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 !
 IMPLICIT NONE
@@ -74,7 +72,7 @@ INTEGER,           INTENT(IN) :: KFIELD       ! integer scalar for complete grid
 INTEGER,           INTENT(OUT):: KFIELD_SPLIT ! integer scalar for splitted grid
 !*      0.2   Declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_SPLIT_GRID_PARAMETER_OL:SPLIT_GRID_PARAMETERN0_OL',0,ZHOOK_HANDLE)

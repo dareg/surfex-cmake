@@ -34,8 +34,7 @@ USE MODD_CANOPY_n, ONLY : CANOPY_t
 USE MODD_CSTS,         ONLY : XRD, XCPD, XP00, XG, XPI
 USE MODD_SURF_PAR,     ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_CANOPY
 !
@@ -89,7 +88,7 @@ REAL, DIMENSION(KI,SB%NLVL) :: ZDENSITY
 REAL, DIMENSION(KI,SB%NLVL) :: ZAIRVOL   ! Fraction of air for each canopy level total volume
 REAL, DIMENSION(KI,SB%NLVL) :: ZP        ! pressure              at full levels
 REAL, DIMENSION(KI,SB%NLVL) :: ZEXN      ! Exner function        at full levels
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

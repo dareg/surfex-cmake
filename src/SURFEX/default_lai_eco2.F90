@@ -7,14 +7,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2002_01
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -105,14 +104,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2003_01
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -203,14 +201,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2004_01
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -301,14 +298,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2005_01
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -399,14 +395,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2006_01
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -497,14 +492,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2002_02
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -595,14 +589,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2003_02
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -693,14 +686,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2004_02
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -791,14 +783,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2005_02
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -889,14 +880,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2006_02
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -987,14 +977,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2002_03
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -1085,14 +1074,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2003_03
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -1183,14 +1171,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2004_03
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -1281,14 +1268,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2005_03
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -1379,14 +1365,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2006_03
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -1477,14 +1462,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2002_04
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -2619,14 +2603,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2003_04
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -3761,14 +3744,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2004_04
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -4903,14 +4885,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2005_04
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -6045,14 +6026,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2006_04
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -7187,14 +7167,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2002_05
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -8329,14 +8308,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2003_05
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -9471,14 +9449,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2004_05
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -10613,14 +10590,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2005_05
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -11755,14 +11731,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2006_05
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -12897,14 +12872,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2002_06
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -12923,14 +12897,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2003_06
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -12949,14 +12922,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2004_06
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -12975,14 +12947,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2005_06
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -13001,14 +12972,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2006_06
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -13027,14 +12997,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2002_07
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -14169,14 +14138,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2003_07
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -15311,14 +15279,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2004_07
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -16453,14 +16420,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2005_07
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -17595,14 +17561,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2006_07
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -18737,14 +18702,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2002_08
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -19879,14 +19843,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2003_08
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -21021,14 +20984,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2004_08
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -22163,14 +22125,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2005_08
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -23305,14 +23266,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2006_08
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -24447,14 +24407,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2002_09
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -25589,14 +25548,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2003_09
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -26731,14 +26689,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2004_09
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -27873,14 +27830,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2005_09
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -29015,14 +28971,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2006_09
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -30157,14 +30112,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2002_10
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -31299,14 +31253,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2003_10
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -32441,14 +32394,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2004_10
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -33583,14 +33535,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2005_10
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -34725,14 +34676,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2006_10
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -35867,14 +35817,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2002_11
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -37009,14 +36958,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2003_11
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -38151,14 +38099,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2004_11
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -39293,14 +39240,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2005_11
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -40435,14 +40381,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2006_11
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -41577,14 +41522,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2002_12
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -42719,14 +42663,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2003_12
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -43861,14 +43804,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2004_12
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -45003,14 +44945,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2005_12
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -46145,14 +46086,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2006_12
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -47287,14 +47227,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2002_13
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -47313,14 +47252,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2003_13
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -47339,14 +47277,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2004_13
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -47365,14 +47302,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2005_13
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -47391,14 +47327,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2006_13
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -47417,14 +47352,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2002_14
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -48559,14 +48493,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2003_14
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -49701,14 +49634,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2004_14
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -50843,14 +50775,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2005_14
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -51985,14 +51916,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2006_14
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -53127,14 +53057,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2002_15
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -54269,14 +54198,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2003_15
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -55411,14 +55339,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2004_15
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -56553,14 +56480,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2005_15
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -57695,14 +57621,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2006_15
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -58837,14 +58762,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2002_16
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -59979,14 +59903,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2003_16
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -61121,14 +61044,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2004_16
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -62263,14 +62185,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2005_16
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -63405,14 +63326,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2006_16
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -64547,14 +64467,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2002_17
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -64573,14 +64492,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2003_17
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -64599,14 +64517,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2004_17
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -64625,14 +64542,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2005_17
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -64651,14 +64567,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2006_17
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -64677,14 +64592,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2002_18
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -65819,14 +65733,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2003_18
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -66961,14 +66874,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2004_18
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -68103,14 +68015,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2005_18
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -69245,14 +69156,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2006_18
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -70387,14 +70297,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2002_19
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -71529,14 +71438,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2003_19
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -72671,14 +72579,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2004_19
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -73813,14 +73720,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2005_19
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -74955,14 +74861,13 @@ SUBROUTINE DEFAULT_LAI_ECO2_Y2006_19
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !

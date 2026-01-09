@@ -47,8 +47,7 @@ USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_TEBD,    &
                                  NVT_BOND, NVT_BOGR, NVT_SHRB, NVT_C3W,  &
                                  NVT_C3S, NVT_FLTR, NVT_FLGR, NVEGTYPE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -62,7 +61,7 @@ INTEGER,        INTENT(IN) :: INPATCH  !total number of PATCHES used
 INTEGER                    :: IPATCH_NB! PATCH index corresponding to the vegtype IVEGTYPE  
 !
  CHARACTER(LEN=2) :: YVEGTYPE
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*      0.2    declarations of local variables
 !

@@ -42,8 +42,7 @@
 USE MODD_IO_BUFF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -62,7 +61,7 @@ LOGICAL,            INTENT(OUT):: OKNOWN   ! T : field has already been read/wri
 !              -------------------------------
 !
 INTEGER :: JLOOP
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('IO_BUFF',0,ZHOOK_HANDLE)

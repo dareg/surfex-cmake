@@ -39,8 +39,7 @@ USE MODD_OCEAN_GRID
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 ! 
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -60,7 +59,7 @@ REAL, DIMENSION(SIZE(O%XSEAT(:,1))) :: ZTMOY,ZSMOY,ZUMOY,ZVMOY,ZDMOY
 INTEGER, DIMENSION(SIZE(O%XSEAT(:,1))) :: IHMOLEVEL
 INTEGER :: INBPTS, IK1, IK2
 INTEGER :: J,JPT
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !
@@ -182,7 +181,7 @@ REAL ::  R   ! density
 !*       0.2 local variables
 !
 REAL :: DET,DES
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !*       1.     COMPUTE R
 !               ---------

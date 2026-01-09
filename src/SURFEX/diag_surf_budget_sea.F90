@@ -41,8 +41,7 @@ USE MODD_CSTS,           ONLY : XSTEFAN, XLSTT, XLVTT
 USE MODD_WATER_PAR,      ONLY : XEMISWATICE, XALBSEAICE
 ! 
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 USE MODI_ABOR1_SFX
 !
 IMPLICIT NONE
@@ -82,7 +81,7 @@ REAL, DIMENSION(:), INTENT(IN) :: PSFMER_ICE! meridional friction
 INTEGER                      :: I
 INTEGER                      :: ISWB ! number of SW bands
 INTEGER                      :: JSWB ! loop counter on number of SW bands
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_BUDGET_SEA',0,ZHOOK_HANDLE)

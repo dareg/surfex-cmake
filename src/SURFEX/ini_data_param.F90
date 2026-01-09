@@ -85,8 +85,7 @@ USE MODI_ABOR1_SFX
 USE MODI_VEG_HEIGHT_FROM_LAI
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -148,7 +147,7 @@ INTEGER            :: IVT_C3, IVT_C3W, IVT_C3S, IVT_PARK, IVT_FLTR, IVT_FLGR
 INTEGER            :: JC                     ! class loop counter
 !
 INTEGER            :: JM                     ! month loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------

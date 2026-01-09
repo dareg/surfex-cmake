@@ -10,8 +10,8 @@
 !############################################################################
 !############################################################################
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB, JPRD
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
+USE PARKIND1  ,ONLY : JPRD
 !
 CONTAINS
 !############################################################################
@@ -96,7 +96,7 @@ INTEGER                         :: IXORMIN, IYORMIN
 INTEGER                         :: IROOT, IROOTPROC
 #endif
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:PUT_GRIDTYPE_CONF_PROJ',0,ZHOOK_HANDLE)
 !
@@ -267,7 +267,7 @@ INTEGER :: IL, IIMAX, IJMAX
 INTEGER :: JI, JJ ! loop counters
 LOGICAL :: GFULL    ! T : entire grid is stored
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:GET_GRIDTYPE_CONF_PROJ',0,ZHOOK_HANDLE)
 !
@@ -423,7 +423,7 @@ REAL                      :: ZXBM0,ZYBM0,ZRO0,ZGA0
 REAL(KIND=JPRD)           :: ZXP,ZYP,ZT1,ZEPSI,ZCGAM,ZSGAM,ZRACLAT0,ZCLAT0,ZRPK,ZSLAT0
 !
 REAL(KIND=JPRD) :: ZATA,ZT2,ZRO2,ZXMI0,ZYMI0,ZLATTMP,ZXI,ZYI,ZIRDSDG
-REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !
 !--------------------------------------------------------------------------------
 !
@@ -682,7 +682,7 @@ REAL :: ZCLAT,ZSLAT,ZRO,ZGA,ZXPR,ZYPR
 !
 INTEGER :: J, ISIZE_OMP
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !
 !
 !-------------------------------------------------------------------------------
@@ -909,7 +909,7 @@ REAL                              :: ZSLAT0   ! sin(lat0)
 REAL                              :: ZRDSDG   ! pi/180
 LOGICAL                           :: GNORTHPROJ! T: projection from north pole
 INTEGER                           :: I
-REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 INTEGER :: J, ISIZE_OMP
 !
 !-------------------------------------------------------------------------------

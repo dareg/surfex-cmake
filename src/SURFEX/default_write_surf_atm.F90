@@ -39,8 +39,7 @@
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -50,7 +49,7 @@ IMPLICIT NONE
 LOGICAL,           INTENT(OUT) :: ONOWRITE_CANOPY  ! flag to desactivate writing of canopy fields
 LOGICAL,           INTENT(OUT) :: ONOWRITE_TEXFILE ! flag to desactivate writing of tex file
 LOGICAL,           INTENT(OUT) :: OSPLIT_PATCH
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------

@@ -43,8 +43,7 @@ USE MODE_GRIDTYPE_CONF_PROJ
 USE MODE_SPLIT_GRID_PARAMETER
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 !
 IMPLICIT NONE
@@ -62,7 +61,7 @@ INTEGER, OPTIONAL,  INTENT(IN)    :: KHALO ! size of the Halo
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !* original grid
 REAL                            :: ZLAT0, ZLON0, ZRPK, ZBETA, ZLATOR, ZLONOR

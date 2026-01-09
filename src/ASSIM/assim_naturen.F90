@@ -37,7 +37,7 @@ USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 !
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
-USE YOMHOOK,         ONLY : LHOOK,   DR_HOOK
+USE YOMHOOK,         ONLY : LHOOK,   DR_HOOK, JPHOOK
 USE PARKIND1,        ONLY : JPRB
 !
 USE MODI_GET_LUOUT
@@ -80,7 +80,7 @@ REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLAT
 !
 !
 INTEGER         :: ILUOUT
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_N',0,ZHOOK_HANDLE)

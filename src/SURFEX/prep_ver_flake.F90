@@ -38,8 +38,7 @@ USE MODD_FLAKE_n, ONLY : FLAKE_t
 !
 USE MODD_PREP,       ONLY : XZS_LS, XT_CLIM_GRAD
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -51,7 +50,7 @@ IMPLICIT NONE
 TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
 REAL, DIMENSION(:), ALLOCATABLE :: ZTS_LS ! large-scale water temperature
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('PREP_VER_FLAKE',0,ZHOOK_HANDLE)

@@ -94,8 +94,7 @@ USE MODE_THERMOS
 !
 USE MODE_SURF_SNOW_FRAC
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -147,7 +146,7 @@ REAL, DIMENSION(:), INTENT(IN)      :: PSNOW_THRUFAL
 REAL, DIMENSION(:,:), INTENT(IN)    :: PSOILCONDZ
 !                                      PSOILCONDZ= ISBA-DF Soil conductivity profile  [W/(m K)]
 !
-REAL, DIMENSION(:), INTENT(OUT)     :: PLE_FLOOD, PLEI_FLOOD !Floodplains latent heat flux [W/m²]
+REAL, DIMENSION(:), INTENT(OUT)     :: PLE_FLOOD, PLEI_FLOOD !Floodplains latent heat flux [W/mÂ²]
 !
 REAL, DIMENSION(:), INTENT(OUT)     :: PRN, PH, PLE, PLEG, PLEV, PLES
 REAL, DIMENSION(:), INTENT(OUT)     :: PLER, PLETR, PEVAP, PGFLUX, PMELTADV, PMELT
@@ -214,7 +213,7 @@ LOGICAL         :: GMODSNOWMELT
 !
 REAL, DIMENSION(SIZE(PTA))      :: ZWORK1, ZWORK2, ZWORK3
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !-------------------------------------------------------------------------------

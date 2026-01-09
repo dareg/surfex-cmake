@@ -23,8 +23,7 @@ USE MODI_CLOSE_NAMELIST
 USE MODE_POS_SURF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -33,7 +32,7 @@ IMPLICIT NONE
 INTEGER :: ILUNAM         ! logical unit of namelist file
 INTEGER :: ILUOUT
 LOGICAL :: GFOUND         ! Return code when searching namelist
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !---------------------------------------
 !

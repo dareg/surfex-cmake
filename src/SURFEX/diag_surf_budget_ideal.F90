@@ -33,8 +33,7 @@
 !!      Original    03/2015
 !!------------------------------------------------------------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -73,7 +72,7 @@ REAL, DIMENSION(:), INTENT(OUT):: PFMV     ! meridional friction
 !
 INTEGER                      :: ISWB ! number of SW bands
 INTEGER                      :: JSWB ! loop counter on number of SW bands
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 !

@@ -37,8 +37,7 @@ USE MODI_PACK_SAME_RANK
 USE MODE_GRIDTYPE_CONF_PROJ
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -86,7 +85,7 @@ INTEGER                           :: IWIDTH_I_Y ! width of I zone
 REAL                              :: ZTRUNC     ! spectral truncation factor
 
 REAL, DIMENSION(:), POINTER       :: ZGRID_PAR2 ! parameters of output grid
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 !*    2.     Computes grid parameters

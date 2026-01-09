@@ -49,8 +49,7 @@ USE MODD_SFX_OASIS, ONLY : LCPL_LAKE, LCPL_CALVING, LCPL_GW
 !
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -66,7 +65,7 @@ INTEGER, INTENT(IN) :: KLUOUT
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

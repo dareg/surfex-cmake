@@ -66,8 +66,7 @@
 USE MODD_CSTS,ONLY : XPI, XRADIUS
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -102,7 +101,7 @@ REAL                      :: ZXBM0,ZYBM0,ZRO0,ZGA0
 REAL                      :: ZXP,ZYP,ZEPSI,ZT1,ZCGAM,ZSGAM,ZRACLAT0
 !
 REAL, DIMENSION(NDIM)     :: ZATA,ZRO2,ZT2,ZXMI0,ZYMI0
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !--------------------------------------------------------------------------------
 !

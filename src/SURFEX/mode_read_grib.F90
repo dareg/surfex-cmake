@@ -10,8 +10,7 @@ MODULE MODE_READ_GRIB
 USE MODI_ABOR1_SFX
 USE GRIB_API
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 CONTAINS
 !-------------------------------------------------------------------
@@ -26,7 +25,7 @@ IMPLICIT NONE
  CHARACTER(LEN=*), INTENT(IN) :: HGRIB
 !
 INTEGER(KIND=kindOfInt) :: IRET
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:MAKE_GRIB_INDEX',0,ZHOOK_HANDLE)
 !
@@ -54,7 +53,7 @@ IMPLICIT NONE
 !
 INTEGER(KIND=kindOfInt) :: IRET
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:CLEAR_GRIB_INDEX',0,ZHOOK_HANDLE)
 !
@@ -90,7 +89,7 @@ INTEGER :: ILEV1
 INTEGER :: ILEV2
 INTEGER(KIND=kindOfInt) :: IRET
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:GET_GRIB_MESSAGE',0,ZHOOK_HANDLE)
 !
@@ -153,7 +152,7 @@ INTEGER, INTENT(IN) :: VAL1
 INTEGER, INTENT(INOUT) :: VAL0
 INTEGER(KIND=kindOfInt), INTENT(INOUT) :: KRET   ! number of the message researched
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:TEST_IRET',0,ZHOOK_HANDLE)
 !
@@ -199,7 +198,7 @@ REAL, DIMENSION(:), POINTER, OPTIONAL   :: PLATS, PLONS
 INTEGER :: ILTYPE, ILEV1, ILEV2
 INTEGER(KIND=kindOfInt) :: IGRIB
 INTEGER :: ISIZE, IFOUND
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB',0,ZHOOK_HANDLE)
 !
@@ -305,7 +304,7 @@ INTEGER                           :: ILTYPE    ! leveltype
 INTEGER                           :: ILEV      ! level
 REAL                              :: ZFR_SMALL, ZFR_LARGE
 INTEGER                           :: IPOINT    ! horizontal grid-box number
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_LAND_MASK',0,ZHOOK_HANDLE)
 WRITE (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_LAND_MASK: | Reading land mask from ',HINMODEL
@@ -374,7 +373,7 @@ REAL, DIMENSION(:), POINTER       :: PZS       !
 !
 INTEGER(KIND=kindOfInt)                           :: IRET      ! return code
 INTEGER :: ILTYPE,ILEV1
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 !* Read orography
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_ZS',0,ZHOOK_HANDLE)
@@ -422,7 +421,7 @@ INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
 REAL, DIMENSION(:), INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:), POINTER       :: PZSL      ! 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_ZS_LAND',0,ZHOOK_HANDLE)
 !
@@ -448,7 +447,7 @@ INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
 REAL, DIMENSION(:), INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:), POINTER       :: PZSS      ! 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_ZS_SEA',0,ZHOOK_HANDLE)
 !
@@ -478,7 +477,7 @@ REAL, DIMENSION(:), POINTER       :: PT        !
 INTEGER(KIND=kindOfInt)                           :: IRET      ! return code
 INTEGER                           :: ILTYPE    ! type of level (Grib code table 3)
 INTEGER                           :: ILEV      ! level definition
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 !* Read surface temperature
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_T',0,ZHOOK_HANDLE)
@@ -535,7 +534,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:), POINTER       :: PTS       ! 
 REAL, DIMENSION(:),   INTENT(IN), OPTIONAL :: PLFRAC ! grib land fraction
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_TS',0,ZHOOK_HANDLE)
 !
@@ -576,7 +575,7 @@ REAL, DIMENSION(:), ALLOCATABLE   :: ZTS       ! surface temperature
 !
 REAL  :: ZMIN, ZMAX  ! Min and max values
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_SST',0,ZHOOK_HANDLE)
 WRITE (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_SST: | Reading sea surface temperature from ',HINMODEL
@@ -662,7 +661,7 @@ REAL, POINTER                     :: ZLATS_RAW(:),  &
 !
 REAL  :: ZMIN, ZMAX  ! Min and max values
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !-------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_SIC',0,ZHOOK_HANDLE)
@@ -700,7 +699,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:), POINTER       :: PTS     ! 
 !
 INTEGER :: IRET
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_TSWATER',0,ZHOOK_HANDLE)
 WRITE (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_TSWATER: | Reading water temperature from ',HINMODEL
@@ -736,7 +735,7 @@ REAL, DIMENSION(:), POINTER       :: PT2       !
 !
 INTEGER(KIND=kindOfInt)                           :: IRET
 INTEGER                           :: ILTYPE, ILEV    ! type of level (Grib code table 3)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 !* Read deep soil temperature
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_T2',0,ZHOOK_HANDLE)
@@ -788,7 +787,7 @@ INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
 REAL, DIMENSION(:), INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:), POINTER       :: ZFIELD    ! 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 !* Read deep soil temperature
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_T2_LAND',0,ZHOOK_HANDLE)
@@ -815,7 +814,7 @@ INTEGER, INTENT(IN) :: KNLAYERDEEP
 REAL, INTENT(IN) :: PV4
 REAL, INTENT(IN) :: PV
 REAL, INTENT(OUT) :: PD
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:PUT_LAYER_DEPTH',0,ZHOOK_HANDLE)
 !
@@ -857,7 +856,7 @@ CHARACTER(3), INTENT(IN), OPTIONAL :: HVAR ! which field to fill
 !
  CHARACTER(LEN=20) :: FMT0
 INTEGER :: JL, JP
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:FILL_PFIELD',0,ZHOOK_HANDLE)
 !--------------------------------------------------------------------------------
@@ -939,7 +938,7 @@ INTEGER                           :: INLAYERDEEP! number of deep moisture layers
 REAL,    DIMENSION(:), POINTER    :: ZFIELD => NULL()  ! first layer temperature
 REAL,  DIMENSION(:,:), ALLOCATABLE:: ZTG      ! first layer temperature
 REAL, DIMENSION(:)   , ALLOCATABLE:: ZD
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !--------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_TG_ECMWF',0,ZHOOK_HANDLE)
 WRITE  (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_TG_ECMWF: | Reading soil temperature'
@@ -1085,7 +1084,7 @@ INTEGER                           :: INLAYERDEEP! number of deep moisture layers
 REAL,    DIMENSION(:), POINTER    :: ZFIELD => NULL()  ! first layer temperature
 REAL,  DIMENSION(:,:), ALLOCATABLE:: ZWG      ! first layer temperature
 REAL, DIMENSION(:)   , ALLOCATABLE:: ZD
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !--------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_WG_ECMWF_1',0,ZHOOK_HANDLE)
 WRITE  (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_WG_ECMWF_1: | Reading soil moisture'
@@ -1207,7 +1206,7 @@ REAL, DIMENSION(:),   INTENT(IN), OPTIONAL :: PLFRAC ! grib land fraction
 !  ---------------
 REAL  :: ZT1, ZT2  ! Temperature threshold
 INTEGER :: JP,JL
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !--------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:ECMWF_WGI',0,ZHOOK_HANDLE)
 !
@@ -1284,7 +1283,7 @@ REAL,  DIMENSION(:,:), POINTER :: ZTG => NULL()          ! profile of temperatur
 REAL,  DIMENSION(:,:), POINTER :: ZDT => NULL()          ! thickness of each temperature layer
 REAL,  DIMENSION(:,:), ALLOCATABLE:: ZWGI      ! profile of soil ice contents
 REAL  :: ZT1, ZT2  ! Temperature threshold
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !--------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:HARMONIZE_GRIB_WG_WGI_ECMWF',0,ZHOOK_HANDLE)
 !
@@ -1374,7 +1373,7 @@ REAL,    DIMENSION(:), ALLOCATABLE:: ZWWILT     ! ECMWF wilting point
 REAL,    DIMENSION(:), ALLOCATABLE:: ZWFC       ! ECMWF field capacity
 INTEGER                           :: JL         ! loop counter on layers
 INTEGER, DIMENSION(:), POINTER    :: ISLT => NULL()       ! soil type integer
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_WG_ECMWF',0,ZHOOK_HANDLE)
 !
@@ -1518,7 +1517,7 @@ REAL,    DIMENSION(:), POINTER    :: ZSLT => NULL()      ! soil type
 REAL,  DIMENSION(:)  , ALLOCATABLE:: ZWSAT     ! ECMWF saturation
 INTEGER                           :: JL        ! loop counter on layers
 INTEGER, DIMENSION(:), POINTER    :: ISLT => NULL()       ! soil type integer
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !--------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_WGI_ECMWF',0,ZHOOK_HANDLE)
 !
@@ -1644,7 +1643,7 @@ REAL, DIMENSION(:,:), POINTER       :: PDT       ! thickness of each layer
 !  ---------------
 REAL,    DIMENSION(:), POINTER    :: ZFIELD => NULL()    ! field to read
 INTEGER                           :: JL         ! layer loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !--------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_TG_METEO_FRANCE',0,ZHOOK_HANDLE)
 WRITE  (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_TG_METEO_FRANCE: | Reading soil temperature'
@@ -1696,7 +1695,7 @@ LOGICAL, INTENT(OUT)                :: GISBA     ! T: surface scheme in file is 
 !  ---------------
 INTEGER(KIND=kindOfInt)                           :: IRET      ! return code
 INTEGER                           :: IPAR      ! parameter number for field reading
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 ! 1.  Search and read clay fraction if available
 !     ------------------------------------------
@@ -1765,7 +1764,7 @@ REAL,  DIMENSION(:),   ALLOCATABLE:: ZWWILT     ! wilting point
 REAL,  DIMENSION(:),   ALLOCATABLE:: ZWFC       ! field capacity
 REAL,  DIMENSION(:),   ALLOCATABLE:: ZWSAT      ! saturation
 INTEGER                           :: JL         ! layer loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_WG_METEO_FRANCE',0,ZHOOK_HANDLE)
 !
@@ -1915,7 +1914,7 @@ REAL,  DIMENSION(:),   POINTER    :: ZSAND => NULL()     ! sand fraction
 REAL,  DIMENSION(:),   POINTER    :: ZFIELD => NULL()
 REAL,  DIMENSION(:),   ALLOCATABLE:: ZWSAT      ! saturation
 INTEGER                           :: JL         ! layer loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_WGI_METEO_FRANCE',0,ZHOOK_HANDLE)
 !
@@ -2051,7 +2050,7 @@ INTEGER                           :: ILEV1     ! level definition
 INTEGER                           :: ILEV2     ! level definition
 REAL,  DIMENSION(:),   POINTER    :: ZFIELD => NULL()
 INTEGER                           :: JL         ! layer loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !--------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_TG_HIRLAM',0,ZHOOK_HANDLE)
 WRITE  (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_TG_HIRLAM: | Reading soil temperature'
@@ -2133,7 +2132,7 @@ REAL                              :: ZWWILT     ! ECMWF wilting point
 REAL                              :: ZWFC       ! ECMWF field capacity
 REAL                              :: ZWSAT      ! ECMWF saturation
 INTEGER                           :: JL         ! loop counter on layers
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !--------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_WG_HIRLAM',0,ZHOOK_HANDLE)
 WRITE  (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_WG_HIRLAM: | Reading soil moisture'
@@ -2215,7 +2214,7 @@ REAL, DIMENSION(:,:), POINTER       :: PD        ! thickness of each layer
 !
 !* local variables
 !  ---------------
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !--------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_WGI_HIRLAM',0,ZHOOK_HANDLE)
 !
@@ -2247,7 +2246,7 @@ REAL, DIMENSION(:),   POINTER      , OPTIONAL :: PTHICK    ! thickness of each l
 !  ---------------
 INTEGER                                       :: IERR      ! error handling
 INTEGER                                       :: INCSS     ! number of soil levels
-REAL(KIND=JPRB)                               :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK)                               :: ZHOOK_HANDLE
 !--------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:SURF_INQ',0,ZHOOK_HANDLE)
 !
@@ -2305,7 +2304,7 @@ REAL, DIMENSION(:),   POINTER       :: ZFIELD => NULL() ! temperature for 1 laye
 REAL, DIMENSION(:),   POINTER       :: ZTHICK => NULL() ! soil layer thickness per layer
 REAL, DIMENSION(:,:), ALLOCATABLE   :: ZTG       ! temperature per layer
 CHARACTER(LEN=1)                    :: YLEV      ! printing string for level
-REAL(KIND=JPRB)                     :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK)                     :: ZHOOK_HANDLE
 !--------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_TG_RACMO',0,ZHOOK_HANDLE)
 WRITE  (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_TG_RACMO: | Reading soil temperature'
@@ -2364,7 +2363,7 @@ REAL, DIMENSION(:),   POINTER       :: ZFIELD => NULL() ! moisture for 1 layer
 REAL, DIMENSION(:),   POINTER       :: ZTHICK => NULL() ! soil layer thickness per layer
 REAL, DIMENSION(:,:), ALLOCATABLE   :: ZWG       ! moisture per layer
 CHARACTER(LEN=1)                    :: YLEV      ! printing string for level
-REAL(KIND=JPRB)                     :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK)                     :: ZHOOK_HANDLE
 !--------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_WG_RACMO_1',0,ZHOOK_HANDLE)
 WRITE  (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_WG_RACMO_1: | Reading soil moisture'
@@ -2436,7 +2435,7 @@ INTEGER(KIND=kindOfInt)                           :: IRET      ! return code
 REAL, DIMENSION(:), POINTER       :: ZFIELD => NULL()    ! field to initialize
 REAL, DIMENSION(:), POINTER       :: ZFIELD2 => NULL()    ! field to initialize
 REAL, DIMENSION(:), POINTER       :: ZRHO => NULL() ! local field for snow density
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !--------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_SNOW_VEG_AND_DEPTH',0,ZHOOK_HANDLE)
 WRITE  (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_SNOW_VEG_AND_DEPTH: | Reading snow depth and density (if present)'
@@ -2559,7 +2558,7 @@ REAL, DIMENSION(:),   INTENT(IN), OPTIONAL :: PLFRAC ! grib land fraction
 !  ---------------
 INTEGER(KIND=kindOfInt)           :: IRET      ! return code
 REAL, DIMENSION(:), POINTER       :: ZFIELD => NULL()    ! field to initialize 
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !--------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_SNOW_ALB',0,ZHOOK_HANDLE)
 WRITE  (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_SNOW_ALB: | Reading snow albedo'
@@ -2649,7 +2648,7 @@ REAL, DIMENSION(:),   INTENT(IN), OPTIONAL :: PLFRAC ! grib land fraction
 !  ---------------
 INTEGER(KIND=kindOfInt)           :: IRET      ! return code
 REAL, DIMENSION(:), POINTER       :: ZFIELD => NULL()    ! field to initialize 
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !--------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_SNOW_DEN',0,ZHOOK_HANDLE)
 WRITE  (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_SNOW_DEN: | Reading snow density'
@@ -2729,7 +2728,7 @@ REAL, DIMENSION(:), POINTER           :: PWR       ! field to initialize, skin r
 !* local variables
 !  ---------------
 INTEGER(KIND=kindOfInt)               :: IRET      ! return code
-REAL(KIND=JPRB)                       :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK)                       :: ZHOOK_HANDLE
 !--------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_WR',0,ZHOOK_HANDLE)
 WRITE  (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_WR: | Reading skin reservoir content'
@@ -2785,7 +2784,7 @@ REAL, DIMENSION(:,:), POINTER       :: PD        ! normalized grid
 !  ---------------
 REAL, DIMENSION(:), POINTER       :: ZFIELD => NULL()    ! field to initialize
 INTEGER                           :: JL         ! layer loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !--------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_T_TEB',0,ZHOOK_HANDLE)
 WRITE  (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_T_TEB: | Reading temperature for buildings'
@@ -2837,7 +2836,7 @@ REAL, DIMENSION(:,:), POINTER       :: PD        ! thickness of each layer
 INTEGER(KIND=kindOfInt)           :: IRET      ! return code
 REAL,    DIMENSION(:), POINTER    :: ZFIELD => NULL()    ! field to read
 INTEGER                           :: JL         ! layer loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !--------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_TF_TEB',0,ZHOOK_HANDLE)
 WRITE  (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_TF_TEB: | Reading temperature for building floor'

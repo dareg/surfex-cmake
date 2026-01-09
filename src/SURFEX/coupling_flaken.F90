@@ -85,8 +85,7 @@ USE MODI_UPDATE_RAD_FLAKE
 USE MODI_ABOR1_SFX
 USE MODI_FLAKE_INTERFACE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 !
 IMPLICIT NONE
@@ -228,7 +227,7 @@ REAL                 :: ZEPS = 1.E-7
 !
 INTEGER :: IBEG, IEND
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 ! Preliminaries:
 !-------------------------------------------------------------------------------------

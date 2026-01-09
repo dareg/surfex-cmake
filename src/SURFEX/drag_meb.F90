@@ -81,8 +81,7 @@ USE MODI_SURFACE_AIR_MEB
 !
 USE MODE_THERMOS, ONLY : QSAT, QSATI
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -253,7 +252,7 @@ REAL, PARAMETER            :: ZRG_COEF1    = 8.206  ! Ground/litter resistance c
 REAL, PARAMETER            :: ZRG_COEF2    = 4.255  ! Ground/litter resistance coefficient 
 !
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*       0.     Initialization:

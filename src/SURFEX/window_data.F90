@@ -55,8 +55,7 @@ SUBROUTINE WINDOW_DATA(KI, B)
 USE MODD_BEM_n, ONLY : BEM_t
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -72,7 +71,7 @@ REAL, DIMENSION(KI) :: ZTRAN_WIN_NORM   ! Window transmittance for normal incide
 REAL, DIMENSION(KI) :: ZALB_WIN_NORM   ! Window reflectance for normal incident beam
 REAL,DIMENSION(KI)  :: ZFAC_TRAN ! transmittance factor of the window to the normal incidence
 REAL,DIMENSION(KI)  :: ZFAC_ALB  ! reflectance (albedo) factor of the window to normal incidence
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 REAL:: TA, RA, TBCD, RBCD, TD, RD, TE, RE, TFGHI, RFGHI, TFH, RFH, TJ, RJ
 !

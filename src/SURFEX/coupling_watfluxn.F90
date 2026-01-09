@@ -73,8 +73,7 @@ USE MODE_SBLS
 USE MODD_DST_SURF
 USE MODD_SLT_SURF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -199,7 +198,7 @@ INTEGER :: IBEG, IEND
 !
 LOGICAL                    :: GHANDLE_SIC = .FALSE. ! no sea-ice model
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 ! Preliminaries:

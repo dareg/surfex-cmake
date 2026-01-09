@@ -53,8 +53,7 @@
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_OCEAN_GRID
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -64,7 +63,7 @@ IMPLICIT NONE
 REAL                   :: ZUP,ZDOWN
 INTEGER            :: JLOOP
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !       1.     Allocations
@@ -175,7 +174,7 @@ USE MODD_OCEAN_CSTS,ONLY : XR,XD1,XD2
 !*      0.1    declarations of arguments
 !
 REAL :: RR,Z      
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !
 !-------------------------------------------------------------------------------

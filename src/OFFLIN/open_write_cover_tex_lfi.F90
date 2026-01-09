@@ -41,8 +41,7 @@ USE MODI_OPEN_FILE_LFI
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -60,7 +59,7 @@ INTEGER           :: IRESP
  CHARACTER(LEN=9)  :: YACTION
  CHARACTER(LEN=6)  :: YACCESS
  CHARACTER(LEN=6)  :: YPOSITION
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*       5.     Prints of cover parameters in a tex file

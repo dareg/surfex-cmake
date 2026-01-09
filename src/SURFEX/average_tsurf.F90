@@ -44,8 +44,7 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -63,7 +62,7 @@ REAL, DIMENSION(:),   INTENT(OUT):: PTSURF      ! surface effective temperature 
 INTEGER :: INI, INP  ! dimenssion
 INTEGER ::  JI, JP    ! loop counter
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('AVERAGE_TSURF',0,ZHOOK_HANDLE)

@@ -37,8 +37,7 @@ SUBROUTINE DSLT_INIT_MODES (KEQ, KSV_BEG, KSV_END, OVARSIG, ORGFIX, &
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -54,7 +53,7 @@ LOGICAL,                         INTENT(IN) :: OVARSIG   ! type of standard devi
 LOGICAL,                         INTENT(IN) :: ORGFIX    ! type of mean radius
 INTEGER,                         INTENT(OUT) :: KMDEBEG  ! Place in scalar list of dustmass in first mode
 INTEGER,                         INTENT(OUT) :: KMDE     ! Number of dust modes
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 
 !Check if you have a multiple of 3 dust related variables, and 

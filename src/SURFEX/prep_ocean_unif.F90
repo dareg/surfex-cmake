@@ -36,8 +36,7 @@ USE MODD_OCEAN_CSTS
 USE MODD_OCEAN_GRID
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -51,7 +50,7 @@ REAL, POINTER, DIMENSION(:,:,:)   :: PFIELD    ! field to interpolate horizontal
 REAL :: ZSSS_UNIF=37.6
 REAL :: ZGRADT,ZGRADS
 INTEGER :: JLEV
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !-------------------------------------------------------------------------------------

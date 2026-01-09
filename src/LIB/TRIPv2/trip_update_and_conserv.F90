@@ -45,8 +45,7 @@ USE MODN_TRIP,     ONLY : XCVEL
 USE MODD_TRIP_PAR, ONLY : XRHOLW
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -76,7 +75,7 @@ REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZRECUP_FINAL! ensure water conse
 !
 INTEGER :: ILON, ILAT, JLON, JLAT
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------

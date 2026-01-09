@@ -42,8 +42,7 @@ USE MODI_WRITE_SURF
 USE MODE_GRIDTYPE_LONLAT_ROT
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -74,7 +73,7 @@ REAL, DIMENSION(:), ALLOCATABLE :: ZLON ! longitude of points
 REAL, DIMENSION(:), ALLOCATABLE :: ZLAT ! latitude  of points
 !
 CHARACTER(LEN=100)                :: YCOMMENT ! comment written in the file
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !
 !*       1.    Grid parameters

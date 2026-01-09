@@ -51,8 +51,7 @@ USE MODD_DATA_COVER,     ONLY :   XDATA_LAI, XDATA_H_TREE, &
                                   XDATA_VEG, XDATA_GREEN, XDATA_Z0, XDATA_EMIS_ECO, &
                                   XDATA_Z0LITTER, XDATA_H_VEG, XDATA_LAIMIN
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ECOCLIMAP2_LAI
 !
@@ -74,7 +73,7 @@ INTEGER, INTENT(IN) :: KPATCH
 !
 INTEGER,             INTENT(IN)    :: KYEAR        ! new year
 INTEGER, SAVE :: IYEAR = 0
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !*    0.2    Declaration of local variables

@@ -38,8 +38,7 @@ USE MODI_TRIP_NEAREST
 !
 USE MODI_GWF_CPL_UPDATE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -67,7 +66,7 @@ REAL,   DIMENSION(KLAT)      :: ZLAT
 !
 INTEGER                      :: IWORK, JLON, JLAT
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

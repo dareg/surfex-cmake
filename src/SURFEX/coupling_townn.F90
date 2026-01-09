@@ -49,8 +49,7 @@ USE MODD_CSTS,       ONLY : XTT, XCPD, XRD, XP00
 !
 ! 
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_COUPLING_IDEAL_FLUX
 !
@@ -142,7 +141,7 @@ REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

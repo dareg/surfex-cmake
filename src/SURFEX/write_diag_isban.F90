@@ -37,8 +37,7 @@ USE MODD_DST_n, ONLY : DST_NP_t
 !
 USE MODD_SURF_PAR,    ONLY : XUNDEF
 ! 
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_WRITE_DIAG_MISC_ISBA_n
 USE MODI_WRITE_DIAG_PGD_ISBA_n
@@ -58,7 +57,7 @@ TYPE(DST_NP_t), INTENT(INOUT) :: NDST
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
  CHARACTER(LEN=3),   INTENT(IN)  :: HWRITE    ! 'PGD' : only physiographic fields are written
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !                                            ! 'ALL' : all fields are written
 !
 !*      0.2    declarations of local variables

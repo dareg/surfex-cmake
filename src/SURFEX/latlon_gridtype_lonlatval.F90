@@ -45,8 +45,7 @@ USE MODE_GRIDTYPE_LONLATVAL
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -67,7 +66,7 @@ REAL, DIMENSION(:),   ALLOCATABLE :: ZDX      ! size in X Lambert coordinate
 REAL, DIMENSION(:),   ALLOCATABLE :: ZDY      ! size in Y Lambert coordinate
 REAL, DIMENSION(:),   ALLOCATABLE :: ZDLAT   ! grid size in latitude  unit
 REAL, DIMENSION(:),   ALLOCATABLE :: ZDLON   ! grid size in longitude unit
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !
 !*       1.    Projection and 2D grid parameters

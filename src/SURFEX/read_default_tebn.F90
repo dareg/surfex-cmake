@@ -58,8 +58,7 @@ USE MODN_TEB_GREENROOF_n
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -86,7 +85,7 @@ LOGICAL           :: GFOUND         ! Return code when searching namelist
 INTEGER           :: ILUOUT         ! output listing logical unit
 INTEGER           :: ILUDES         ! .des file logical unit
 INTEGER           :: IMI
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_DEFAULT_TEB_N',0,ZHOOK_HANDLE)

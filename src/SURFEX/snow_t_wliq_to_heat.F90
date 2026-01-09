@@ -42,8 +42,7 @@ USE MODD_CSTS,       ONLY : XTT, XLMTT
 USE MODE_SNOW3L
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -55,7 +54,7 @@ REAL, DIMENSION(:), INTENT(OUT)          :: PHEAT  ! snow heat density        (J
 REAL, DIMENSION(:), INTENT(IN)           :: PRHO   ! snow density             (kg/m3)
 REAL, DIMENSION(:), INTENT(IN)           :: PT     ! snow temperature profile (K)
 REAL, DIMENSION(:), INTENT(IN), OPTIONAL :: PWLIQ  ! liquid water profile     (kg/m3)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !*      0.2    declarations of local variables
@@ -89,8 +88,7 @@ USE MODD_CSTS,       ONLY : XTT, XLMTT
 USE MODE_SNOW3L
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -102,7 +100,7 @@ REAL, DIMENSION(:,:), INTENT(OUT)          :: PHEAT  ! snow heat density        
 REAL, DIMENSION(:,:), INTENT(IN)           :: PRHO   ! snow density             (kg/m3)
 REAL, DIMENSION(:,:), INTENT(IN)           :: PT     ! snow temperature profile (K)
 REAL, DIMENSION(:,:), INTENT(IN), OPTIONAL :: PWLIQ  ! liquid water profile     (kg/m3)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !*      0.2    declarations of local variables
@@ -136,8 +134,7 @@ USE MODD_CSTS,       ONLY : XTT, XLMTT
 USE MODE_SNOW3L
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -149,7 +146,7 @@ REAL, DIMENSION(:,:,:), INTENT(OUT)          :: PHEAT  ! snow heat density      
 REAL, DIMENSION(:,:,:), INTENT(IN)           :: PRHO   ! snow density             (kg/m3)
 REAL, DIMENSION(:,:,:), INTENT(IN)           :: PT     ! snow temperature profile (K)
 REAL, DIMENSION(:,:,:), INTENT(IN), OPTIONAL :: PWLIQ  ! liquid water profile     (kg/m3)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !*      0.2    declarations of local variables

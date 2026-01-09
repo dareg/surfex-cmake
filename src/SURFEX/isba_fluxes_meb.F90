@@ -75,8 +75,7 @@ USE MODD_CSTS,           ONLY : XLVTT, XLSTT, XSTEFAN
 !
 USE MODI_ISBA_EMIS_MEB
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -230,7 +229,7 @@ REAL, DIMENSION(SIZE(PEK%XTV(:)))         :: ZQSATN_V, ZQSATIN_N, ZQSATN_G
 !                                                 over snow, we do not need to explicitly consider a "ZQSATN_N"
 !                                     ZQSATN_G  = saturation specific humidity (over water) for the understory (kg kg-1)
 !                
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*       0.     Initialization:

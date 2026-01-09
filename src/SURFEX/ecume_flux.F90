@@ -41,7 +41,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!      C. Lebeaupin  *Météo-France* (adapted from S. Belamari's code)
+!!      C. Lebeaupin  *MÃ©tÃ©o-France* (adapted from S. Belamari's code)
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -80,8 +80,7 @@ USE MODI_SURFACE_RI
 USE MODE_THERMOS
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 
@@ -176,7 +175,7 @@ REAL    :: ZALFAC,ZCPLW,ZDQSDT,ZDTMP,ZDWAT,ZP00,ZTAC,ZWW
 !
 INTEGER :: NITERFL         ! maximum number of iterations (5 or 6)
 INTEGER :: JLON, JJ
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ECUME_FLUX',0,ZHOOK_HANDLE)

@@ -20,8 +20,7 @@ MODULE MODE_AER_SURF
   USE MODD_CHS_AEROSOL
   USE MODD_DST_SURF, ONLY : XDENSITY_DST
 !
-  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-  USE PARKIND1  ,ONLY : JPRB
+  USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
   USE MODD_SURF_PAR , ONLY : XSURF_TINY
 !
   IMPLICIT NONE
@@ -41,7 +40,7 @@ REAL,DIMENSION(NSP+NCARB+NSOA)                     :: ZRHOI    ! aerosol density
 REAL                                               :: ZPI
 INTEGER                                            :: JJ
 REAL, PARAMETER                                    :: ZMOL = 6.0221367E+11
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_AER_SURF:INIT_VAR',0,ZHOOK_HANDLE)
 !
@@ -217,7 +216,7 @@ REAL,DIMENSION(NSP+NCARB+NSOA)                     :: ZFAC     ! M3 / mass conve
 REAL, PARAMETER                                    :: ZDEN2MOL = 1E-6 * 6.0221367E+23  / 28.9644E-3
 REAL                                               :: ZEMISRADIUSI, ZEMISRADIUSJ
 INTEGER                                            :: JJ, JN   ! [idx] loop counters
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_AER_SURF:PPP2AERO_SURF',0,ZHOOK_HANDLE)
@@ -407,7 +406,7 @@ REAL,DIMENSION(SIZE(PSVT,1), JPMODE*3) :: ZM                  ! [aerosol units] 
 REAL,DIMENSION(NSP+NCARB+NSOA)       :: ZFAC                ! M3 / mass conversion factor
 REAL, PARAMETER                      :: ZDEN2MOL = 1E-6 * 6.0221367E+23  / 28.9644E-3
 INTEGER                              :: JJ                  ! [idx] loop counters
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_AER_SURF:AERO2PPP_SURF',0,ZHOOK_HANDLE)

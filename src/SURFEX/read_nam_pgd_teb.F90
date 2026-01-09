@@ -58,8 +58,7 @@ USE MODI_CLOSE_NAMELIST
 USE MODE_POS_SURF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -104,7 +103,7 @@ LOGICAL                  :: LGREENROOF       ! key for greenroof activation
 LOGICAL                  :: LHYDRO           ! key for urban hydrology activation
 LOGICAL                  :: LSOLAR_PANEL     ! key for solar panel activation
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_TEB/ NTEB_PATCH, CBEM, CCOOL_COIL, CHEAT_COIL, LAUTOSIZE, &
                   NROAD_LAYER, NFLOOR_LAYER, NROOF_LAYER, NWALL_LAYER, &

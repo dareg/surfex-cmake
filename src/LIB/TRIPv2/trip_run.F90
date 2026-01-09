@@ -47,8 +47,7 @@ USE MODI_TRIP_DATE
 USE MODI_TRIP_OASIS_RECV
 USE MODI_TRIP_OASIS_SEND
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -99,7 +98,7 @@ INTEGER                    :: JNB_TSTEP_DIAG    ! DIAG call counter
 INTEGER                    :: ICOUNT
  CHARACTER(LEN=3)          :: YWORK
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 ! --------------------------------------------------------------------------------------
 ! * 1. Initialize

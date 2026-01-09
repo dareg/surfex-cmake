@@ -44,8 +44,7 @@ USE MODI_READ_SURF_FIELD2D
 USE MODI_OPEN_NAMELIST
 USE MODI_CLOSE_NAMELIST
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 !
 IMPLICIT NONE
@@ -84,7 +83,7 @@ INTEGER             :: JSNAP                 ! Loop index for SNAP categories
 INTEGER           :: IVERSION       ! version of surfex file being read
 INTEGER           :: IBUG           ! version of SURFEX bugfix
 INTEGER           :: ICH      ! unit of input chemical file
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('CH_INIT_SNAP_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)

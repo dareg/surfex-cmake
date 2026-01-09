@@ -47,8 +47,7 @@ FUNCTION CONTROL_MOIST_FUNC (PMOIST,PSAT) RESULT (PMOISTFUNC)
 !               ------------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -68,7 +67,7 @@ REAL, PARAMETER               :: ZCOEF3 = 0.29
 !
 REAL, DIMENSION(SIZE(PMOIST)) :: PMOISTFUNC    ! moisture control factor
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*      1.0    Calculates moisture control factor
 !

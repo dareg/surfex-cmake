@@ -42,8 +42,7 @@
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_READ_SURF
 !
@@ -68,7 +67,7 @@ INTEGER :: IVERSION  ! version of the old file
 INTEGER :: IBUGFIX   ! bugfix  of the old file
 !
 INTEGER :: IRESP
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('OLD_NAME',0,ZHOOK_HANDLE)

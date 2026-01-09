@@ -7,8 +7,7 @@ MODULE MODE_DSLT_SURF
 !!   ########################
 !!
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -89,7 +88,7 @@ REAL,DIMENSION(SIZE(PFLUX,1),3) :: ZFM               !Intermediate variable to g
 !
 INTEGER   :: JMODE  ! Counter for dust modes
 INTEGER   :: JSV_IDX ! Counter for dust scalar variables
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -250,7 +249,7 @@ REAL,DIMENSION(SIZE(PSVT,1), SIZE(KM0)*3)  :: ZM     ! [moments] local array for
 REAL,DIMENSION(SIZE(PSVT,1))               :: ZSIGMA ! [-] standard deviation
 REAL,DIMENSION(SIZE(PSVT,1))               :: ZRG    ! [um] number median diameter
 INTEGER                   :: JN, J0, J3, J6          ! [idx] loop counters
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !        1.1    initialisation 
 ! 

@@ -133,8 +133,7 @@ USE MODI_DEFAULT_ALB_VEG_ECO2_17
 USE MODI_DEFAULT_ALB_VEG_ECO2_18
 USE MODI_DEFAULT_ALB_VEG_ECO2_19
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -145,7 +144,7 @@ IMPLICIT NONE
 !* local variables
 !  ---------------
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !

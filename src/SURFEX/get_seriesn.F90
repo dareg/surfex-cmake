@@ -46,8 +46,7 @@ USE MODI_UNPACK_SAME_RANK
 USE MODD_SURF_PAR,        ONLY   : XUNDEF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_GET_1D_MASK
 IMPLICIT NONE
@@ -74,7 +73,7 @@ INTEGER, DIMENSION(KI)        :: IMASK
 REAL, DIMENSION(KI)           :: ZOUT
 REAL, DIMENSION(SIZE(F%XTS))    :: ZAUX
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------

@@ -43,8 +43,7 @@
 !           ------------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -58,7 +57,7 @@ REAL                                 :: PGAMMA
 INTEGER                              :: JJ ! Loop index
 REAL                                 :: ZSER,ZSTP,ZTMP,ZX,ZY,ZCOEF(6)
 REAL                                 :: ZPI
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('GAMMAS',0,ZHOOK_HANDLE)
 ZCOEF(1) = 76.18009172947146

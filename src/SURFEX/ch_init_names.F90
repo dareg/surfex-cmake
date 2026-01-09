@@ -40,8 +40,7 @@ USE MODD_CHS_AEROSOL
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -60,7 +59,7 @@ LOGICAL,                         INTENT(OUT) :: OVARSIGI, OVARSIGJ ! type of sta
 INTEGER :: JSV  !! loop  NBEQ
 CHARACTER         :: YRC1
 CHARACTER(LEN=16) :: YRC2
-REAL(KIND=JPRB)   :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 

@@ -24,8 +24,7 @@ USE MODI_READ_SEAFLUX_CONF_n
 !
 USE MODI_READ_NAM_PREP_SEAFLUX_n
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -34,7 +33,7 @@ TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=3),   INTENT(IN)  :: HINIT     ! choice of fields to initialize
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !---------------------------------------------------------------
 !

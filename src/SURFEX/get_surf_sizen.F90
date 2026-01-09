@@ -41,8 +41,7 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODI_CONVERT_COVER_FRAC
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -65,7 +64,7 @@ REAL, DIMENSION(:),   ALLOCATABLE :: ZTOWN  ! town cover
 REAL, DIMENSION(:),   ALLOCATABLE :: ZWATER ! water cover
 !
 INTEGER           :: ILU    ! total horizontal size
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*        1.    Fractions

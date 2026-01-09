@@ -35,8 +35,7 @@
 USE MODE_GRIDTYPE_LONLAT_ROT
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -48,7 +47,7 @@ REAL,    DIMENSION(KGRID_PAR),   INTENT(IN)    :: PGRID_PAR ! grid parameters
 LOGICAL,                         INTENT(OUT)   :: ORECT     ! T if rectangular grid
 INTEGER,                         INTENT(OUT)   :: KDIM1     ! 1st dimension
 INTEGER,                         INTENT(OUT)   :: KDIM2     ! 2nd dimension
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*    0.2    Declaration of other local variables
 !            ------------------------------------

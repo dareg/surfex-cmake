@@ -56,8 +56,7 @@ USE MODI_INI_SSOWORK
 USE MODI_PT_BY_PT_TREATMENT
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -106,7 +105,7 @@ REAL, DIMENSION(:), POINTER     :: ZLAT   ! latitude of data points
 REAL, DIMENSION(:), POINTER     :: ZLON   ! longitude of data points
 LOGICAL :: GCOMPRESS
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------------
 !

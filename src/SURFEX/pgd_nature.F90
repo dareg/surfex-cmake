@@ -48,8 +48,7 @@ USE MODD_SSO_n, ONLY : SSO_t
 USE MODI_PGD_ISBA
 USE MODI_PGD_TSZ0_PAR
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -66,7 +65,7 @@ TYPE(SSO_t), INTENT(INOUT) :: USS
  REAL, DIMENSION(:,:), POINTER :: PVEGTYPE
 !
  CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM   ! program calling surf. schemes
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------

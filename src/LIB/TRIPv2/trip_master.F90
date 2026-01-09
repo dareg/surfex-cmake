@@ -64,8 +64,7 @@ USE MODI_TRIP_XIOS_INIT
 USE MPL_DATA_MODULE, ONLY : LMPLUSERCOMM, MPLUSERCOMM
 #endif
 #endif
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -94,7 +93,7 @@ INTEGER                           :: ILOCAL_COMM         ! Local communicator
 LOGICAL                           :: GOASIS              ! OASIS used(default=.false.)
 LOGICAL                           :: GXIOS               ! XIOS used(default=.false.)
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 ! --------------------------------------------------------------------------------------
 ! * 0. MPI and OASIS must be initialized before any DR_HOOK call

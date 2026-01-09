@@ -49,8 +49,7 @@ USE MODD_POINT_OVERLAY
 USE MODI_GET_MESH_INDEX
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -80,7 +79,7 @@ REAL :: ZNODATA
 !
 REAL    :: ZCUT
 INTEGER :: JL, JGR, JOV        ! loop index on input arrays
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 !*    1.     Get position

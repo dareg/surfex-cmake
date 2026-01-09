@@ -71,8 +71,7 @@ USE MODI_READ_PGD_ISBA_PAR_n
 USE MODI_CLEAN_PREP_OUTPUT_GRID
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -113,7 +112,7 @@ REAL, DIMENSION(:,:), POINTER     :: ZRUNOFFB! runoff coef. on all surface point
 REAL, DIMENSION(:,:), POINTER     :: ZWDRAIN ! drainage coef. on all surface points
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZOUTB   ! runoff coef. on all surface points
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZOUTW   ! drainage coef. on all surface points
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_ISBA_FULL',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)

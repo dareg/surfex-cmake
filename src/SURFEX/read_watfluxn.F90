@@ -50,8 +50,7 @@ USE MODI_READ_SURF
 USE MODI_INTERPOL_TS_WATER_MTH
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_GET_TYPE_DIM_n
 !
@@ -79,7 +78,7 @@ INTEGER           :: ILU          ! 1D physical dimension
 INTEGER           :: IRESP          ! Error code after redding
 !
  CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

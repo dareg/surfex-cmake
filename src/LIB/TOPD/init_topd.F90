@@ -78,8 +78,7 @@ USE MODI_READ_TOPD_HEADER_CONNEX
 USE MODI_READ_CONNEX_FILE
 USE MODI_READ_SLOPE_FILE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -100,7 +99,7 @@ INTEGER                   :: ILUOUT                 ! Unit of the files
 !
 REAL, DIMENSION(:),ALLOCATABLE    :: ZTOPD_READ !Topgraphic variable read
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('INIT_TOPD',0,ZHOOK_HANDLE)
 !

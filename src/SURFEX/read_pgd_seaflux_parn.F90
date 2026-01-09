@@ -53,7 +53,7 @@ USE MODI_HOR_INTERPOL
 
 USE MODD_EXTFORC,       ONLY : EXT_FORC, FORCINGFILE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
@@ -88,7 +88,7 @@ INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
 INTEGER           :: JTIME          ! loop index
 INTEGER           :: IVERSION, IBUGFIX, NUMFORCINGSTEPS=0, YY,MM,DD,HH
 REAL(KIND=JPRB) :: SST
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 

@@ -53,8 +53,7 @@ USE MODI_URBAN_SOLAR_ABS
 USE MODE_SURF_SNOW_FRAC
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -106,7 +105,7 @@ LOGICAL, DIMENSION(SIZE(T%XBLD)) :: GSHAD_DAY
 !
 TYPE(DIAG_MISC_TEB_t) :: YDMT
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !* snow fractions

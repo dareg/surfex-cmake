@@ -51,8 +51,7 @@ USE MODI_CLOSE_AUX_IO_SURF
 !
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -93,7 +92,7 @@ REAL, DIMENSION(:), ALLOCATABLE     :: ZMASK
 INTEGER                             :: JP, JL       ! loop counter for patch
 INTEGER :: IVERSION, IBUGFIX
 LOGICAL :: GDIM
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !

@@ -3,8 +3,7 @@ MODULE MODE_TRIP_GRID
 !##############################
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 !############################################################################
 !############################################################################
@@ -42,13 +41,13 @@ REAL,               INTENT(IN)  :: PLONMIN  ! minimum longitude
 REAL,               INTENT(IN)  :: PLONMAX  ! maximum longitude
 REAL,               INTENT(IN)  :: PLATMIN  ! minimum latitude
 REAL,               INTENT(IN)  :: PLATMAX  ! maximum latitude
-REAL,               INTENT(IN)  :: PRES     ! 1° or 0.5° resolution
+REAL,               INTENT(IN)  :: PRES     ! 1Â° or 0.5Â° resolution
 INTEGER,            INTENT(IN)  :: KLON     ! number of points in longitude
 INTEGER,            INTENT(IN)  :: KLAT     ! number of points in latitude
 REAL, DIMENSION(:), INTENT(IN)  :: PLON     ! longitude
 REAL, DIMENSION(:), INTENT(IN)  :: PLAT     ! latitude
 REAL, DIMENSION(:), INTENT(OUT) :: PTRIP_GRID! parameters defining this grid
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !*       0.2   Declarations of local variables
@@ -101,7 +100,7 @@ REAL,               INTENT(OUT), OPTIONAL :: PLONMIN  ! minimum longitude
 REAL,               INTENT(OUT), OPTIONAL :: PLONMAX  ! maximum longitude
 REAL,               INTENT(OUT), OPTIONAL :: PLATMIN  ! minimum latitude
 REAL,               INTENT(OUT), OPTIONAL :: PLATMAX  ! maximum latitude
-REAL,               INTENT(OUT), OPTIONAL :: PRES     ! 1° or 0.5° resolution
+REAL,               INTENT(OUT), OPTIONAL :: PRES     ! 1Â° or 0.5Â° resolution
 INTEGER,            INTENT(OUT), OPTIONAL :: KLON     ! number of points in longitude
 INTEGER,            INTENT(OUT), OPTIONAL :: KLAT     ! number of points in latitude
 REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PLON     ! longitude
@@ -113,7 +112,7 @@ REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PLAT     ! latitude
 !
 INTEGER :: ILON, ILAT
 INTEGER :: IL
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_TRIP_GRID:GET_TRIP_GRID',0,ZHOOK_HANDLE)
 ILON = NINT(PTRIP_GRID(6))

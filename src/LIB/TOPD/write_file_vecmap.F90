@@ -47,8 +47,7 @@ USE MODD_SURF_PAR, ONLY:XUNDEF
 USE MODI_OPEN_FILE
 USE MODI_CLOSE_FILE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -66,7 +65,7 @@ INTEGER                    :: JJ,JI,JK
 INTEGER                    :: IINDEX ! reference number of the pixel
 REAL                       :: ZOUT ! pixel not included in the catchment
 REAL                       :: ZMIN,ZMAX
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('WRITE_FILE_VECMAP',0,ZHOOK_HANDLE)
 !

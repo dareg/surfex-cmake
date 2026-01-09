@@ -40,8 +40,7 @@
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 #ifdef SFX_MNH
 USE MODI_DEFAULT_SCHEMES_MNH
@@ -57,7 +56,7 @@ IMPLICIT NONE
  CHARACTER(LEN=6),  INTENT(OUT) :: HSEA     ! scheme for sea
  CHARACTER(LEN=6),  INTENT(OUT) :: HTOWN    ! scheme for towns
  CHARACTER(LEN=6),  INTENT(OUT) :: HWATER   ! scheme for inland water
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !*    0.2    Declaration of local variables

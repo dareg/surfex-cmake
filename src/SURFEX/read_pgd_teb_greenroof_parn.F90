@@ -59,8 +59,7 @@ USE MODI_VEG_FROM_LAI
 USE MODI_Z0V_FROM_LAI
 USE MODI_EMIS_FROM_VEG
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -87,7 +86,7 @@ INTEGER                               :: JLAYER         ! loop index
 !
 LOGICAL :: GAGRI_TO_GRASS
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

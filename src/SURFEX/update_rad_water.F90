@@ -43,8 +43,7 @@ USE MODD_SFX_OASIS,  ONLY : LCPL_SEA
 USE MODI_ALBEDO_TA96
 USE MODI_ALBEDO_MK10
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -64,7 +63,7 @@ REAL, DIMENSION(:),     INTENT(OUT)  :: PTRAD          ! radiative temp at t+1 f
 !
 INTEGER :: JSWB
 REAL, DIMENSION(SIZE(W%XTS)) :: ZALBEDO
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

@@ -36,8 +36,7 @@ USE MODD_POINT_OVERLAY
 USE MODE_GRIDTYPE_IGN
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -82,7 +81,7 @@ INTEGER                           :: JL       ! loop counter in lambert grid
 INTEGER                           :: JI, JJ       ! loop counter on input points
 INTEGER, DIMENSION(SIZE(PLAT),2) :: ICI
 INTEGER, DIMENSION(1)             :: IDX0
-REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_IGN_1',0,ZHOOK_HANDLE)

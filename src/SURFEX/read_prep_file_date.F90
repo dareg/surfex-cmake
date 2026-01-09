@@ -41,8 +41,7 @@ USE MODI_CLOSE_AUX_IO_SURF
 USE MODI_ABOR1_SFX
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -64,7 +63,7 @@ INTEGER                            :: IREC
  CHARACTER(LEN=6)             :: YINTERPTYPE
  CHARACTER(LEN=10)             :: YGRIDTYPE ! Grid type
 INTEGER                       :: IRESP     ! Error code after redding
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

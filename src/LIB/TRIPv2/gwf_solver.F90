@@ -6,8 +6,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -35,7 +34,7 @@ INTEGER                        :: INBSOU
 REAL                           :: ZHOR,ZNOM,ZDENOM,ZDIAG,ZPASD,ZDIAG_HORI
 REAL                           :: ZEVOL
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 ! *      1. INITIALISATION

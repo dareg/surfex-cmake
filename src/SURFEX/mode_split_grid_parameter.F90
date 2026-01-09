@@ -14,8 +14,7 @@ CONTAINS
 !
 !!****  * - routine to split a real array on the splitted grid 
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 #ifdef SFX_OL
 USE MODE_SPLIT_GRID_PARAMETER_OL
@@ -42,7 +41,7 @@ INTEGER, OPTIONAL,      INTENT(IN) :: KHALO ! size of the Halo
 !
 !*      0.2   Declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_SPLIT_GRID_PARAMETER:SPLIT_GRID_PARAMETERX1',0,ZHOOK_HANDLE)
 !
@@ -79,8 +78,7 @@ END SUBROUTINE SPLIT_GRID_PARAMETERX1
 !
 !!****  * - routine to define an integer related to splitted grid
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 #ifdef SFX_OL
 USE MODE_SPLIT_GRID_PARAMETER_OL
@@ -104,7 +102,7 @@ INTEGER, OPTIONAL,  INTENT(IN) :: KHALO ! size of the Halo
 !
 !*      0.2   Declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_SPLIT_GRID_PARAMETER:SPLIT_GRID_PARAMETERN0',0,ZHOOK_HANDLE)
 !

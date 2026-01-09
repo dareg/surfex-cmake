@@ -32,8 +32,7 @@ USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_CSTS,           ONLY : XSTEFAN
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -55,7 +54,7 @@ REAL, DIMENSION(:), INTENT(IN)   :: PEMIS     ! emissivity                      
 !
 INTEGER                          :: ISWB      ! number of SW bands
 INTEGER                          :: JSWB      ! loop counter on number of SW bands
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 !

@@ -44,8 +44,7 @@
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_READ_GRIDTYPE_CARTESIAN
 !
@@ -83,7 +82,7 @@ REAL, DIMENSION(:), ALLOCATABLE :: ZGRID_PAR
 INTEGER                         :: IGRID_PAR
 INTEGER                         :: IRESP
  CHARACTER(LEN=1)                :: YDIR
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !---------------------------------------------------------------------------
 !

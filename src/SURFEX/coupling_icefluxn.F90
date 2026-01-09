@@ -40,8 +40,7 @@ USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 USE MODI_ICE_SEA_FLUX
 ! 
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -86,7 +85,7 @@ INTEGER, DIMENSION(KI)           :: IMASK
 LOGICAL                          :: GHANDLE_SIC
 INTEGER                          :: JJ, ISIZE
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 ! Preliminaries:
@@ -163,7 +162,7 @@ REAL, DIMENSION(KSIZE)  :: ZCH        ! Heat transfer coefficient
 REAL, DIMENSION(KSIZE)  :: ZRI        ! Richardson number
 REAL, DIMENSION(KSIZE)  :: ZRESA      ! aerodynamical resistance
 REAL, DIMENSION(KSIZE)  :: ZZ0H       ! heat roughness length over ice
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_ICEFLUX_N:TREAT_ICE',0,ZHOOK_HANDLE)
 !

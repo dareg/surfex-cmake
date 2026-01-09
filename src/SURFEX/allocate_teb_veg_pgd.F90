@@ -9,8 +9,7 @@
 !
 USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_PE_t, ISBA_P_t, ISBA_K_t
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -23,7 +22,7 @@ LOGICAL, INTENT(IN) :: OALLOC ! True if constant PGD fields must be allocated
 INTEGER, INTENT(IN) :: KLU
 INTEGER, INTENT(IN) :: KVEGTYPE
 INTEGER, INTENT(IN) :: KGROUND_LAYER
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

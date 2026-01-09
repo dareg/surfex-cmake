@@ -44,8 +44,7 @@ USE MODD_PGDWORK,       ONLY : NSIZE, XSUMVAL, XPREC, &
                                XMIN_WORK, XMAX_WORK 
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -59,7 +58,7 @@ REAL, DIMENSION(SIZE(NSIZE,1)) :: ZSIZE
 !
 REAL :: ZINT
 INTEGER :: JI
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('AVERAGE2_CTI',0,ZHOOK_HANDLE)

@@ -39,8 +39,7 @@ USE MODD_PREP_TEB_GREENROOF,ONLY : XHUG_SURF_GR, XHUG_ROOT_GR, XHUG_DEEP_GR,    
                                    XWR_DEF  
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -53,7 +52,7 @@ REAL, POINTER, DIMENSION(:,:,:) :: PFIELD    ! field to interpolate horizontally
 !*      0.2    declarations of local variables
 !
 INTEGER :: JV ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

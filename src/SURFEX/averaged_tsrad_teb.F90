@@ -54,8 +54,7 @@ USE MODI_URBAN_LW_COEF
 USE MODE_SURF_SNOW_FRAC
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -123,7 +122,7 @@ REAL, DIMENSION(SIZE(T%XBLD)) :: ZABS_LW_GREENROOF! longwave absorbed by green r
 REAL, DIMENSION(SIZE(T%XBLD)) :: ZLW_UP           ! outgoing longwave
 !
 REAL, DIMENSION(SIZE(T%XBLD)) :: ZT_SKY
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

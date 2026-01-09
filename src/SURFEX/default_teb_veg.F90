@@ -44,8 +44,7 @@
 !              ------------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -74,7 +73,7 @@ REAL,    INTENT(OUT)           :: PCGMAX     ! maximum soil heat capacity
 REAL,    INTENT(OUT)           :: PCSMAX     ! maximum snow heat capacity
 LOGICAL, INTENT(OUT)           :: ONITRO_DILU ! nitrogen dilution fct of CO2 (Calvet et al. 2008)
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------

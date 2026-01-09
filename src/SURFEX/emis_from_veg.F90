@@ -93,8 +93,7 @@ USE MODD_ISBA_PAR,       ONLY : XEMISSOIL, XEMISVEG
 USE MODD_SNOW_PAR,       ONLY : XEMISSN
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -108,7 +107,7 @@ REAL                             :: PEMIS        ! emissivity
 !*      0.2    declarations of local variables
 !
 REAL :: ZEMISSOIL                  ! soil emissivity
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-----------------------------------------------------------------
 !
@@ -168,8 +167,7 @@ USE MODD_ISBA_PAR,       ONLY : XEMISSOIL, XEMISVEG
 USE MODD_SNOW_PAR,       ONLY : XEMISSN
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -183,7 +181,7 @@ REAL,   DIMENSION(SIZE(PVEG))      :: PEMIS        ! emissivity
 !*      0.2    declarations of local variables
 !
 REAL,   DIMENSION(SIZE(PVEG))      :: ZEMISSOIL    ! soil emissivity
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-----------------------------------------------------------------
 !
@@ -244,8 +242,7 @@ USE MODD_ISBA_PAR,       ONLY : XEMISSOIL, XEMISVEG
 USE MODD_SNOW_PAR,       ONLY : XEMISSN
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -259,7 +256,7 @@ REAL,   DIMENSION(SIZE(PVEG,1),SIZE(PVEG,2)) :: PEMIS! emissivity
 !*      0.2    declarations of local variables
 !
 REAL,   DIMENSION(SIZE(PVEG,1),SIZE(PVEG,2)) :: ZEMISSOIL ! soil emissivity
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-----------------------------------------------------------------
 !
@@ -323,8 +320,7 @@ USE MODD_ISBA_PAR,       ONLY : XEMISSOIL, XEMISVEG
 USE MODD_SNOW_PAR,       ONLY : XEMISSN
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -339,7 +335,7 @@ REAL,   DIMENSION(SIZE(PVEG))      :: PEMIS        ! emissivity
 REAL,   DIMENSION(SIZE(PVEG))      :: ZEMISSOIL    ! soil emissivity
 !
 INTEGER :: JJ
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-----------------------------------------------------------------
 !

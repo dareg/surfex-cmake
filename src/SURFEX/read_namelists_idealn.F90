@@ -19,8 +19,7 @@ USE MODI_READ_DEFAULT_IDEAL_n
 USE MODI_READ_IDEAL_CONF_n
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -28,7 +27,7 @@ IMPLICIT NONE
 TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------
 !ideal: reprend essentiellement la namelist NAM_DIAG_SURF

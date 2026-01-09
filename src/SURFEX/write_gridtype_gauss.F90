@@ -42,8 +42,7 @@ USE MODI_WRITE_SURF
 USE MODE_GRIDTYPE_GAUSS
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -81,7 +80,7 @@ REAL,    DIMENSION(KLU) :: ZLONINF     ! Grid corner Longitude  Inf
 INTEGER                            :: IL    ! total number of points
 !
  CHARACTER(LEN=100)                :: YCOMMENT ! comment written in the file
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_GRIDTYPE_GAUSS',0,ZHOOK_HANDLE)

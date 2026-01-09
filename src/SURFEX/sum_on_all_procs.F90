@@ -50,8 +50,7 @@ USE MODI_SUM_ON_ALL_PROCS_MNH_HAL
 #endif
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -67,7 +66,7 @@ INTEGER                           :: KOUT
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 INTEGER                       :: ISIZE
 INTEGER, DIMENSION(SIZE(OIN)) :: IIN ! 1 if OIN true, 0 otherwise

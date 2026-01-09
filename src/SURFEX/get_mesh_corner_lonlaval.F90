@@ -30,8 +30,7 @@ USE MODE_GRIDTYPE_LONLATVAL
 !
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -56,7 +55,7 @@ REAL, DIMENSION(KL) :: ZLAT   ! latitude  grid
 REAL, DIMENSION(KL) :: ZDLON  ! longitude grid size
 REAL, DIMENSION(KL) :: ZDLAT  ! latitude  grid size
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------------
 !

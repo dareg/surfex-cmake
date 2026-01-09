@@ -38,8 +38,7 @@ USE MODD_WRITE_TXT,  ONLY:NUNIT0, NVAR, CVAR, CVARN, JPVAR, NIND
 USE MODI_ABOR1_SFX
 !USE MODI_TEST_RECORD_LEN
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -50,7 +49,7 @@ IMPLICIT NONE
 LOGICAL,             INTENT(INOUT)  :: OWFL
 INTEGER                             :: IP, IVAR, IFIELD, JFIELD
 !LOGICAL                             :: LMATCH
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !

@@ -52,8 +52,7 @@ USE MODD_DATA_COVER_PAR, ONLY : NTYPE, NUT_CPHR, NUT_CPMR, NUT_CPLR, NUT_OPHR, &
                                 NUT_OPMR, NUT_OPLR, NUT_LWLR, NUT_LALR, NUT_SPAR, &
                                 NUT_INDU, NVT_NO, NVT_TEBD, NVT_BOBD, NVT_GRAS
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -68,7 +67,7 @@ INTEGER               :: JTYPE
 !*    0.3    Declaration of namelists
 !            ------------------------
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('INIT_TYPES_PARAM',0,ZHOOK_HANDLE)
 !

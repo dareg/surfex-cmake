@@ -58,8 +58,7 @@ USE MODI_CLOSE_FILE
 USE MODE_POS_SURF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -95,7 +94,7 @@ INTEGER, DIMENSION(:), ALLOCATABLE   :: IVALUE   ! value of a record of data poi
 !            ------------------------
 !
  CHARACTER(LEN=28)        :: YIRRIG   ! file name for irrigation
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !                                        
 NAMELIST/NAM_ECOCLIMAP2/  YIRRIG, LCLIM_LAI
 !-------------------------------------------------------------------------------

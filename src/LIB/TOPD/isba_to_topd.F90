@@ -48,8 +48,7 @@ USE MODD_TOPODYN,       ONLY : NNCAT, NNMC
 USE MODD_COUPLING_TOPD, ONLY : NMASKT
 USE MODD_SURF_PAR,        ONLY : XUNDEF, NUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -61,7 +60,7 @@ REAL, DIMENSION(:,:), INTENT(OUT)   :: PVART   ! variable for TOPODYN grid
 !*      0.2    declarations of local variables
 !
 INTEGER            :: JJ, JI             ! loop control 
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ISBA_TO_TOPD',0,ZHOOK_HANDLE)
 !

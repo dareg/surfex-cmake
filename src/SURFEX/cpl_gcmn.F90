@@ -39,8 +39,7 @@
 !
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -61,7 +60,7 @@ REAL, DIMENSION(KI), INTENT(IN), OPTIONAL :: PQSURF   ! specific humidity at sur
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('CPL_GCM_N',0,ZHOOK_HANDLE)

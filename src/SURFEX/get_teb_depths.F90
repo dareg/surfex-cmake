@@ -60,8 +60,7 @@ USE MODI_CLOSE_AUX_IO_SURF
 USE MODI_READ_LECOCLIMAP
 USE MODI_DEFAULT_DATA_COVER
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -120,7 +119,7 @@ INTEGER :: ILU                      ! number of points
 LOGICAL           :: GECOCLIMAP, GECOSG
 LOGICAL           :: GDATA, GDIM          ! T if depth is to be read in the file
 LOGICAL           :: GREAD_EXT
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*    2.      SECONDARY VARIABLES

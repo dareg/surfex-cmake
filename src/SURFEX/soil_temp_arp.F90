@@ -67,8 +67,7 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODI_TRIDIAG_GROUND
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -101,7 +100,7 @@ INTEGER                             :: INLVLD ! Number of points and grid layers
 !
 REAL, DIMENSION(SIZE(PTG,1),SIZE(PTG,2))  :: ZTGM, ZFRCV, ZAMTRX, ZBMTRX,     &
                                              ZCMTRX, ZLAMBDA, ZALPHA  
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

@@ -48,8 +48,7 @@ USE MODI_GET_LONLAT_TRIP
 USE XIOS
 #endif
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -78,7 +77,7 @@ TYPE(XIOS_DATE)      :: TDATE
 #endif
 INTEGER              :: NHOURS,NMINUTES,NSECONDS
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

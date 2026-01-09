@@ -86,8 +86,7 @@
 USE MODD_SURFEX_MPI, ONLY : NRANK
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -110,7 +109,7 @@ INTEGER                              :: JI        ! grid 1 x index
 INTEGER                              :: JL        ! grid 2 index
 !
 REAL                                 :: ZEPS=1.E-3
-REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('BILIN_GRIDIN_1',0,ZHOOK_HANDLE)

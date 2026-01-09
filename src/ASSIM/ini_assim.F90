@@ -52,12 +52,11 @@ USE MODD_ASSIM, ONLY : LFGEL, LCLIM, XSODELX, NTVGLA, XRD1, XRTINER, XWCRIN, &
 USE MODD_CSTS,  ONLY : XPI 
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 INTEGER :: J
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !  
 !**-----------------------------------------------------------------------
 !**  - 1 - Initialisations, diagnostics.

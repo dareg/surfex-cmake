@@ -11,8 +11,7 @@ USE MODD_SLT_n, ONLY : SLT_t
 !
 USE MODD_SLT_SURF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 
@@ -26,7 +25,7 @@ TYPE(SLT_t), INTENT(INOUT) :: SLT
  CHARACTER(LEN=4)    :: CRGUNITS              ! type of log-normal geometric mean radius
 INTEGER             :: JMODE                 ! Counter for sea salt modes
 INTEGER             :: JMODE_IDX             ! Index for sea salt modes
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !get output listing unit
 IF (LHOOK) CALL DR_HOOK('INIT_SLT',0,ZHOOK_HANDLE)

@@ -51,8 +51,7 @@ USE MODI_PREP_OCEAN_ASCLLV
 !
 USE MODI_HOR_INTERPOL
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 IMPLICIT NONE
@@ -86,7 +85,7 @@ REAL, ALLOCATABLE, DIMENSION(:,:,:)::ZFIELDOUT!field interpolated horizontally
 !
 INTEGER                       :: JLEV, JLEV2    ! loop on oceanic vertical level
 INTEGER                       :: IK1
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !*      1.     Does the field exist?
 !

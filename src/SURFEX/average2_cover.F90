@@ -48,8 +48,7 @@ USE MODD_PGD_GRID,       ONLY : CGRID
 !
 USE MODI_SUM_ON_ALL_PROCS
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -69,7 +68,7 @@ REAL, DIMENSION(:), ALLOCATABLE :: ZUNITY
 REAL :: ZINT
 INTEGER :: JI, JJ
 INTEGER :: JCOV ! loop counter on cover classes
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 !*    1.     Average values

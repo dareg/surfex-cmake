@@ -49,8 +49,7 @@ USE MODN_TRIP,     ONLY : XCVEL
 USE MODD_TRIP_PAR, ONLY : XUNDEF, XM, XVELMIN, &
                           XHSMIN, XRHOLW
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABORT_TRIP
 !
@@ -75,7 +74,7 @@ LOGICAL, INTENT(IN)                    :: OPRINT   !Printable budget key
 !
 LOGICAL, DIMENSION(:,:), INTENT(IN)    :: OMASK_VEL  ! Variable velocity mask
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PLEN       ! river length       [m] 
-REAL,    DIMENSION(:,:), INTENT(IN)    :: PAREA      ! Grid-cell area    [m²]
+REAL,    DIMENSION(:,:), INTENT(IN)    :: PAREA      ! Grid-cell area    [mÂ²]
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PRUNOFF    ! Surface runoff from ISBA    [kg/s]
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PGOUT      ! ground water outflow        [kg/s]
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PQFR       ! Flood flow to river         [kg/s]
@@ -105,7 +104,7 @@ REAL    :: ZAREA
 !
 INTEGER :: ILON, ILAT, JLON, JLAT, ISEQ, INEXTX, INEXTY
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 ! * Init
@@ -197,7 +196,7 @@ SUBROUTINE SEQUENCE_LOOP(KNUM)
 !
 INTEGER, INTENT(IN) :: KNUM
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('TRIP_SURFACE_WATER:SEQUENCE_LOOP',0,ZHOOK_HANDLE)
 !

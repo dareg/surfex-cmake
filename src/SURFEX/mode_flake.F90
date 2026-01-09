@@ -107,8 +107,7 @@ MODULE mode_flake
 !==============================================================================
 
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODD_SURFEX_OMP, ONLY : NBLOCK
 !
@@ -279,7 +278,7 @@ TYPE (opticpar_medium), INTENT(IN) ::  &
 !  Local variables of type INTEGER
 INTEGER  ::  &! Help variable(s)
     i                             ! DO loop index  
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !==============================================================================
 !  Start calculations
@@ -491,7 +490,7 @@ REAL :: &
     R_rho_c_icesnow     ,  &! Dimensionless ratio, used to store intermediate results
     R_TI_icesnow        ,  &! Dimensionless ratio, used to store intermediate results
     R_Tstar_icesnow         ! Dimensionless ratio, used to store intermediate results  
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !rsal
 !REAL :: aux1,aux2,aux3,aux4,aux5
@@ -1176,7 +1175,7 @@ REAL , INTENT(IN) :: &
 !  Output (function result) 
 REAL               :: &
     flake_buoypar                       ! Buoyancy parameter [m s^{-2} K^{-1}]  
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !==============================================================================
 !  Start calculations
@@ -1262,7 +1261,7 @@ REAL , INTENT(IN) :: &
 !  Output (function result) 
 REAL               :: &
     flake_snowdensity                   ! Snow density [kg m^{-3}]  
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !==============================================================================
 !  Start calculations
@@ -1351,7 +1350,7 @@ REAL , INTENT(IN) :: &
 !  Output (function result) 
 REAL               :: &
     flake_snowheatconduct               ! Snow heat conductivity [J m^{-1} s^{-1} K^{-1} = kg m s^{-3} K^{-1}]  
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !==============================================================================
 !  Start calculations

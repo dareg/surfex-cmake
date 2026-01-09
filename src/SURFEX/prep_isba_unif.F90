@@ -39,8 +39,7 @@ USE MODD_PREP_ISBA,      ONLY : XHUG_SURF, XHUG_ROOT, XHUG_DEEP,    &
 !
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -52,7 +51,7 @@ REAL, POINTER, DIMENSION(:,:,:) :: PFIELD    ! field to interpolate horizontally
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

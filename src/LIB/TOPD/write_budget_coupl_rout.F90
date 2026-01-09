@@ -48,8 +48,7 @@ USE MODD_BUDGET_COUPL_ROUT
 USE MODI_OPEN_FILE
 USE MODI_CLOSE_FILE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -60,7 +59,7 @@ INTEGER           :: JCAT,JSTP ! loop control
 INTEGER           :: INB_VAR   ! number of variable to write
  CHARACTER(LEN=28) :: YFILE     ! file name
  CHARACTER(LEN=40) :: YFORM     ! Writing format
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('WRITE_BUDGET_COUPL_ROUT',0,ZHOOK_HANDLE)
 !

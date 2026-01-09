@@ -80,8 +80,7 @@ USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 USE MODE_THERMOS
 USE MODI_URBAN_EXCH_COEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -222,7 +221,7 @@ INTEGER                   ::  JLOOP, JJ            !!
 REAL :: ZZ0_O_Z0H = 200.  ! z0/z0h ratio used in Mascart (1995) formulation.
 !                         ! It is set to the maximum value acceptable by
 !                         ! formulation. Observed values are often larger in cities.
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 LOGICAL :: LLIMPLICIT_WIND_IS_OLD
 
 !-------------------------------------------------------------------------------

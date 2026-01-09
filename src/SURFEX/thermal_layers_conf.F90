@@ -44,8 +44,7 @@
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -90,7 +89,7 @@ REAL, PARAMETER                :: ZD_G1 = 0.001  ! uppermost soil layer
 !                                                ! into question. If it is too
 !                                                ! thick, then resolution of
 !                                                ! diurnal cycle not as valid.
-REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('THERMAL_LAYER_CONF',0,ZHOOK_HANDLE)
@@ -219,7 +218,7 @@ REAL    :: ZEPS=1.E-6
 !
 INTEGER :: JOUT, JIN
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !* total depth:
 !
@@ -327,8 +326,7 @@ END SUBROUTINE AV_THERMAL_DATA
 !               ------------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -366,7 +364,7 @@ REAL                              :: ZD_G1 = 0.01      ! uppermost soil layer
 !                                                      ! diurnal cycle not as valid.
 !                                                      ! Also chosen to comply with
 !                                                      ! remotely sensed soil moisture.
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !        0.     Initialization
 !               --------------

@@ -47,8 +47,7 @@ USE MODE_TRIP_GRID
 USE MODI_ABORT_TRIP
 USE MODI_GET_LONLAT_TRIP
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 #ifdef CPLOASIS
 USE MOD_OASIS
@@ -83,7 +82,7 @@ INTEGER                        :: INAM     ! logical unit of namelist file
 !
 INTEGER                        :: JLON, JLAT, JC, IFLAG
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

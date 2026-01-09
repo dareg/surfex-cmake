@@ -29,7 +29,7 @@ USE MODD_PREP_SEAFLUX, ONLY : CFILE_SEAFLX,CTYPE_SEAFLX
 USE MODE_READ_NETCDF_MERCATOR
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -43,7 +43,7 @@ INTEGER :: JDIMENSION
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
                                            ! and ZLON arrays
 !----------------------------------------------------------------------------
 !

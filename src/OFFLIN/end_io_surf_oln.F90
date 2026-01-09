@@ -41,8 +41,7 @@ USE MODD_IO_SURF_OL, ONLY : LMASK, LDEF, NID_NC
 !
 USE NETCDF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -50,7 +49,7 @@ IMPLICIT NONE
 !              -------------------------
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! main program
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------

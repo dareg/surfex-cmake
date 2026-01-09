@@ -49,8 +49,7 @@ USE MODE_GRIDTYPE_IGN
 USE MODD_IGN, ONLY : XEXPAND
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -80,7 +79,7 @@ REAL, DIMENSION(:), ALLOCATABLE   :: ZDY      ! Grid dimension in Y
 INTEGER                           :: ILAMBERT ! Lambert projection type
 INTEGER                           :: IL       ! Number og grid points
 INTEGER                           :: JLAT, JLON
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('LATLONMASK_IGN',0,ZHOOK_HANDLE)

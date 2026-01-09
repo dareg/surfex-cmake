@@ -6,8 +6,7 @@
 SUBROUTINE SW_DAYCYCLE(KI, PZENITH, PTOT_SW)
 !     #############################################################
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 !http://www.apesimulator.it/help/models/solarradiation/Calculating_extra-terrestrial_solar_radiation.html
 !
@@ -21,7 +20,7 @@ INTEGER :: JJ
 REAL      :: ZC_SOL  ! Solar constant [W/m2]
 REAL      :: ZD_CORR ! Correction to acutal solar distance at any specific day of the year
 INTEGER   :: ZJULIAN ! Julian day of the year
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('SW_DAYCYCLE',0,ZHOOK_HANDLE)
 !

@@ -209,8 +209,7 @@ USE MODI_WIND_THRESHOLD
 USE MODI_BEM
 USE MODI_TEB_IRRIG
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -439,7 +438,7 @@ REAL, DIMENSION(SIZE(PTA)) :: ZLOAD_IN_WL   ! indoor load on wall W/m2[wall]
 REAL, DIMENSION(SIZE(PTA)) :: ZLOAD_IN_WIN   ! indoor load on win W/m2[win]
 REAL, DIMENSION(SIZE(PTA)) :: ZLOAD_IN_MA   ! indoor load on mass W/m2[mass]
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE                                             
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE                                             
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('TEB',0,ZHOOK_HANDLE)

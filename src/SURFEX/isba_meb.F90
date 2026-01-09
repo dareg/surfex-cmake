@@ -108,8 +108,7 @@ USE MODI_COTWORES
 USE MODI_ABOR1_SFX
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -465,7 +464,7 @@ REAL, DIMENSION(SIZE(PEK%XWR,1))         :: ZFROZEN1SFC
 !
 INTEGER :: INJ, INL, JJ, JL
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -1019,7 +1018,7 @@ IMPLICIT NONE
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -1108,7 +1107,7 @@ IMPLICIT NONE
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -1213,7 +1212,7 @@ IMPLICIT NONE
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -1361,7 +1360,7 @@ REAL, DIMENSION(SIZE(PPS),NSPEC_BAND_SNOW)       :: ZSPECTRALALBEDO
 !                                                        MEB currently uses 2)
 !                                                        1=VIS, 2=NIR, 3=UV
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -1515,7 +1514,7 @@ REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZRADSINK
 REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: ZRADXS,ZZENITH,ZSW_RAD,ZSNOWALB
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1),JPNBANDS_ATM)  :: ZSPEC_DIR, ZSPEC_DIF,ZSNOWALB_SP ! BC : new output par. from SNOWCRO_TARTES ! BC : new output par. from SNOWCRO_TARTES
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -1764,7 +1763,7 @@ REAL, DIMENSION(SIZE(PALBEDOSC))  :: ZVAGE1
 !
 INTEGER         :: JJ   ! looping indexes
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('SNOWCROALB',0,ZHOOK_HANDLE)
@@ -1861,7 +1860,7 @@ CHARACTER(3),INTENT(IN)::HSNOWMETAMO
 !
 REAL :: ZDIAM, ZDIAM_SQRT
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('SNOWCRO:GET_ALB',0,ZHOOK_HANDLE)
 !
@@ -1930,7 +1929,7 @@ INTEGER                              :: INLVLS
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZDSGRAIN, ZCOEF, ZSNOWDZ, ZAGE
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 ! 0. Initialization:
@@ -2034,7 +2033,7 @@ REAL, DIMENSION(SIZE(PSNOWRHO,1))    :: ZOPTICALPATH1, ZOPTICALPATH2, ZOPTICALPA
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZDSGRAIN, ZCOEF, ZSNOWDZ, ZAGE
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZBETA1, ZBETA2, ZBETA3, ZWORK
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 ! 0. Initialization:
@@ -2132,7 +2131,7 @@ IMPLICIT NONE
 !
 INTEGER         :: INLL
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 
@@ -2159,7 +2158,7 @@ IMPLICIT NONE
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 
@@ -2194,7 +2193,7 @@ TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DEK
 !
 INTEGER                               :: JJ, JL
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 
@@ -2272,7 +2271,7 @@ REAL,   DIMENSION(:),   INTENT(OUT)   :: PFROZEN1SFC
 !
 INTEGER                               :: INJ, INL, JJ, JL
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -2366,7 +2365,7 @@ REAL, DIMENSION(SIZE(PEK%XTG,1))    :: ZEXCESS, ZK, ZHCAPL,ZELITTERI,           
 !
 REAL                                :: ZPSI
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*      0.3    declaration of local parameters
 !

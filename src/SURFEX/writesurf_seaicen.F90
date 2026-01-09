@@ -46,8 +46,7 @@ USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 USE MODI_WRITE_SURF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_GET_TYPE_DIM_n
 !
@@ -80,7 +79,7 @@ CHARACTER(LEN=100):: YCOMMENT         ! Error Message
 !
 INTEGER :: JK,JL                   ! loop counter on ice categories and layes 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('WRITESURF_SEAICE_n',0,ZHOOK_HANDLE)

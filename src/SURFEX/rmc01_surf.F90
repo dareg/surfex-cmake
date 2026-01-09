@@ -48,8 +48,7 @@ USE MODD_CANOPY_TURB, ONLY : XALPSBL, XCMFS, XCED
 USE MODE_SBLS
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -74,7 +73,7 @@ REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZPHIM    ! MO function
                                                    ! for stress
 REAL, DIMENSION(SIZE(PZ,1),SIZE(PZ,2)) :: ZPHIE    ! MO function
                                                    ! for TKE
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 GNEUTRAL = .FALSE.

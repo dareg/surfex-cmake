@@ -64,8 +64,7 @@ USE MODI_CARBON_SOIL
 
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -135,7 +134,7 @@ INTEGER  :: ITCSPIN
 !
 INTEGER  :: INI, INL, JI, JL, IDEKTH, INBIOMASS
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

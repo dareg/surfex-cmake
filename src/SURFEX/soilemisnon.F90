@@ -61,8 +61,7 @@ USE MODD_CSTS,       ONLY : XAVOGADRO
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -107,7 +106,7 @@ REAL, DIMENSION(SIZE(PUA,1),3)   :: ZS            ! normalized sum
  CHARACTER(LEN=2)               :: TEST_CRF ! 'OK' if VEG<60% (i.e. soils with sparse vegetation)
 !
 INTEGER :: J, IMASK
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !=============================================================================
 IF (LHOOK) CALL DR_HOOK('SOILEMISNO_n',0,ZHOOK_HANDLE)
 !

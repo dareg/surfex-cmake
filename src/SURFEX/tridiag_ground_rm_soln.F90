@@ -48,8 +48,7 @@ SUBROUTINE TRIDIAG_GROUND_RM_SOLN(PSOLN,PA_COEF,PB_COEF)
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -66,7 +65,7 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PSOLN       ! solution vector
 !
 INTEGER                             :: JJ, JI
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('TRIDIAG_GROUND_RM_SOLN',0,ZHOOK_HANDLE)

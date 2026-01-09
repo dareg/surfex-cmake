@@ -59,8 +59,7 @@ USE MODI_MNHOPEN_NAMELIST
 USE MODI_AROOPEN_NAMELIST
 #endif
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -76,7 +75,7 @@ INTEGER,           INTENT(OUT) :: KLUNAM   ! logical unit of namelist
 !              -------------------------------
 !
  CHARACTER(LEN=28) :: YFILE
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

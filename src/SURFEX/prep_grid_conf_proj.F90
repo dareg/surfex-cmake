@@ -45,8 +45,7 @@ USE MODI_READ_SURF
 !
 USE MODD_GRID_CONF_PROJ_n, ONLY : GRID_CONF_PROJ_t, XX, XY
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -68,7 +67,7 @@ REAL, DIMENSION(:), ALLOCATABLE :: ZW ! work array
  CHARACTER(LEN=1) :: YDIR
 INTEGER           :: IRESP
 INTEGER           :: JL        ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-----------------------------------------------------------------------
 !

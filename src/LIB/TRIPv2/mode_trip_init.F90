@@ -33,8 +33,7 @@ MODULE MODE_TRIP_INIT
 !
 USE MODE_TRIP_FUNCTION
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 !-------------------------------------------------------------------------------
 !
@@ -69,7 +68,7 @@ LOGICAL, INTENT(IN), OPTIONAL          :: GMLON,GMLAT
 !*      declarations of local variables
 !
 INTEGER :: JLON, JLAT, IDIR
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*      procedure
 !
@@ -129,7 +128,7 @@ END SUBROUTINE SETNEXT
 !!    PURPOSE
 !!    -------
 !    
-!     set area [m²] of each grid box
+!     set area [mÂ²] of each grid box
 !
 USE MODD_TRIP_PAR, ONLY : XPI, XRAD
 !
@@ -148,7 +147,7 @@ REAL, DIMENSION(:,:), INTENT(OUT)  :: PAREA
 REAL    :: ZDLAT, ZDLON, ZLAT
 !
 INTEGER :: JI, JJ
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*      procedure
 !
@@ -200,7 +199,7 @@ REAL, DIMENSION(:,:), INTENT(OUT)   :: PLEN
 REAL    :: ZLON, ZLAT, ZLON_N, ZLAT_N
 !
 INTEGER :: JLON, JLAT
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*      procedure
 !

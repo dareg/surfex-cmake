@@ -58,8 +58,7 @@
 !
 USE MODD_CANOPY_n, ONLY : CANOPY_t
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -74,7 +73,7 @@ TYPE(CANOPY_t), INTENT(INOUT) :: SB
 !              -------------------------------
 !
 INTEGER :: JLAYER                 ! loop counter on layers
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

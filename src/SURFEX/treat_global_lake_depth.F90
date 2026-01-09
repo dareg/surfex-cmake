@@ -62,8 +62,7 @@ USE MODI_GET_LUOUT
 USE MODI_TREAT_FIELD
 !ek USE MODI_PACK_SAME_RANK
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !ek USE MODI_GET_SURF_MASK_n
@@ -104,7 +103,7 @@ INTEGER                        :: JI
 !ek CHARACTER(LEN=6)    :: YMASK
 INTEGER, DIMENSION(NL) :: ISTATUS
 REAL, DIMENSION(NL,1) :: ZDEPTH, ZSTATUS    ! physiographic field on full grid
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*    1.      Initializations

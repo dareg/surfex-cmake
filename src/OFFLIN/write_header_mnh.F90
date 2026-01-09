@@ -55,8 +55,7 @@ USE MODD_IO_SURF_FA
 !
 USE MODI_ABOR1_SFX
 
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -72,7 +71,7 @@ INTEGER            :: INB ! number of articles in the file
  CHARACTER(LEN=12) :: YREC
  CHARACTER(LEN=40) :: YFIELD
 INTEGER :: J
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_HEADER_MNH',0,ZHOOK_HANDLE)

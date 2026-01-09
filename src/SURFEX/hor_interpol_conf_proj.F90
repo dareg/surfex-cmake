@@ -44,8 +44,7 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODI_BILIN_VALUE
 USE MODI_BILIN_EXTRAP
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -59,7 +58,7 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PFIELDOUT ! interpolated field
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 LOGICAL, DIMENSION(:), ALLOCATABLE :: GINTERP_DUPLIQUE ! .true. where physical value is needed ! Ajout MT
 !-------------------------------------------------------------------------------------

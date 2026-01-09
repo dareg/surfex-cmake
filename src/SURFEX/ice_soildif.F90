@@ -79,8 +79,7 @@ USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_P_t, ISBA_PE_t
 USE MODD_CSTS,     ONLY : XLMTT, XTT, XG, XCI, XRHOLI, XRHOLW
 USE MODD_ISBA_PAR, ONLY : XWGMIN
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -123,7 +122,7 @@ REAL                                     :: ZWGMAX, ZPSIMAX, ZPSI, ZDELTAT,  &
                                             ZEFFIC, ZPHASEM, ZPHASEF, ZWORK, &
                                             ZAPPHEATCAP
 !                                            
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 ! Initialization:

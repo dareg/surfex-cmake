@@ -29,8 +29,7 @@ USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE  ! Number of possible vegtypes
 !!------------------------------------------------------------------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -55,7 +54,7 @@ INTEGER, DIMENSION(KSIZE_VEG), INTENT(OUT)   :: KMASK     !vegetation type to pa
 INTEGER                                  :: KK       ! Counter for points in vegetation vector
 INTEGER                                  :: JJ       ! Counter for points in patch vector
 INTEGER                                  :: II       ! Point in nature vector corresponding to JJ
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

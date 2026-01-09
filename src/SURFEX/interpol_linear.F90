@@ -42,8 +42,7 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -63,7 +62,7 @@ REAL, DIMENSION(:),      INTENT(OUT)   :: POUT    ! Interpolated value
 !
 REAL         :: ZFACT0, ZFACT1, ZFACT2
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------------
 !

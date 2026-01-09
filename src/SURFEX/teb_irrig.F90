@@ -45,8 +45,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -64,7 +63,7 @@ REAL, DIMENSION(:), INTENT(IN)  :: PEND_HOUR   ! Last  month for irrigation (ecl
 REAL, DIMENSION(:), INTENT(IN)  :: P24H_IRRIG  ! 24h total irrigation
 REAL, DIMENSION(:), INTENT(OUT) :: PIRRIG      ! present irrigation
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*      0.2    declarations of local variables
 !

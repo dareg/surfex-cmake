@@ -82,8 +82,7 @@ USE MODE_THERMOS
 USE MODI_ABOR1_SFX
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -188,7 +187,7 @@ REAL    :: ZS                  !height of rougness length ref
 REAL    :: ZCH10               !transfer coef. at 10m
 !
 INTEGER :: J, JLOOP    !loop indice
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

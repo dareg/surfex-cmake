@@ -49,8 +49,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -69,7 +68,7 @@ INTEGER                  :: JCOL  ! third index of the pixel in the array XCONN
 INTEGER                  :: JREF  ! index of the upslope pixel in the topo domain
 REAL                     :: ZFAC  ! propagation factor between this pixel and the
                                   ! upslope one
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('FLOWDOWN',0,ZHOOK_HANDLE)
 !

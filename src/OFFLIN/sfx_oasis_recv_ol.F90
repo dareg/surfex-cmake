@@ -66,8 +66,7 @@ USE MODI_PUT_SFX_LAND
 USE MODI_PUT_SFX_SEA
 USE MODI_UPDATE_ESM_SURF_ATM_n
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 #ifdef AIX64
 !$ USE OMP_LIB
@@ -131,7 +130,7 @@ LOGICAL             :: GRECV_SEA
 !
 INTEGER             :: ILUOUT
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

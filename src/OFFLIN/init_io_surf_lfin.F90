@@ -60,8 +60,7 @@ USE MODI_GET_SIZE_FULL_n
 USE MODI_GET_TYPE_DIM_n
 USE MODI_INIT_IO_SURF_MASK_n
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -74,7 +73,7 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 INTEGER                        :: ILU,IRET, IL
 INTEGER                :: INB ! number of articles in the file
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_LFI_N',0,ZHOOK_HANDLE)
 !

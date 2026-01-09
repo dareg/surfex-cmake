@@ -43,8 +43,7 @@ USE MODD_CANOPY_n, ONLY : CANOPY_t
 !
 USE MODI_CANOPY_EVOL_FIELD
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -92,7 +91,7 @@ REAL, DIMENSION(KI,SB%NLVL)   :: ZU       ! work variable : wind at futur instan
 !                                       ! (or past at the end of the routine) 
 REAL, DIMENSION(KI)         :: ZDUADT   ! dUa/dt   at forcing level
 LOGICAL                     :: LIMPL
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

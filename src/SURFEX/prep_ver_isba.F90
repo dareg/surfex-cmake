@@ -43,8 +43,7 @@ USE MODE_THERMOS
 USE MODI_PREP_VER_SNOW
 USE MODI_PACK_SAME_RANK
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -79,7 +78,7 @@ REAL, DIMENSION(:,:), ALLOCATABLE :: ZTG_LS! temperature on initial orography
 REAL                            :: ZGRADX = 5.E-4 ! slope of ice content gradient
 REAL                            :: ZH0    = 5.E-1 ! constant used to define ice content gradient
 REAL                            :: ZEPS   = 1e-3  ! epsilon value for equality tests
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 !*      1.0    Ice content climatologic gradient

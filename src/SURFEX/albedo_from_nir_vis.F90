@@ -43,8 +43,7 @@ USE MODD_ISBA_PAR,   ONLY : XRED_EDGE, XUV_EDGE
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -63,7 +62,7 @@ REAL, DIMENSION(:,:), INTENT(OUT):: PSCA_ALB  ! diffuse albedo for each waveleng
 !
 INTEGER :: ISWB ! number of SW spectral bands
 INTEGER :: JSWB ! loop counter on number of SW spectral bands
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('ALBEDO_FROM_NIR_VIS',0,ZHOOK_HANDLE)

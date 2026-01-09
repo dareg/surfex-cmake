@@ -35,8 +35,7 @@ USE MODD_GET_MESH_INDEX_CONF_PROJ, ONLY : XLAT0, XLON0, XRPK, XBETA,    &
 USE MODE_GRIDTYPE_CONF_PROJ
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 USE MODD_CSTS ,ONLY : XSURF_EPSILON
 !
 IMPLICIT NONE
@@ -72,7 +71,7 @@ REAL                              :: ZDYLIM   ! Y grid mesh size
 INTEGER                           :: JI       ! loop counter in x
 INTEGER                           :: JJ       ! loop counter in y
 INTEGER                           :: JL       ! loop counter on input points
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_CONF_PROJ',0,ZHOOK_HANDLE)

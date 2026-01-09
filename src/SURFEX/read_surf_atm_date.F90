@@ -51,8 +51,7 @@ USE MODI_READ_PRE_SURFA_DAT_CONF
 USE MODI_READ_PREP_SURF_ATM_CONF
 USE MODI_READ_PREP_FILE_DATE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -84,7 +83,7 @@ REAL,              INTENT(IN)  :: PTIME       ! current time since midnight (UTC
  CHARACTER(LEN=6)               :: YFILEPGDTYPE   ! file type
  CHARACTER(LEN=28)              :: YFILEPGDIN       ! file name
  CHARACTER(LEN=6)               :: YFILEPGDINTYPE   ! file type
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

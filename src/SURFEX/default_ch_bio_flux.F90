@@ -40,8 +40,7 @@
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -49,7 +48,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 LOGICAL,  INTENT(OUT) :: OCH_BIO_FLUX  ! flag for the calculation of biogenic fluxes
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !
 !

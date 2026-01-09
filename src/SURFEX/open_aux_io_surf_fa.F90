@@ -49,8 +49,7 @@ USE MODI_IO_BUFF_CLEAN
 USE MODI_GET_SURF_MASK_n
 USE MODI_GET_1D_MASK
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -71,7 +70,7 @@ INTEGER                :: INB ! number of articles in the file
 INTEGER, DIMENSION(:),POINTER  :: IMASK
 INTEGER                        :: ILU, IRET, IL
 REAL, DIMENSION(:),ALLOCATABLE :: ZFULL  ! total cover
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('OPEN_AUX_IO_SURF_FA',0,ZHOOK_HANDLE)

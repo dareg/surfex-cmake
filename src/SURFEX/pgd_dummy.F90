@@ -56,8 +56,7 @@ USE MODI_PGD_FIELD
 USE MODI_READ_NAM_PGD_DUMMY
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -90,7 +89,7 @@ INTEGER                             :: IDUMMY_NBR
 !                                                      ! 'ARI' , 'INV'
  CHARACTER(LEN=28), DIMENSION(1000)  :: CDUMMY_FILE     ! data files
  CHARACTER(LEN=6),  DIMENSION(1000)  :: CDUMMY_FILETYPE ! type of these files
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

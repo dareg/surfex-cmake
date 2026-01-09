@@ -10,8 +10,7 @@
 !############################################################################
 !############################################################################
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 CONTAINS
 !############################################################################
@@ -69,7 +68,7 @@ REAL, DIMENSION(:), POINTER     :: PGRID_PAR! parameters defining this grid
 !              -------------------------------
 !
 INTEGER :: IL ! number of points
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_IGN:PUT_GRIDTYPE_IGN',0,ZHOOK_HANDLE)
 IL = SIZE(PX)
@@ -142,7 +141,7 @@ REAL, DIMENSION(:), INTENT(IN)            :: PGRID_PAR! parameters defining this
 !
 INTEGER :: IL, IDIMX, IDIMY
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_IGN:GET_GRIDTYPE_IGN',0,ZHOOK_HANDLE)
 IF (PRESENT(KLAMBERT))  KLAMBERT = NINT(PGRID_PAR(1))
@@ -241,7 +240,7 @@ REAL, DIMENSION(SIZE(PX)) :: ZLATISO          ! Isometric latitude
 REAL :: ZLAT0            ! For iteration
 ! 
 INTEGER                         :: J, JJ
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !*       1.     PRELIMINARY
@@ -350,7 +349,7 @@ REAL :: ZGAMMA
 REAL :: ZLATFI           ! Isometric latitude
 REAL :: ZR               ! length of arc meridian line projection
 INTEGER :: JJ
-REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !
 !
 !-------------------------------------------------------------------------------
@@ -462,7 +461,7 @@ REAL, DIMENSION(SIZE(PX))       :: ZR       ! R in the IGN formula
 REAL, DIMENSION(SIZE(PX))       :: ZGRANDN  ! N in the IGN formula
 !
 INTEGER                         :: J
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

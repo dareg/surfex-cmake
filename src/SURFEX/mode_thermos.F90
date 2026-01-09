@@ -43,8 +43,7 @@
 !-------------------------------------------------------------------------------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 INTERFACE PSAT
   MODULE PROCEDURE PSAT_0D
@@ -112,7 +111,7 @@ REAL                            :: PPSAT  ! saturation vapor
 !
 REAL            :: ZALP, ZBETA, ZGAM
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE                                          
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE                                          
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:PSAT_0D',0,ZHOOK_HANDLE)
 !
@@ -158,7 +157,7 @@ REAL, DIMENSION(SIZE(PT))                     :: PPSAT  ! saturation vapor press
 REAL, DIMENSION(SIZE(PT))  :: ZALP, ZBETA, ZGAM
 !
 INTEGER                         :: JJ !loop index
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:PSAT_1D',0,ZHOOK_HANDLE)
 !
@@ -211,7 +210,7 @@ REAL, DIMENSION(SIZE(PT,1),SIZE(PT,2))        :: PPSAT  ! saturation vapor press
 REAL, DIMENSION(SIZE(PT,1),SIZE(PT,2))        :: ZALP, ZBETA, ZGAM
 !
 INTEGER         :: JJ, JL, INI, INL, IWORK !loop index
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:PSAT_2D',0,ZHOOK_HANDLE)
 !
@@ -272,7 +271,7 @@ REAL                            :: PPSAT  ! saturation vapor
 !
 REAL            :: ZALP, ZBETA, ZGAM
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE                                          
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE                                          
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:PSATW_0D',0,ZHOOK_HANDLE)
 !
@@ -311,7 +310,7 @@ REAL, DIMENSION(SIZE(PT))                     :: PPSAT  ! saturation vapor press
 REAL, DIMENSION(SIZE(PT))  :: ZALP, ZBETA, ZGAM
 !
 INTEGER                         :: JJ !loop index
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:PSATW_1D',0,ZHOOK_HANDLE)
 !
@@ -355,7 +354,7 @@ REAL, DIMENSION(SIZE(PT,1),SIZE(PT,2))        :: PPSAT  ! saturation vapor press
 REAL, DIMENSION(SIZE(PT,1),SIZE(PT,2))        :: ZALP, ZBETA, ZGAM
 !
 INTEGER         :: JJ, JL, INI, INL, IWORK !loop index
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:PSATW_2D',0,ZHOOK_HANDLE)
 !
@@ -408,7 +407,7 @@ REAL, DIMENSION(SIZE(PT))      :: PDPSAT
 !
 REAL, DIMENSION(SIZE(PT))      :: ZBETA, ZGAM
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:DPSAT_1D',0,ZHOOK_HANDLE)
@@ -514,7 +513,7 @@ REAL                           :: ZFOES  ! saturation vapor
 !
 REAL                           :: ZWORK1
 REAL                           :: ZWORK2
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSAT_0D',0,ZHOOK_HANDLE)
 !
@@ -618,7 +617,7 @@ REAL, DIMENSION(SIZE(PT))                   :: ZFOES  ! saturation vapor
 !
 REAL, DIMENSION(SIZE(PT))                   :: ZWORK1
 REAL                                        :: ZWORK2 
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSAT_1D',0,ZHOOK_HANDLE)
@@ -733,7 +732,7 @@ REAL, DIMENSION(SIZE(PT,1),SIZE(PT,2)) :: ZFOES
 INTEGER, DIMENSION(SIZE(PT,1))         :: IMASK
 !
 INTEGER         :: INL
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSAT_2D',0,ZHOOK_HANDLE)
@@ -847,7 +846,7 @@ REAL                           :: ZFOES  ! saturation vapor
 !
 REAL                           :: ZWORK1
 REAL                           :: ZWORK2
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSATW_0D',0,ZHOOK_HANDLE)
 !
@@ -951,7 +950,7 @@ REAL, DIMENSION(SIZE(PT))                   :: ZFOES  ! saturation vapor
 !
 REAL, DIMENSION(SIZE(PT))                   :: ZWORK1
 REAL                                        :: ZWORK2 
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSATW_1D',0,ZHOOK_HANDLE)
@@ -1066,7 +1065,7 @@ REAL, DIMENSION(SIZE(PT,1),SIZE(PT,2)) :: ZFOES
 INTEGER, DIMENSION(SIZE(PT,1))         :: IMASK
 !
 INTEGER         :: INL
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSATW_2D',0,ZHOOK_HANDLE)
@@ -1149,7 +1148,7 @@ END FUNCTION QSATW_2D
 !!      Book2 of documentation of Meso-NH 
 !!      Zeng, X., Zhao, M., and Dickinson, R. E., 1998 : Intercomparaison of bulk
 !!      aerodynamic algorithm for the computation of sea surface fluxes using
-!!      TOGA COARE and TAO data. Journal of Climate, vol 11, n°10, pp 2628--2644
+!!      TOGA COARE and TAO data. Journal of Climate, vol 11, nÂ°10, pp 2628--2644
 !!
 !!
 !!    AUTHOR
@@ -1188,7 +1187,7 @@ REAL, DIMENSION(SIZE(PT))                   :: ZFOES  ! saturation vapor
 !
 REAL, DIMENSION(SIZE(PT))                   :: ZWORK1
 REAL                                        :: ZWORK2
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSATSEAW_1D',0,ZHOOK_HANDLE)
@@ -1248,7 +1247,7 @@ END FUNCTION QSATSEAW_1D
 !!    REFERENCE
 !!    ---------
 !!      Weiss, R.F., and Price, B.A., 1980 : Nitrous oxide solubility in water
-!!      and seawater. Marine Chemistry, n°8, pp 347-359.
+!!      and seawater. Marine Chemistry, nÂ°8, pp 347-359.
 !!
 !!
 !!    AUTHOR
@@ -1289,7 +1288,7 @@ REAL, DIMENSION(SIZE(PT))                   :: ZFOES  ! saturation vapor
 !
 REAL, DIMENSION(SIZE(PT))                   :: ZWORK1
 REAL                                        :: ZWORK2
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSATSEAW2_1D',0,ZHOOK_HANDLE)
@@ -1407,7 +1406,7 @@ REAL, DIMENSION(SIZE(PT))  :: ZFOES  ! saturation vapor
 REAL                       :: ZWORK1
 REAL, DIMENSION(SIZE(PT))  :: ZWORK2
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:DQSATW_O_DT_1D',0,ZHOOK_HANDLE)
@@ -1524,7 +1523,7 @@ REAL, DIMENSION(SIZE(PT))                       :: ZFOES  ! saturation vapor
 REAL                      :: ZWORK1
 REAL, DIMENSION(SIZE(PT)) :: ZWORK2
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:DQSATI_O_DT_1D',0,ZHOOK_HANDLE)
@@ -1632,7 +1631,7 @@ REAL, DIMENSION(SIZE(PT))                   :: ZFOES  ! saturation vapor
 !
 REAL, DIMENSION(SIZE(PT))                   :: ZWORK1
 REAL                                        :: ZWORK2
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSATI_1D',0,ZHOOK_HANDLE)
@@ -1745,7 +1744,7 @@ REAL, DIMENSION(SIZE(PT,1),SIZE(PT,2))      :: ZFOES  ! saturation vapor pressur
 INTEGER, DIMENSION(SIZE(PT,1)) :: IMASK
 !
 INTEGER         :: INL
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSATI_2D',0,ZHOOK_HANDLE)

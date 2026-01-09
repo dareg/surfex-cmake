@@ -78,7 +78,7 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_DEEPSOIL,   ONLY : LPHYSDOMC
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
@@ -148,7 +148,7 @@ REAL, DIMENSION(SIZE(PVEG)) :: ZCF !heat capacity of the flood
 REAL, DIMENSION(SIZE(PVEG)) :: ZFF !Fraction of floodplain at the surface without snow
 !
 INTEGER                 :: JJ
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('SOIL',0,ZHOOK_HANDLE)

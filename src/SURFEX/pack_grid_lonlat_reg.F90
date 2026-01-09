@@ -36,8 +36,7 @@ USE MODI_PACK_SAME_RANK
 USE MODE_GRIDTYPE_LONLAT_REG
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -69,7 +68,7 @@ REAL, DIMENSION(:), ALLOCATABLE    :: ZLON2     ! longitude of subset of grid po
 
 !
 REAL, DIMENSION(:), POINTER       :: ZGRID_PAR2 ! parameters of output grid
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 !*    1.     Computes grid parameters

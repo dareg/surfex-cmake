@@ -61,8 +61,7 @@ USE MODD_ISBA_PAR, ONLY : NOPTIMLAYER, XOPTIMGRID
 !
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -84,7 +83,7 @@ INTEGER            :: JJ,JL
 !
 LOGICAL            :: LOPTIMGRID
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !        0.     Initialization
 !               --------------
@@ -181,7 +180,7 @@ REAL, DIMENSION(NDLIM), PARAMETER   :: ZDLIM = &
 REAL,DIMENSION(SIZE(PDG,1)) :: ZDG_WATER
 !
 LOGICAL            :: LWORK
-REAL(KIND=JPRB)    :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK)    :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 ! init

@@ -35,8 +35,7 @@ USE MODN_TRIP,     ONLY : CGROUNDW, CVIT, LFLOOD
 USE MODD_TRIP_PAR, ONLY : XUNDEF, NDIMTAB, LNCPRINT
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE NETCDF
 !
@@ -70,7 +69,7 @@ REAL,    DIMENSION(:), ALLOCATABLE ::  ZLAT
 LOGICAL, DIMENSION(:), ALLOCATABLE ::  LDOUBLE
 !
 INTEGER :: INPARAM, INCID, INUM
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------

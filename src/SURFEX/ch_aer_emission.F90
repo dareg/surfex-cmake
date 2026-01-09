@@ -8,8 +8,8 @@
 !!
 !!    PURPOSE
 !!    -------
-!!    Transforme les emissions  d'aérosol en masse kg.kg-1.m.s-1 en molecules.m-2.s-1 : flux du moment m3
-!!    Calcule les flux des moments m0 et m6 à partir de sigma  et Rg (um)
+!!    Transforme les emissions  d'aÃ©rosol en masse kg.kg-1.m.s-1 en molecules.m-2.s-1 : flux du moment m3
+!!    Calcule les flux des moments m0 et m6 Ã  partir de sigma  et Rg (um)
 !!
 !!    REFERENCE
 !!    ---------
@@ -31,8 +31,7 @@ USE MODD_CHS_AEROSOL
 USE MODD_DST_SURF, ONLY : XDENSITY_DST
 USE MODI_ABOR1_SFX
 !!
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !!
@@ -69,7 +68,7 @@ REAL   :: ZVALBC, ZVALOC
 INTEGER :: I_CH_M0i, I_CH_M0j, I_CH_M6i, I_CH_M6j, I_CH_H2Oi, I_CH_H2Oj,&
                   I_CH_SO4i,I_CH_SO4j, I_CH_NO3i, I_CH_NO3j, I_CH_NH3i, I_CH_NH3j,&
                   I_CH_OCi, I_CH_OCj, I_CH_BCi, I_CH_BCj  , I_CH_DSTi, I_CH_DSTj   
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !
 !-------------------------------------------------------------------------------

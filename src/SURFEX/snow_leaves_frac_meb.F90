@@ -53,8 +53,7 @@ USE MODD_CSTS,     ONLY : XTT
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -94,7 +93,7 @@ REAL, DIMENSION(SIZE(PLAIV)) :: ZLAI,ZFCP,ZFRACVN, ZSNOWRHOV
 !                                ZFRACVN   = fraction of interception snow
 !                                ZSNOWRHOV = density of snow intercepted by the canopy (kg m-3)
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*      0.3    declarations of local parameters
 !

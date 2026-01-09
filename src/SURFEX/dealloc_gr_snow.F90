@@ -46,8 +46,7 @@
 !
 USE MODD_TYPE_SNOW
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -55,7 +54,7 @@ IMPLICIT NONE
 !              ------------------------
 !
 TYPE(SURF_SNOW), INTENT(INOUT)             :: TPSNOW
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*       0.2   Declaration of local variables
 !              ------------------------------

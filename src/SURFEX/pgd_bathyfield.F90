@@ -55,8 +55,7 @@ USE MODI_GET_LUOUT
 USE MODI_TREAT_BATHYFIELD
 USE MODI_INTERPOL_FIELD
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -93,7 +92,7 @@ INTEGER :: ILUOUT    ! output listing logical unit
 !
  CHARACTER(LEN=20) :: YFIELD
 INTEGER :: JLOOP
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*    1.      Initializations

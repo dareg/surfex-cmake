@@ -88,8 +88,7 @@ USE MODI_DSLT_DEP
 USE MODI_TEB_GARDEN
 USE MODI_TEB_CANOPY
 ! 
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 USE MODI_CANOPY_EVOL
@@ -408,7 +407,7 @@ INTEGER                           :: JJ
 !
 INTEGER                    :: JP, IBEG, IEND ! loop counter
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 ! Preliminaries:

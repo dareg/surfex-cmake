@@ -108,8 +108,7 @@ USE MODI_LAYER_E_BUDGET_GET_COEF
 USE MODI_LAYER_E_BUDGET
 USE MODE_CONV_DOE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -197,7 +196,7 @@ REAL, DIMENSION(SIZE(PPS)) :: ZF_WL_WL       ! View factor wall-wall inside the 
 REAL, DIMENSION(SIZE(PPS)) :: ZCHTC_IN_WL  ! indoor convective heat transfer coeff wall [W m-2 K-1]
 INTEGER :: IWL_LAYER           ! number of wall layers
 INTEGER :: JJ                    ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('WALL_LAYER_E_BUDGET',0,ZHOOK_HANDLE)
 !

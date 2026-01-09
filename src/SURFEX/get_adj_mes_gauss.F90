@@ -35,8 +35,7 @@
 USE MODE_GRIDTYPE_GAUSS
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -68,7 +67,7 @@ INTEGER :: JLAT, JLON, IL, JL, ILGRID, JLON2, ID, JL0
 !
 REAL :: ZDIS, ZINTER
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------------
 !

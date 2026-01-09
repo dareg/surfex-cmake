@@ -56,8 +56,7 @@ USE MODD_TOPD_PAR, ONLY : NUNIT
 USE MODD_TOPODYN, ONLY : NPMAX
 USE MODD_SURF_PAR,  ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -81,7 +80,7 @@ INTEGER                   :: ILUOUT      ! Unit of the files
 !
 REAL                      :: ZWRK        ! work variable
 REAL, DIMENSION(KNMC)     :: ZDAREA      ! drainage area (aire drainee)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 CHARACTER(LEN=100)    :: YHEADER    ! Header File to be read
 !------------------------------------------------------------------------------

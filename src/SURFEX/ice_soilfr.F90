@@ -65,8 +65,7 @@ USE MODD_CSTS,       ONLY : XCL, XTT, XPI, XDAY, XCI, XRHOLI,     &
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_ISBA_PAR,   ONLY : XWGMIN, XSPHSOIL, XDRYWGHT
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -147,7 +146,7 @@ INTEGER         :: INJ, JJ
 !
 REAL, DIMENSION(SIZE(DMK%XCG))          :: ZWORK1, ZWORK2, ZTDIURN
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*       0.     Initialization

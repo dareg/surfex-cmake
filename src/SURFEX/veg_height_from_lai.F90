@@ -127,8 +127,7 @@ USE MODD_TREEDRAG,       ONLY : LTREEDRAG, XALLEN_TERM, XGRASS_H_DNM,        &
                                 LFAKETREE, XHFAKETREE, XFFAKETREE,           &
                                 XSCALE_H_TREE_ECOFG
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -150,7 +149,7 @@ REAL                            :: ZAVG_H      ! averaged height
 REAL                            :: ZZREF       ! Reference height 
 !
 INTEGER                         :: JTYPE       ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-----------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODI_VEG_HEIGHT_FROM_LAI:VEG_HEIGHT_FROM_LAI_0D',0,ZHOOK_HANDLE)
@@ -346,8 +345,7 @@ USE MODD_TREEDRAG,       ONLY : LTREEDRAG, XALLEN_TERM, XGRASS_H_DNM,        &
                                 LFAKETREE, XHFAKETREE, XFFAKETREE,           &
                                 XSCALE_H_TREE_ECOFG
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -369,7 +367,7 @@ REAL, DIMENSION(SIZE(PLAI))                  :: ZAVG_H      ! averaged height
 REAL                                         :: ZZREF       ! reference height        
 !
 INTEGER                                      :: JTYPE       ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-----------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODI_VEG_HEIGHT_FROM_LAI:VEG_HEIGHT_FROM_LAI_1D',0,ZHOOK_HANDLE)
@@ -569,8 +567,7 @@ USE MODD_TREEDRAG,       ONLY : LTREEDRAG, XALLEN_TERM, XGRASS_H_DNM,        &
                                 LFAKETREE, XHFAKETREE, XFFAKETREE,           &
                                 XSCALE_H_TREE_ECOFG
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -593,7 +590,7 @@ REAL, DIMENSION(SIZE(PLAI,1),SIZE(PLAI,2))                  :: ZAVG_H   ! averag
 REAL                                                        :: ZZREF    ! reference height        
 !
 INTEGER                                                     :: JTYPE    ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-----------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODI_VEG_HEIGHT_FROM_LAI:VEG_HEIGHT_FROM_LAI_2D',0,ZHOOK_HANDLE)
@@ -801,8 +798,7 @@ USE MODD_TREEDRAG,       ONLY : LTREEDRAG, XALLEN_TERM, XGRASS_H_DNM,        &
                                 LFAKETREE, XHFAKETREE, XFFAKETREE,           &
                                 XSCALE_H_TREE_ECOFG
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -818,7 +814,7 @@ REAL,   DIMENSION(SIZE(PLAI))  :: PH_VEG          ! vegetation height
 !
 REAL, DIMENSION(SIZE(PLAI))     :: ZALLEN_H    ! Allen formula for height
 REAL                            :: ZZREF       ! Reference height
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-----------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODI_VEG_HEIGHT_FROM_LAI:VEG_HEIGHT_FROM_LAI_VEGTYPE',0,ZHOOK_HANDLE)

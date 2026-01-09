@@ -56,8 +56,7 @@ USE MODD_SURF_PAR,        ONLY: NUNDEF,XUNDEF
 !
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -77,7 +76,7 @@ INTEGER            :: INBSAT, INBALL
 !
 REAL                           :: ZREST            ! m
 REAL                           :: ZWNEW            ! m3/m3
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('RECHARGE_SURF_TOPD',0,ZHOOK_HANDLE)
 !
@@ -121,7 +120,7 @@ DO J3 = 1,KI
           J4 = J4+1
           IF ( J4<=SIZE(NMASKI,3) ) J2 = NMASKI(J3,J1,J4)
           !
-        ELSE ! pixel non défini dans Isba
+        ELSE ! pixel non dÃ©fini dans Isba
           !
           XDMAXT(J1,J2) = 0.0
           PHT = 0.0
@@ -152,7 +151,7 @@ DO J3 = 1,KI
             !
             ZWNEW = XWTOPT(J1,J2) + PHI(J3) / XDTOPT(J1,J2)
             !
-            IF ( XWTOPT(J1,J2) == XWSTOPT(J1,J2) ) THEN ! pixel déjà saturé
+            IF ( XWTOPT(J1,J2) == XWSTOPT(J1,J2) ) THEN ! pixel dÃ©jÃ  saturÃ©
               !
               XDMAXT(J1,J2) = 0.0
               PHT(J1,J2) = 0.0
@@ -169,28 +168,28 @@ DO J3 = 1,KI
               !
             ELSE IF ( XWTOPT(J1,J2) < XWFCTOPT(J1,J2) ) THEN 
               !
-              ! en dessous de la capacité au champ avant d'ajouter la recharge
+              ! en dessous de la capacitÃ© au champ avant d'ajouter la recharge
               IF ( (XWTOPT(J1,J2) + PHI(J3)/XDTOPT(J1,J2)) <= XWFCTOPT(J1,J2) ) THEN 
                 !
-                ! en dessous de la capacité au champ avec la recharge 
+                ! en dessous de la capacitÃ© au champ avec la recharge 
                 XDMAXT(J1,J2) = ( XWSTOPT(J1,J2) - ZWNEW ) * XDTOPT(J1,J2)
                 PHT(J1,J2) = 0.0
                 !
-              ELSE ! au-dessus de la capacité au champ avec la recharge
+              ELSE ! au-dessus de la capacitÃ© au champ avec la recharge
                 !
                 XDMAXT(J1,J2) = XDMAXFC(J1,J2)
                 PHT(J1,J2) = ( ZWNEW - XWFCTOPT(J1,J2) ) * XDTOPT(J1,J2)
                 !
               ENDIF
               !
-            ELSE ! au-dessus de la capacité au champ avant d'ajouter la recharge
+            ELSE ! au-dessus de la capacitÃ© au champ avant d'ajouter la recharge
               !
               XDMAXT(J1,J2) = XDMAXFC(J1,J2)
               PHT(J1,J2) = ( ZWNEW - XWFCTOPT(J1,J2) ) * XDTOPT(J1,J2)
               !
             ENDIF
             !
-          ELSE IF ( NMASKT(J1,J2)==NUNDEF ) THEN! pixel non défini dans Isba
+          ELSE IF ( NMASKT(J1,J2)==NUNDEF ) THEN! pixel non dÃ©fini dans Isba
             !
             XDMAXT(J1,J2) = 0.0
             PHT = 0.0
@@ -206,7 +205,7 @@ DO J3 = 1,KI
       !
       IF ( ZREST/=0.0 ) THEN
         !
-        INBSAT=COUNT(.NOT.GTEST) !nb de pixels saturés avec ou sans la recharge
+        INBSAT=COUNT(.NOT.GTEST) !nb de pixels saturÃ©s avec ou sans la recharge
         !
         IF ( INBSAT == NNPIX(J3) ) THEN
           !
@@ -219,7 +218,7 @@ DO J3 = 1,KI
           !
         ELSE
           !
-          PHI(J3) = PHI(J3) + ( ZREST / (NNPIX(J3) - INBSAT) ) ! nouvelle recharge à distribuer
+          PHI(J3) = PHI(J3) + ( ZREST / (NNPIX(J3) - INBSAT) ) ! nouvelle recharge Ã  distribuer
           !
         ENDIF
       ENDIF

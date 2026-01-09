@@ -50,8 +50,7 @@ USE MODD_CSTS,       ONLY : XTT
 USE MODD_SNOW_PAR,   ONLY : XANSMIN, XRHOSMAX
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -66,7 +65,7 @@ IMPLICIT NONE
 !-------------------------------------------------------------------------------
 !
 
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('DEFAULT_PREP_TEB',0,ZHOOK_HANDLE)
 CFILE_TEB= '                          '

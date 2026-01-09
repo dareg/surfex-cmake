@@ -17,8 +17,7 @@ CONTAINS
 !
 !!****  * - routine to extend a real splitted array on SURFEX halo
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 #ifdef SFX_OL
 !USE MODE_EXTEND_GRID_PARAMETER_OL
@@ -43,7 +42,7 @@ REAL, DIMENSION(KSIZE), INTENT(OUT):: PFIELD_EXTEND! real field for splitted gri
 !
 !*      0.2   Declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_EXTEND_GRID_PARAMETER:EXTEND_GRID_PARAMETERX1',0,ZHOOK_HANDLE)
 !
@@ -73,8 +72,7 @@ END SUBROUTINE EXTEND_GRID_PARAMETERX1
 !
 !!****  * - routine to "extend" a integer related to splitted grid on SURFEX halo
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 #ifdef SFX_OL
 !USE MODE_EXTEND_GRID_PARAMETER_OL
@@ -94,7 +92,7 @@ INTEGER,           INTENT(IN) :: KFIELD       ! integer scalar for complete grid
 INTEGER,           INTENT(OUT):: KFIELD_EXTEND ! integer scalar for splitted grid
 !*      0.2   Declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_EXTEND_GRID_PARAMETER:EXTEND_GRID_PARAMETERN0',0,ZHOOK_HANDLE)
 !

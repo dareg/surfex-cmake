@@ -55,8 +55,7 @@ USE MODI_WRITE_FIELD_1D_PATCH
 USE MODI_DETECT_FIELD
 USE MODI_WRITE_SURF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -101,7 +100,7 @@ INTEGER             :: JL, JP , JIMP       ! loop counter
 !
 LOGICAL             :: GSNOW          ! T --> snow exists somewhere                                  
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('WRITESURF_GR_SNOW',0,ZHOOK_HANDLE)
 !

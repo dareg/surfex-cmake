@@ -35,8 +35,7 @@
 !            -----------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_GET_ADJ_MES_CART
 USE MODI_GET_ADJ_MES_CONF_PROJ
@@ -58,7 +57,7 @@ INTEGER, DIMENSION(KL),          INTENT(OUT)   :: KLEFT     ! left   mesh index
 INTEGER, DIMENSION(KL),          INTENT(OUT)   :: KRIGHT    ! right  mesh index
 INTEGER, DIMENSION(KL),          INTENT(OUT)   :: KTOP      ! top    mesh index
 INTEGER, DIMENSION(KL),          INTENT(OUT)   :: KBOTTOM   ! bottom mesh index
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*    0.2    Declaration of other local variables
 !            ------------------------------------

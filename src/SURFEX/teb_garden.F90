@@ -95,8 +95,7 @@ USE MODI_TEB
 USE MODI_AVG_URBAN_FLUXES
 USE MODI_BLD_OCC_CALENDAR
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -402,7 +401,7 @@ LOGICAL, DIMENSION(SIZE(PTA)) :: GSHADE           ! describes if one encounters 
 !                                                 ! conditions to close windows
 INTEGER :: JJ
 
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*      1.     Initializations

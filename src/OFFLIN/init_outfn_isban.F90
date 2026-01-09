@@ -85,8 +85,7 @@ USE MODI_DEF_VAR_NETCDF
 USE MODI_OL_WRITE_COORD
 USE MODI_OL_WRITE_PROJ
 !
-USE YOMHOOK ,ONLY : LHOOK,  DR_HOOK
-USE PARKIND1,ONLY : JPRB
+USE YOMHOOK ,ONLY : LHOOK,  DR_HOOK, JPHOOK
 !
 USE NETCDF
 !
@@ -138,7 +137,7 @@ INTEGER                      :: IDIM1, INDIMS, INDIMSALL, INJDIMS
 INTEGER                      :: IFILE_ID, IDIMID, JSV
 INTEGER                      :: IL,JRET, INSNLAYER, JFILE
 INTEGER                          :: JNDAYS
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 

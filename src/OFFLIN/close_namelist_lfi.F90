@@ -43,8 +43,7 @@ USE MODD_FMDECLAR,    ONLY : CNAMFI
 USE MODD_IO_SURF_LFI, ONLY : CLUOUT_LFI
 
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -58,7 +57,7 @@ INTEGER,           INTENT(IN)  :: KLUNAM   ! logical unit of namelist
 !              -------------------------------
 !
 INTEGER :: IRESP
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !* closes the namelist

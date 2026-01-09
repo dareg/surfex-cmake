@@ -56,8 +56,7 @@ USE MODI_SFX_OASIS_CHECK
 USE MOD_OASIS
 #endif
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -89,7 +88,7 @@ INTEGER                        :: IERR     ! Error info
 !
 INTEGER                        :: ILUOUT, IFLAG
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

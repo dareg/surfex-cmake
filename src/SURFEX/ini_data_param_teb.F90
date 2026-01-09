@@ -65,8 +65,7 @@ USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
 USE MODI_ABOR1_SFX
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -154,7 +153,7 @@ INTEGER            :: JLOOP        ! spatial loop counter
 INTEGER            :: JLIST        ! loop counter on urban types
 INTEGER            :: IINDEX       ! index of type for each point
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------

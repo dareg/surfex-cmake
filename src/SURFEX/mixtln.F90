@@ -65,8 +65,7 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 ! Module containing relaxation fields
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -133,7 +132,7 @@ REAL :: ZT1, ZT2, ZT3, ZS1, ZS2
 INTEGER :: IUP,IBOT
 INTEGER :: J,JJ,JPT,JIN,IKHML
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------------
 !       1.     Initializations

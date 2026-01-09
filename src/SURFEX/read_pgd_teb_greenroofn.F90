@@ -57,8 +57,7 @@ USE MODI_READ_PGD_TEB_GREENROOF_PAR_n
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_GET_TYPE_DIM_n
 !
@@ -90,7 +89,7 @@ INTEGER           :: IRESP          ! Error code after redding
 !
 !
 INTEGER           :: JLAYER         ! loop counter on layers ! not used
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

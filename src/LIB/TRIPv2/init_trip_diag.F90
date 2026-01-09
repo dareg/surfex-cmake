@@ -40,8 +40,7 @@ USE MODD_TRIP_OASIS, ONLY : LCPL_LAND
 USE MODD_TRIP_PAR, ONLY : XUNDEF, LNCPRINT
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE NETCDF
 !
@@ -75,7 +74,7 @@ REAL, DIMENSION(:), ALLOCATABLE ::  ZLON
 REAL, DIMENSION(:), ALLOCATABLE ::  ZLAT
 !
 INTEGER :: INDIAG, INCID, INUM
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------

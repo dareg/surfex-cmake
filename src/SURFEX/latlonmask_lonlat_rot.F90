@@ -48,8 +48,7 @@
 USE MODE_GRIDTYPE_LONLAT_ROT
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -81,7 +80,7 @@ INTEGER :: ZKL
 !
 REAL, DIMENSION(720,360) :: ZLON_MASK! mask points longitudes
 REAL, DIMENSION(720,360) :: ZLAT_MASK! mask points latitudes
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('LATLONMASK_LONLAT_ROT',0,ZHOOK_HANDLE)

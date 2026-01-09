@@ -6,8 +6,7 @@ MODULE MODE_TRIP_DATE_NETCDF
 ! Modifications
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -57,7 +56,7 @@ INTEGER :: ICARACUNITS,ICARACHOUR,ICARACDAY,ICARACMONTH,ICARACYEAR
 INTEGER :: IERROR
 INTEGER :: IV_DIFFREF
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -158,7 +157,7 @@ REAL,    INTENT(OUT) :: PTIME
 INTEGER,DIMENSION(12) :: INBDM          !Number of days per months
 INTEGER               :: IREMAININGDAYS !Number of remaining days to add
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -249,7 +248,7 @@ END SUBROUTINE ADDTIME
 !
 LOGICAL FUNCTION LEAPYEAR (PYEAR)
 INTEGER, INTENT(IN) :: PYEAR ! Is the year a leap year ?
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_TRIP_DATE_NETCDF:LEAPYEAR',0,ZHOOK_HANDLE)
 !

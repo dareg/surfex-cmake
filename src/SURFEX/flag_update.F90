@@ -47,8 +47,7 @@ USE MODD_DIAG_n, ONLY : DIAG_OPTIONS_t
 USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -64,7 +63,7 @@ LOGICAL, INTENT(IN) :: OPGD            ! flag to (des)activate writing of pgd fi
 LOGICAL, INTENT(IN) :: OPROVAR_TO_DIAG ! flag to (des)activate writing of diag of prognostic field
 LOGICAL, INTENT(IN) :: OSELECT         ! flag to (des)activate control which fields are written
 LOGICAL, INTENT(IN), OPTIONAL :: ORESETMINMAX ! flag to control reset of min/max fields
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------

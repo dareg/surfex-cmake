@@ -53,8 +53,7 @@
 !               ------------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -92,7 +91,7 @@ REAL                              :: ZD_G1 = 0.01      ! uppermost soil layer
 !                                                      ! diurnal cycle not as valid.
 !                                                      ! Also chosen to comply with
 !                                                      ! remotely sensed soil moisture.
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !        0.     Initialization
 !               --------------

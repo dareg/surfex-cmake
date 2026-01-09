@@ -52,8 +52,7 @@ USE MODD_CO2V_PAR,       ONLY : XTAU_SOILCARB
 USE MODD_CSTS,           ONLY : XDAY
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 
@@ -101,7 +100,7 @@ REAL, DIMENSION(SIZE(PSOILCARB,1))                                     :: ZWORK 
 INTEGER                                                           :: INI, INSOILCARB
 ! indices
 INTEGER                                                           :: JI, JL
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 ! correspondence between array indices and litter levels
 ! LT_ABOVE = 1

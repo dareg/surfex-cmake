@@ -44,8 +44,7 @@ USE MODI_AVERAGE_DIAG
 USE MODI_MINZS_VERT_SHIFT
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -63,7 +62,7 @@ LOGICAL :: GNATURE, GTOWN, GWATER, GSEA ! .T. if the corresponding surface is re
 INTEGER :: JSW                          ! number of spectral whort wave bands
 !
 REAL, DIMENSION(SIZE(YSC%U%XSEA),NTILESFC) :: ZFRAC_TILE! fraction of each tile
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 ! Preliminaries: Tile related operations
 !-------------------------------------------------------------------------------------
@@ -169,7 +168,7 @@ SUBROUTINE GET_2M
 !
 REAL, DIMENSION(SIZE(YSC%U%XSEA)) :: ZPS         ! surface air pressure
 REAL, DIMENSION(SIZE(YSC%U%XSEA)) :: ZRHOA       ! surface air density
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_ATM_n:GET_2M',0,ZHOOK_HANDLE)
 !

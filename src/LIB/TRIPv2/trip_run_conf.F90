@@ -42,8 +42,7 @@ USE MODN_TRIP,     ONLY : XTSTEP
 USE MODI_ABORT_TRIP
 USE MODI_TRIP_FORCING_CONF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -66,7 +65,7 @@ REAL,                   INTENT(INOUT) :: PRUNTIME
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 ! Read the configuration of the run

@@ -67,8 +67,7 @@ USE MODD_CSTS, ONLY : XCPD
 !
 USE MODI_WALL_LAYER_E_BUDGET
 USE MODI_WINDOW_E_BUDGET
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -159,7 +158,7 @@ REAL, DIMENSION(SIZE(B%XTI_BLD)) :: ZRAD_WL_MA ! rad. fluxes from wall to mass [
 REAL, DIMENSION(SIZE(B%XTI_BLD)) :: ZCONV_WL_BLD ! conv. fluxes from wall to bld [W m-2(wall)]
 REAL, DIMENSION(SIZE(B%XTI_BLD)) :: ZLW_W_TO_WIN   ! Radiative heat trasfer coeff wall-window [W K-1 m-2]
 INTEGER                        :: IWL
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('FACADE_E_BUDGET',0,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

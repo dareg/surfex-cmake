@@ -13,8 +13,7 @@
 USE MODI_READ_SURF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -37,7 +36,7 @@ INTEGER           :: IRESP      ! reading return code
 !
 INTEGER           :: IVERSION   ! surface version
 INTEGER           :: IBUGFIX    ! surface bugfix
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !------------------------------------------------------------------------------

@@ -30,8 +30,7 @@ SUBROUTINE SSO_BELJAARS04 (USS, SB, KI, PSSO_STDEV, PFORC_U, PDFORC_UDU)
 USE MODD_CANOPY_n, ONLY : CANOPY_t
 USE MODD_SSO_n, ONLY : SSO_t
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -66,7 +65,7 @@ REAL            :: C_AVAR                 ! = C_K1**(C_N1-C_N2) / (C_IH * C_KFLT
 !
 INTEGER                  :: JL            ! loop counter on canopy heights
 REAL, DIMENSION(KI,SB%NLVL) :: ZSSO_DRAG     ! drag due to subgrid-scale orogaphy
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------------

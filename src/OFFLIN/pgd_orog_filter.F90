@@ -52,7 +52,7 @@ USE MODI_OROGRAPHY_FILTER
 USE MODI_READ_AND_SEND_MPI
 USE MODI_GATHER_AND_WRITE_MPI
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
@@ -79,7 +79,7 @@ INTEGER                  :: NZSFILTER   ! number of orographic spatial filter it
 REAL(KIND=JPRB)          :: RCOFILTER   ! filtering coefficient
 REAL(KIND=JPRB)          :: RTHFILTER   ! filtering threshold
 
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

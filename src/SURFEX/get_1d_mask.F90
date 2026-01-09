@@ -17,8 +17,7 @@ SUBROUTINE GET_1D_MASK(KSIZE,KFRAC,PFRAC,KMASK)
 !!      Original    01/2003
 !!------------------------------------------------------------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -33,7 +32,7 @@ INTEGER, DIMENSION(KSIZE), INTENT(OUT)   :: KMASK
 !*      0.2    declarations of local variables
 !
 INTEGER                                  :: JI, JJ
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

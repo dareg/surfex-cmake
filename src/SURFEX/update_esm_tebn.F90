@@ -51,8 +51,7 @@ USE MODI_TEB_VEG_PROPERTIES
 USE MODI_AVERAGED_TSRAD_TEB
 USE MODI_AVERAGED_ALBEDO_TEB
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -77,7 +76,7 @@ REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo fo
 REAL,             DIMENSION(KI),    INTENT(OUT) :: PEMIS     ! emissivity
 REAL,             DIMENSION(KI),    INTENT(OUT) :: PTSRAD    ! radiative temperature
 REAL,             DIMENSION(KI),    INTENT(OUT) :: PTSURF    ! surface temperature
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !*       0.2   Declarations of local variables

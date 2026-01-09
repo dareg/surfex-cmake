@@ -42,8 +42,7 @@ USE MODD_SSO_n, ONLY : SSO_t
 USE MODI_PACK_SAME_RANK
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -58,7 +57,7 @@ TYPE(SSO_t), INTENT(INOUT) :: ISS
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !
 !*       1.    Reading of type of grid

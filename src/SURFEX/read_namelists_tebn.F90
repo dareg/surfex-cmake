@@ -34,8 +34,7 @@ USE MODI_READ_NAM_PREP_GARDEN_n
 USE MODI_READ_NAM_PREP_GREENROOF_n
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_READ_TEB_CONF_n
 IMPLICIT NONE
@@ -47,7 +46,7 @@ TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: GDO
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=3),   INTENT(IN)  :: HINIT     ! choice of fields to initialize
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------------
 !

@@ -102,8 +102,7 @@
 !
 USE MODD_SURF_PAR,  ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -155,7 +154,7 @@ INTEGER                            :: JLAT0, IOS_SAVE
 INTEGER                            :: JOPOS     ! Output position
 INTEGER                            :: JL, JL2   ! Dummy counter
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------
 !
 !*     1. DETERMINATKON  of the latitude of the poles (depending of the latitude

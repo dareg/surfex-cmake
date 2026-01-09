@@ -65,8 +65,7 @@
 !*       0. DECLARATIONS
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -89,7 +88,7 @@ INTEGER           :: INL            ! number of vertical levels
 !
 REAL, DIMENSION(SIZE(PA,1)           ) :: ZDET ! work array
 REAL, DIMENSION(SIZE(PA,1),SIZE(PA,2)) :: ZW   ! work array
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 ! ---------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('TRIDIAG_GROUND',0,ZHOOK_HANDLE)

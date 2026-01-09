@@ -97,8 +97,7 @@ USE MODD_SLT_SURF
 ! 
 USE MODD_OCEAN_GRID,   ONLY : NOCKMIN
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -251,7 +250,7 @@ INTEGER                          :: ISLT       ! number of sea salt variable
 !
 INTEGER :: IBEG, IEND
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 ! Preliminaries:
 !-------------------------------------------------------------------------------------
@@ -694,7 +693,7 @@ REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux          
 REAL, DIMENSION(KI) :: ZUSTAR2    ! square of friction velocity (m2/s2)
 REAL, DIMENSION(KI) :: ZWORK      ! Work array
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_SEAFLUX_N: SEA_MOMENTUM_FLUXES',0,ZHOOK_HANDLE)
 !
@@ -740,7 +739,7 @@ SUBROUTINE COMPLEMENT_EACH_OTHER_FLUX
 !
 IMPLICIT NONE
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_SEAFLUX_N: COMPLEMENT_EACH_OTHER_FLUX',0,ZHOOK_HANDLE)
 !

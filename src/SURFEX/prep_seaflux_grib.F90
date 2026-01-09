@@ -35,7 +35,7 @@ USE MODD_GRID_GRIB,  ONLY : CGRIB_FILE, NNI, CINMODEL
 !
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
@@ -52,7 +52,7 @@ REAL,DIMENSION(:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
 !
 REAL, DIMENSION(:)  ,     POINTER :: ZMASK => NULL()          ! Land mask
 REAL, DIMENSION(:),       POINTER :: ZFIELD => NULL()   ! field read
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

@@ -43,8 +43,7 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PREP,           ONLY : CINTERP_TYPE
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -76,7 +75,7 @@ REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZLWCSNOW !(kg/m2)
 !
 INTEGER            :: JIMP       ! loop counter on impurity type
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

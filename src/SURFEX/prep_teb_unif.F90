@@ -36,8 +36,7 @@ USE MODD_PREP_TEB,   ONLY : XGRID_ROAD, XGRID_WALL, XGRID_ROOF, XGRID_FLOOR,    
 USE MODD_CSTS, ONLY : XG, XP00
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 USE MODE_THERMOS
@@ -55,7 +54,7 @@ REAL, DIMENSION(:), ALLOCATABLE :: ZPS       ! surface pressure
 REAL, DIMENSION(:), ALLOCATABLE :: ZTI_BLD   ! indoor building temperature
 REAL, PARAMETER                 :: ZRHOA=1.19! air volumic mass at 20C and 1015hPa
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !
@@ -168,7 +167,7 @@ REAL               :: ZTS! surface temperature
 REAL               :: ZTI! internal temperature
 REAL, DIMENSION(1,2) :: ZT ! temperature profile
 REAL, DIMENSION(1,2) :: ZD ! normalized depth profile
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 

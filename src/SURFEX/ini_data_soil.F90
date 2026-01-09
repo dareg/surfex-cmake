@@ -45,8 +45,7 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODI_SOILGRID
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -72,7 +71,7 @@ INTEGER            :: JLOOP    ! class loop counter
 INTEGER            :: JLAYER   ! soil layer loop counter
 INTEGER            :: JVEG     ! vegetation types loop counter
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
 !

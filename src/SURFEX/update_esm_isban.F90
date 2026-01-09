@@ -55,8 +55,7 @@ USE MODI_AVERAGE_TSURF
 USE MODI_UPDATE_RAD_ISBA_n
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -101,7 +100,7 @@ LOGICAL :: LEXPLICIT_SNOW ! snow scheme key
 !
 INTEGER :: IMASK, JI, JP
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

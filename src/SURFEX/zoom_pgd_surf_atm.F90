@@ -61,8 +61,7 @@ USE MODI_ZOOM_PGD_TOWN
 USE MODI_READ_COVER_GARDEN
 USE MODI_GOTO_MODEL_MNH
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -84,7 +83,7 @@ TYPE(SURFEX_t), INTENT(INOUT) :: YSC
 !
 INTEGER :: IRESP
 INTEGER :: IINFO_ll
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------
 !
 !*    1.      Set default constant values 

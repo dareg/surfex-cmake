@@ -90,8 +90,7 @@ USE MODI_ROOF_IMPL_COEF
 USE MODI_TEB_IRRIG
 USE MODI_FLAG_TEB_VEG_n
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -210,7 +209,7 @@ INTEGER                    :: ILU
 !
 LOGICAL :: GUPDATED, GALB
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

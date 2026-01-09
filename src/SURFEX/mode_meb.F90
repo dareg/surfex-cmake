@@ -107,8 +107,7 @@ USE MODD_ISBA_PAR,                ONLY : XOMSPH
 USE MODD_CSTS,                    ONLY : XRHOLW, XRHOLI, XCI, XCL
 
 
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -125,7 +124,7 @@ REAL, DIMENSION(:,:), INTENT(OUT)  :: PHCAP, PCOND
 !
 !*      0.2    declaration of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 REAL, DIMENSION(SIZE(PGNDLITTER,1),SIZE(PGNDLITTER,2))  :: ZWORK
 !
@@ -176,8 +175,7 @@ USE MODD_ISBA_PAR,                ONLY : XOMSPH
 USE MODD_CSTS,                    ONLY : XRHOLW, XRHOLI, XCI, XCL
 
 
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -194,7 +192,7 @@ REAL, DIMENSION(:), INTENT(OUT)    :: PHCAP, PCOND
 !
 !*      0.2    declaration of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 REAL, DIMENSION(SIZE(PGNDLITTER))  :: ZWORK
 !
@@ -245,8 +243,7 @@ USE MODD_ISBA_PAR,                ONLY : XOMSPH
 USE MODD_CSTS,                    ONLY : XRHOLW, XRHOLI, XCI, XCL
 
 
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -263,7 +260,7 @@ REAL,               INTENT(OUT)    :: PHCAP, PCOND
 !
 !*      0.2    declaration of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 REAL                               :: ZWORK
 !
@@ -296,8 +293,7 @@ END SUBROUTINE MEBLITTER_THRM_0D
 !     0 for snow at canopy base
 !     1 for snow at canopy top
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -309,7 +305,7 @@ REAL, DIMENSION(SIZE(PSNOWDEPTH,1),SIZE(PSNOWDEPTH,2),SIZE(PSNOWDEPTH,3)) :: PPA
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 REAL, DIMENSION(SIZE(PSNOWDEPTH,1),SIZE(PSNOWDEPTH,2),SIZE(PSNOWDEPTH,3))   :: ZH_BASEVEG  ! height of the base of the canopy
 !
@@ -341,8 +337,7 @@ END FUNCTION MEBPALPHAN_3D
 !     0 for snow at canopy base
 !     1 for snow at canopy top
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -354,7 +349,7 @@ REAL, DIMENSION(SIZE(PSNOWDEPTH,1),SIZE(PSNOWDEPTH,2)) :: PPALPHAN
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 REAL, DIMENSION(SIZE(PSNOWDEPTH,1),SIZE(PSNOWDEPTH,2))   :: ZH_BASEVEG  ! height of the base of the canopy
 !
@@ -385,8 +380,7 @@ END FUNCTION MEBPALPHAN_2D
 !     0 for snow at canopy base
 !     1 for snow at canopy top
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -398,7 +392,7 @@ REAL, DIMENSION(SIZE(PSNOWDEPTH,1)) :: PPALPHAN
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 REAL, DIMENSION(SIZE(PSNOWDEPTH,1))   :: ZH_BASEVEG  ! height of the base of the canopy
 !
@@ -430,8 +424,7 @@ END FUNCTION MEBPALPHAN_1D
 !     0 for snow at canopy base
 !     1 for snow at canopy top
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -443,7 +436,7 @@ REAL :: PPALPHAN
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 REAL :: ZH_BASEVEG  ! height of the base of the canopy
 !
@@ -473,8 +466,7 @@ FUNCTION SFC_HEATCAP_VEG_0D(PWRN,PWR,PCV) RESULT(ZCHEATV)
 USE MODD_CSTS,     ONLY : XCL, XCI
 USE MODD_ISBA_PAR, ONLY : XCVHEATF
 
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 
@@ -487,7 +479,7 @@ REAL,               INTENT(IN)  :: PWRN, PWR, PCV
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 REAL                            :: ZCHEATV
 !                                  ZCHEATV = Total bulk Vegetation canopy heat capacity (J m-2 K-1)
@@ -524,8 +516,7 @@ FUNCTION SFC_HEATCAP_VEG_1D(PWRN,PWR,PCV) RESULT(ZCHEATV)
 USE MODD_CSTS,     ONLY : XCL, XCI
 USE MODD_ISBA_PAR, ONLY : XCVHEATF
 
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 
@@ -538,7 +529,7 @@ REAL, DIMENSION(:), INTENT(IN)  :: PWRN, PWR, PCV
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 REAL, DIMENSION(SIZE(PCV))     :: ZCHEATV
 !                                  ZCHEATV = Total bulk Vegetation canopy heat capacity (J m-2 K-1)
@@ -575,8 +566,7 @@ FUNCTION SFC_HEATCAP_VEG_2D(PWRN,PWR,PCV) RESULT(ZCHEATV)
 USE MODD_CSTS,     ONLY : XCL, XCI
 USE MODD_ISBA_PAR, ONLY : XCVHEATF
 
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 
@@ -589,7 +579,7 @@ REAL, DIMENSION(:,:), INTENT(IN) :: PWRN, PWR, PCV
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 REAL, DIMENSION(SIZE(PCV),SIZE(PCV,2)) :: ZCHEATV
 !                                  ZCHEATV = Total bulk Vegetation canopy heat capacity (J m-2 K-1)
@@ -634,8 +624,7 @@ FUNCTION SWDOWN_DIFF_2D(PSW_RAD,PCOSZENITH) RESULT(ZSWDOWN_DIFF)
 
 USE MODD_CSTS, ONLY : XI0
 
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 
@@ -648,7 +637,7 @@ REAL,    DIMENSION(:,:), INTENT(IN)                 :: PCOSZENITH
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 REAL,    DIMENSION(SIZE(PSW_RAD,1),SIZE(PSW_RAD,2)) :: ZSWDOWN_DIFF, ZRATIO
 
@@ -692,8 +681,7 @@ FUNCTION SWDOWN_DIFF_1D(PSW_RAD,PCOSZENITH) RESULT(ZSWDOWN_DIFF)
 
 USE MODD_CSTS, ONLY : XI0
 
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 
@@ -706,7 +694,7 @@ REAL,    DIMENSION(:), INTENT(IN)                 :: PCOSZENITH
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 REAL,    DIMENSION(SIZE(PSW_RAD))                 :: ZSWDOWN_DIFF, ZRATIO
 
@@ -751,8 +739,7 @@ FUNCTION SWDOWN_DIFF_0D(PSW_RAD,PCOSZENITH) RESULT(ZSWDOWN_DIFF)
 
 USE MODD_CSTS, ONLY : XI0
 
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 
@@ -765,7 +752,7 @@ REAL, INTENT(IN)                 :: PCOSZENITH
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 REAL                             :: ZSWDOWN_DIFF, ZRATIO
 !
@@ -820,8 +807,7 @@ FUNCTION SNOW_INTERCEPT_EFF_0D(PCHIP,PVELC,PWRVNMAX) RESULT(ZKVN)
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -847,7 +833,7 @@ REAL                             :: ZKVN
 !
 REAL                             :: ZFCP
 !                                     ZFCP       = snow interception factor
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*      0.3    declarations of local parameters
 !
@@ -896,8 +882,7 @@ FUNCTION SNOW_INTERCEPT_EFF_1D(PCHIP,PVELC,PWRVNMAX) RESULT(ZKVN)
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -923,7 +908,7 @@ REAL, DIMENSION(SIZE(PVELC))     :: ZKVN
 !
 REAL, DIMENSION(SIZE(PVELC))     :: ZFCP
 !                                     ZFCP       = snow interception factor
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*      0.3    declarations of local parameters
 !
@@ -972,8 +957,7 @@ FUNCTION SNOW_INTERCEPT_EFF_2D(PCHIP,PVELC,PWRVNMAX) RESULT(ZKVN)
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -999,7 +983,7 @@ REAL, DIMENSION(SIZE(PVELC,1),SIZE(PVELC,2)) :: ZKVN
 !
 REAL, DIMENSION(SIZE(PVELC,1),SIZE(PVELC,2)) :: ZFCP
 !                                     ZFCP       = snow interception factor
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*      0.3    declarations of local parameters
 !
@@ -1050,8 +1034,7 @@ FUNCTION MEB_SHIELD_FACTOR_0D(PLAI,PPALPHAN) RESULT(PCHIP)
 !
 USE MODD_MEB_PAR,   ONLY : XTAU_LW
 !
-USE YOMHOOK,        ONLY : LHOOK,   DR_HOOK
-USE PARKIND1,       ONLY : JPRB
+USE YOMHOOK,        ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -1066,7 +1049,7 @@ REAL                             :: PCHIP
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_MEB:MEB_SHIELD_FACTOR_0D',0,ZHOOK_HANDLE)
@@ -1103,8 +1086,7 @@ FUNCTION MEB_SHIELD_FACTOR_1D(PLAI,PPALPHAN) RESULT(PCHIP)
 !
 USE MODD_MEB_PAR,   ONLY : XTAU_LW
 !
-USE YOMHOOK,        ONLY : LHOOK,   DR_HOOK
-USE PARKIND1,       ONLY : JPRB
+USE YOMHOOK,        ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -1119,7 +1101,7 @@ REAL, DIMENSION(SIZE(PLAI,1))    :: PCHIP
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_MEB:MEB_SHIELD_FACTOR_1D',0,ZHOOK_HANDLE)
@@ -1156,8 +1138,7 @@ FUNCTION MEB_SHIELD_FACTOR_2D(PLAI,PPALPHAN) RESULT(PCHIP)
 !
 USE MODD_MEB_PAR,   ONLY : XTAU_LW
 !
-USE YOMHOOK,        ONLY : LHOOK,   DR_HOOK
-USE PARKIND1,       ONLY : JPRB
+USE YOMHOOK,        ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -1172,7 +1153,7 @@ REAL, DIMENSION(SIZE(PLAI,1),SIZE(PLAI,2))    :: PCHIP
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_MEB:MEB_SHIELD_FACTOR_2D',0,ZHOOK_HANDLE)

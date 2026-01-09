@@ -55,8 +55,7 @@ USE MODI_READ_SURF
 USE MODI_OCEAN_MERCATORVERGRID
 USE MODI_PREP_OCEAN_MERCATORVERGRID
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_GET_TYPE_DIM_n
 !
@@ -90,7 +89,7 @@ INTEGER :: JLEVEL ! loop counter on oceanic levels
 INTEGER :: J      ! loop counter on sea grid points
 !
 INTEGER           :: IVERSION       ! surface version
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('READ_OCEAN_N',0,ZHOOK_HANDLE)

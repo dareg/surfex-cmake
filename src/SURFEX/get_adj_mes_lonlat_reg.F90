@@ -35,8 +35,7 @@
 USE MODE_GRIDTYPE_LONLAT_REG
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -62,7 +61,7 @@ INTEGER :: ILON    ! number of points in longitude
 INTEGER :: ILAT    ! number of points in latitude
 INTEGER :: JLAT, JLON
 INTEGER :: JL
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_ADJ_MES_LONLAT_REG',0,ZHOOK_HANDLE)

@@ -86,8 +86,7 @@ USE MODI_UPDATE_RAD_WATER
 USE MODI_READ_SBL_n
 USE MODI_SET_SURFEX_FILEIN
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -138,7 +137,7 @@ TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence paramet
 INTEGER           :: ILU    ! sizes of WATFLUX arrays
 INTEGER           :: ILUOUT ! unit of output listing file
 INTEGER           :: IRESP  ! return code
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

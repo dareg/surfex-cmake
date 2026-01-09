@@ -103,7 +103,7 @@ MODULE lib_mpp
 #ifdef SFX_MPI
    !!  Case Surfex Offline with MPI
    !!  define mpp_min, mpp_max, mpp_sum for Offline Surfex case with MPI
-   USE MODD_SURFEX_MPI, ONLY : mpi_comm_opa => NCOMM
+   USE MODD_SURFEX_MPI, ONLY : mpi_comm_opa => NCOMM, LSFX_MPI
 #ifdef in_arpege
    !! Case SUrfex in Arpege
    USE MPL_ALLREDUCE_MOD, ONLY : MPL_ALLREDUCE
@@ -1310,8 +1310,10 @@ CONTAINS
       !!----------------------------------------------------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
-      localcomm = mpi_comm_opa
-      IF( PRESENT(kcom) )   localcomm = kcom
+      IF (LSFX_MPI) THEN
+        localcomm = mpi_comm_opa
+        IF( PRESENT(kcom) )   localcomm = kcom
+      ENDIF
       !
 #if !defined in_arpege
 !$OMP SINGLE
@@ -1344,9 +1346,10 @@ CONTAINS
       !!----------------------------------------------------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
-      localcomm = mpi_comm_opa
-      IF( PRESENT(kcom) )   localcomm = kcom
-      !
+      IF (LSFX_MPI) THEN
+        localcomm = mpi_comm_opa
+        IF( PRESENT(kcom) )   localcomm = kcom
+      ENDIF
 #if !defined in_arpege
 !$OMP SINGLE
       CALL mpi_allreduce( ktab, iwork, 1, mpi_integer, mpi_max, localcomm, ierror)
@@ -1380,9 +1383,10 @@ CONTAINS
       !!----------------------------------------------------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
-      localcomm = mpi_comm_opa
-      IF( PRESENT(kcom) )   localcomm = kcom
-      !
+      IF (LSFX_MPI) THEN
+        localcomm = mpi_comm_opa
+        IF( PRESENT(kcom) )   localcomm = kcom
+      ENDIF
 #if !defined in_arpege
 !$OMP SINGLE
       CALL mpi_allreduce( ktab, iwork, kdim, mpi_integer, mpi_min, localcomm, ierror )
@@ -1414,9 +1418,10 @@ CONTAINS
       !!----------------------------------------------------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
-      localcomm = mpi_comm_opa
-      IF( PRESENT(kcom) )   localcomm = kcom
-      !
+      IF (LSFX_MPI) THEN
+        localcomm = mpi_comm_opa
+        IF( PRESENT(kcom) )   localcomm = kcom
+      ENDIF
 #if !defined in_arpege
 !$OMP SINGLE
       CALL mpi_allreduce( ktab, iwork, 1, mpi_integer, mpi_min, localcomm, ierror )
@@ -1449,6 +1454,7 @@ CONTAINS
       !!----------------------------------------------------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
+IF (LSFX_MPI) THEN
 #if !defined in_arpege
 !$OMP SINGLE
       CALL mpi_allreduce( ktab, iwork, kdim, mpi_integer, mpi_sum, mpi_comm_opa, ierror )
@@ -1458,6 +1464,7 @@ CONTAINS
 #else
       CALL abor1_sfx("lib_mpp:mmpsum_a_int : Cannot yet sum a real array in Arpege")
 #endif
+ENDIF
 #endif
       !
    END SUBROUTINE mppsum_a_int
@@ -1479,6 +1486,7 @@ CONTAINS
       !!----------------------------------------------------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
+IF (LSFX_MPI) THEN
 #if !defined in_arpege
 !$OMP SINGLE
       CALL mpi_allreduce( ktab, iwork, 1, mpi_integer, mpi_sum, mpi_comm_opa, ierror)
@@ -1491,6 +1499,7 @@ CONTAINS
 !      CALL MPL_ALLREDUCE(jb,'SUM')
       ktab=jb
 #endif
+ENDIF
 #endif
       !
    END SUBROUTINE mppsum_int
@@ -1512,9 +1521,10 @@ CONTAINS
       !!----------------------------------------------------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
-      localcomm = mpi_comm_opa
-      IF( PRESENT(kcom) ) localcomm = kcom
-      !
+      IF (LSFX_MPI) THEN
+        localcomm = mpi_comm_opa
+        IF( PRESENT(kcom) ) localcomm = kcom
+      ENDIF
 #if !defined in_arpege
 !$OMP SINGLE
       CALL mpi_allreduce( ptab, zwork, kdim, mpi_double_precision, mpi_max, localcomm, ierror )
@@ -1546,6 +1556,7 @@ CONTAINS
       !!----------------------------------------------------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
+IF (LSFX_MPI) THEN
       localcomm = mpi_comm_opa
       IF( PRESENT(kcom) )   localcomm = kcom
       !
@@ -1561,6 +1572,7 @@ CONTAINS
 !      CALL MPL_ALLREDUCE(rb,'MAX',LDREPROD=.TRUE.)
       ptab=rb
 #endif
+ENDIF
 #endif
    END SUBROUTINE mppmax_real
 
@@ -1581,6 +1593,7 @@ CONTAINS
       !!-----------------------------------------------------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
+IF (LSFX_MPI) THEN
       localcomm = mpi_comm_opa
       IF( PRESENT(kcom) ) localcomm = kcom
       !
@@ -1593,6 +1606,7 @@ CONTAINS
 #else
       CALL abor1_sfx("lib_mpp:mmpmin_a_real : Cannot yet make a min on a real array in Arpege")
 #endif
+ENDIF
 #endif
    END SUBROUTINE mppmin_a_real
 
@@ -1616,6 +1630,7 @@ CONTAINS
       !!-----------------------------------------------------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
+IF (LSFX_MPI) THEN
       localcomm = mpi_comm_opa
       IF( PRESENT(kcom) )   localcomm = kcom
       !
@@ -1631,6 +1646,7 @@ CONTAINS
 !      CALL MPL_ALLREDUCE(rb,'MIN',LDREPROD=.TRUE.)
       ptab=rb
 #endif
+ENDIF
 #endif
    END SUBROUTINE mppmin_real
 
@@ -1652,6 +1668,7 @@ CONTAINS
       !!-----------------------------------------------------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
+IF (LSFX_MPI) THEN
       localcomm = mpi_comm_opa
       IF( PRESENT(kcom) )   localcomm = kcom
       !
@@ -1664,6 +1681,7 @@ CONTAINS
 #else
       CALL abor1_sfx("lib_mpp:mmpsum_a_real : Cannot yet make a sum on a real array in Arpege") 
 #endif
+ENDIF
 #endif
    END SUBROUTINE mppsum_a_real
 
@@ -1686,6 +1704,7 @@ CONTAINS
       !!--------------------------------------------- -------------------------
       !
 #if !defined in_surfex || defined SFX_MPI
+IF (LSFX_MPI) THEN
       localcomm = mpi_comm_opa
       IF( PRESENT(kcom) ) localcomm = kcom
       !
@@ -1701,6 +1720,7 @@ CONTAINS
 !      CALL MPL_ALLREDUCE(rb,'SUM',LDREPROD=.TRUE.)
       ptab=rb
 #endif
+ENDIF
 #endif
    END SUBROUTINE mppsum_real
 

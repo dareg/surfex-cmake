@@ -173,8 +173,7 @@ USE MODD_DATA_COVER_PAR, ONLY : NVT_TEBD, NVT_BONE, NVT_TRBE, XCDREF, NVT_TRBD, 
 !
 USE MODE_AV_PGD
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -209,7 +208,7 @@ REAL, DIMENSION(SIZE(PCOVER,1)) :: ZWORK, ZDZ, ZVAL
 REAL, DIMENSION(SIZE(PCOVER,2)) :: ZWEIGHT
 REAL :: ZCOVER_WEIGHT
 REAL, DIMENSION(SIZE(PCOVER,1)) :: ZSUM_COVER_WEIGHT
-REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !-------------------------------------------------------------------------------
 !
 !*    1.1    field does not exist
@@ -447,8 +446,7 @@ USE MODI_VEGTYPE_TO_PATCH
 USE MODE_AV_PGD
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -498,7 +496,7 @@ REAL, DIMENSION(SIZE(PCOVER,1),SIZE(PFIELD,2))   :: ZDZ
 INTEGER, DIMENSION(SIZE(PCOVER,1),SIZE(PFIELD,2))  :: IMASK
 INTEGER, DIMENSION(SIZE(PFIELD,2)) :: JCOUNT
 INTEGER ::  PATCH_LIST(NVEGTYPE)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 
 !-------------------------------------------------------------------------------
 !
@@ -749,8 +747,7 @@ USE MODD_DATA_COVER_PAR, ONLY : NVT_TEBD, NVT_BONE, NVT_TRBE, XCDREF, NVT_TRBD, 
                                 NVT_TEBE, NVT_TENE, NVT_BOBD, NVT_BOND, NVT_SHRB
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -784,7 +781,7 @@ REAL                                           :: ZWEIGHT
 REAL, DIMENSION(SIZE(PCOVER,1),SIZE(PCOVER,2)) :: ZCOVER_WEIGHT
 REAL                                           :: ZDATA
 REAL, DIMENSION(SIZE(PCOVER,1),SIZE(PCOVER,2)) :: ZSUM_COVER_WEIGHT
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*    1.1    field does not exist
@@ -1063,8 +1060,7 @@ USE MODI_VEGTYPE_TO_PATCH
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -1108,7 +1104,7 @@ REAL, DIMENSION(NVEGTYPE)                                    :: ZDATA
 !
 REAL, DIMENSION(SIZE(PCOVER,1),SIZE(PCOVER,2),SIZE(PFIELD,3)):: ZWORK
 REAL, DIMENSION(SIZE(PCOVER,1),SIZE(PCOVER,2),SIZE(PFIELD,3)):: ZDZ
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*    1.1    field does not exist
@@ -1460,8 +1456,7 @@ USE MODI_VEGTYPE_TO_PATCH
 !
 USE MODE_AV_PGD
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -1491,7 +1486,7 @@ INTEGER, DIMENSION(SIZE(PCOVER,1))               :: IDOY
 REAL,    DIMENSION(365)                          :: ZCOUNT
 INTEGER                                          :: JP, IMONTH, IDAY
 INTEGER                                          :: IPATCH, JPATCH
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*    1.1    field does not exist

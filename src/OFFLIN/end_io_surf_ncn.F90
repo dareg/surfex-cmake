@@ -42,8 +42,7 @@ USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 USE MODD_IO_SURF_NC, ONLY : LMASK, NID_NC, LDEF, CFILEIN_NC, CFILEOUT_NC, &
                             CFILE_NC, NMASK, NFULL
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE NETCDF
 !
@@ -54,7 +53,7 @@ IMPLICIT NONE
 !              -------------------------
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! main program
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------

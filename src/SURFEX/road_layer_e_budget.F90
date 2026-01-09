@@ -102,8 +102,7 @@ USE MODE_THERMOS
 USE MODI_LAYER_E_BUDGET
 USE MODI_LAYER_E_BUDGET_GET_COEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -178,7 +177,7 @@ REAL, DIMENSION(SIZE(PPS)) :: ZT_SKY      ! road surface temperature
 !
 INTEGER :: IROAD_LAYER           ! number of road layers
 INTEGER :: JJ            ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ROAD_LAYER_E_BUDGET',0,ZHOOK_HANDLE)
 !

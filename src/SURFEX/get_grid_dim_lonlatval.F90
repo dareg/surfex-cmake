@@ -35,8 +35,7 @@
 USE MODE_GRIDTYPE_LONLATVAL
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -54,7 +53,7 @@ INTEGER,                         INTENT(OUT)   :: KDIM2     ! 2nd dimension
 !
 REAL,DIMENSION(:),ALLOCATABLE :: ZX, ZY,V0
 INTEGER:: JX, JY, IL
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_GRID_DIM_LONLATVAL',0,ZHOOK_HANDLE)

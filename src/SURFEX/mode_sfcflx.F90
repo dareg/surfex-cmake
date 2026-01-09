@@ -80,8 +80,7 @@ USE modd_flake_parameters , ONLY :   &
 !==============================================================================
 
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 
@@ -311,7 +310,7 @@ REAL  ::    &
     T_corr                 ,  &! Temperature used to compute the MGO cloud correction [K]
     f_wvpres_corr          ,  &! Correction function with respect to water vapour
     f_cloud_corr               ! Correction function with respect to cloudiness  
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
  
 !==============================================================================
 !  Start calculations
@@ -433,7 +432,7 @@ REAL , INTENT(IN) ::   &
 !  Output (function result) 
 REAL               ::   &
     sfcflx_lwradwsfc                      ! Long-wave radiation flux [W m^{-2}]  
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !==============================================================================
 !  Start calculations
@@ -605,7 +604,7 @@ REAL  ::    &
     psi_u                  ,  &! The MO stability function for wind profile
     psi_t                  ,  &! The MO stability function for temperature profile
     psi_q                      ! The MO stability function for specific humidity profile  
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 
 !==============================================================================
@@ -957,7 +956,7 @@ REAL , INTENT(IN) ::   &
 !  Output (function result) 
 REAL               ::  &
     sfcflx_rhoair                         ! Air density [kg m^{-3}]  
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !==============================================================================
 !  Start calculations
@@ -1061,7 +1060,7 @@ REAL , INTENT(OUT) ::   &
 REAL  ::    &
     Re_s                   ,  &! Surface Reynolds number 
     Re_s_thresh                ! Threshold value of Re_s  
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !==============================================================================
 !  Start calculations
@@ -1206,7 +1205,7 @@ REAL , PARAMETER ::   &
      b2i_vap  = 21.8745584    ,  &! Coefficient (ice) 
      b4w_vap  = 35.86         ,  &! Coefficient (temperature) [K]
      b4i_vap  = 7.66              ! Coefficient (temperature) [K]  
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !==============================================================================
 !  Start calculations
@@ -1290,7 +1289,7 @@ REAL , INTENT(IN) ::   &
 !  Output (function result) 
 REAL               ::  &
     sfcflx_spechum                        ! Specific humidity  
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !==============================================================================
 !  Start calculations
@@ -1373,7 +1372,7 @@ REAL , INTENT(IN) ::   &
 !  Output (function result) 
 REAL               ::  &
     sfcflx_wvpreswetbulb                  ! Water vapour pressure [N m^{-2} = kg m^{-1} s^{-2}]  
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !==============================================================================
 !  Start calculations

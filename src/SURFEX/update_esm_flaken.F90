@@ -49,8 +49,7 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODI_UPDATE_RAD_FLAKE
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -70,7 +69,7 @@ REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo fo
 REAL,             DIMENSION(KI),    INTENT(OUT) :: PEMIS     ! emissivity
 REAL,             DIMENSION(KI),    INTENT(OUT) :: PTSRAD    ! radiative temperature
 REAL,             DIMENSION(KI),    INTENT(OUT) :: PTSURF    ! effective temperature
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !*       0.2   Declarations of local variables

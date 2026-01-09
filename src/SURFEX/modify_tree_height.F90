@@ -43,8 +43,7 @@ USE MODD_TREEDRAG,       ONLY : XSCALE_H_TREE_ECOSG, &
                                 XFORLAT1, XFORLAT2,  &
                                 XFORFRAC1, XFORFRAC2
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -57,7 +56,7 @@ INTEGER   :: JN, JCOVER, NCOVER
 REAL, DIMENSION(SIZE(PLAT))    :: ZLATFACT, ZFORFRFACT, ZSUMLAND, &
                                   ZSUMFOREST, ZFRACFOREST
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODIFY_TREE_HEIGHT',0,ZHOOK_HANDLE)

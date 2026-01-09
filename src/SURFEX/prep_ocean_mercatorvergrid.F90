@@ -53,8 +53,7 @@ USE MODD_OCEAN_GRID
 USE MODI_READ_Z1D_NETCDF
 USE MODI_READ_SURF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -65,7 +64,7 @@ LOGICAL, INTENT(IN) :: OUNIF
 !*      0.2    declarations of local variables
 !
 INTEGER            :: IK1,IKK1
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !       1.     Allocations

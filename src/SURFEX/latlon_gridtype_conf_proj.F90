@@ -45,8 +45,7 @@ USE MODE_GRIDTYPE_CONF_PROJ
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -77,7 +76,7 @@ REAL, DIMENSION(:),   ALLOCATABLE :: ZY       ! Y conformal coordinate
 REAL, DIMENSION(:),   ALLOCATABLE :: ZMAP     ! map factor
 REAL, DIMENSION(:),   ALLOCATABLE :: ZDX      ! size in X conformal coordinate
 REAL, DIMENSION(:),   ALLOCATABLE :: ZDY      ! size in Y conformal coordinate
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !---------------------------------------------------------------------------
 !

@@ -60,7 +60,7 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 USE PARKIND1  ,ONLY : JPRB, JPRD
 !
 IMPLICIT NONE
@@ -150,7 +150,7 @@ REAL, DIMENSION(SIZE(PTA))       :: ZWORK
 REAL(KIND=JPRD), DIMENSION(SIZE(PTA)) :: ZTSRAD_DP
 #endif
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -354,7 +354,7 @@ USE MODI_WIND_THRESHOLD
 !
 REAL, DIMENSION(SIZE(PTA)) :: ZFP, ZRRCOR, ZVMOD, ZAC, ZRA
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

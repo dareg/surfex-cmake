@@ -48,8 +48,7 @@
 USE MODE_GRIDTYPE_LONLATVAL
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -79,7 +78,7 @@ REAL, DIMENSION(:), ALLOCATABLE   :: ZDY      ! Grid dimension in Y
 !
 INTEGER                           :: IL       ! Number og grid points
 INTEGER                           :: JLAT, JLON
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('LATLONMASK_LONLATVAL',0,ZHOOK_HANDLE)

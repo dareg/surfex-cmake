@@ -48,8 +48,7 @@ USE MODD_WRITE_SURF_ATM, ONLY : LNAM_FLAKE_WRITTEN
 !
 USE MODI_GET_DEFAULT_NAM_n
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -68,7 +67,7 @@ TYPE(FLAKE_t), INTENT(INOUT) :: F
 !              -------------------------------
 !
 INTEGER :: ILUDES
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !NAMELIST/NAM_DIAG_FLAKEn/LWATER_PROFILE,XZW_PROFILE

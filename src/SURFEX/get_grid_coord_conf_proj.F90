@@ -42,8 +42,7 @@ USE MODD_CSTS,      ONLY : XPI
 USE MODE_GRIDTYPE_CONF_PROJ
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -55,7 +54,7 @@ INTEGER,                    INTENT(IN)  :: KL         ! number of points
 REAL, DIMENSION(KGRID_PAR), INTENT(IN)  :: PGRID_PAR  ! parameters defining this grid
 REAL, DIMENSION(KL),        INTENT(OUT) :: PX         ! X (m)
 REAL, DIMENSION(KL),        INTENT(OUT) :: PY         ! Y (m)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------

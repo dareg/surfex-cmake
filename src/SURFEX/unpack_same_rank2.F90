@@ -68,8 +68,7 @@ END MODULE MODI_UNPACK_SAME_RANK2
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -85,7 +84,7 @@ REAL, OPTIONAL,       INTENT(IN) :: PMISS
 !              -------------------------------
 !
 INTEGER :: JI ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -144,8 +143,7 @@ END SUBROUTINE UNPACK_SAME_RANK2_FROM1D
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -161,7 +159,7 @@ REAL, OPTIONAL,         INTENT(IN) :: PMISS
 !              -------------------------------
 !
 INTEGER :: JI, JJ ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

@@ -52,8 +52,7 @@ USE MODD_SURF_PAR,    ONLY : XUNDEF
 USE MODD_PREP_SNOW,    ONLY : NIMPUR
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -62,7 +61,7 @@ IMPLICIT NONE
 !
 TYPE(SURF_SNOW), INTENT(INOUT)             :: TPSNOW
 INTEGER, INTENT(IN)                        :: KLU
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*       0.2   Declaration of local variables
 !              ------------------------------

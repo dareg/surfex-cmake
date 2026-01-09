@@ -48,8 +48,7 @@ USE MODD_DATA_COVER, ONLY : LREAD_DATA_COVER
 USE MODE_POS_SURF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -66,7 +65,7 @@ INTEGER           :: ILUOUT     ! logical unit
 INTEGER           :: ILUNAM     ! logical unit
 !
 LOGICAL           :: GFOUND
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !*    0.2    local namelist variables

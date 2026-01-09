@@ -48,8 +48,7 @@
 !              ------------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -60,7 +59,7 @@ INTEGER, INTENT(INOUT) :: KMONTH ! month of date
 INTEGER, INTENT(INOUT) :: KDAY   ! day of date
 REAL,    INTENT(INOUT) :: PSEC   ! number of seconds since date at 00 UTC
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('SUBSTRACT_TO_DATE_SURF',0,ZHOOK_HANDLE)
 !

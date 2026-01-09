@@ -44,7 +44,7 @@ USE MODD_ASSIM,           ONLY : LOBSWG, NITRAD, NPRINTLEV, NECHGU, XRD1, XRSCAL
                                  XAHU2M_ISBA, XAZON10M_ISBA, XAMER10M_ISBA, LPIO
 !
 
-USE YOMHOOK,              ONLY : LHOOK,   DR_HOOK
+USE YOMHOOK,              ONLY : LHOOK,   DR_HOOK, JPHOOK
 USE PARKIND1,             ONLY : JPRB
 !
 USE MODI_PACK_SAME_RANK
@@ -128,7 +128,7 @@ INTEGER  :: IOBS_T2M                   ! number of T2M observations
 INTEGER  :: IOBS_RH2M                  ! number of RH2M observations
 INTEGER  :: ILUOUT
 !
-REAL(KIND=JPRB)      :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK)      :: ZHOOK_HANDLE
 !
 ! ----------------------------------------------------------------------------------
 !

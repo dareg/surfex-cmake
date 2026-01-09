@@ -74,8 +74,7 @@ USE MODI_PGD_BEM_PAR
 USE MODI_ABOR1_SFX
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_WRITE_COVER_TEX_TEB
 !
@@ -112,7 +111,7 @@ TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGR
 !            ------------------------------
 !
 INTEGER         :: ILUOUT    ! output listing logical unit
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

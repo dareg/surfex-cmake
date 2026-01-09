@@ -72,8 +72,7 @@
 !
 USE MODI_TRIDIAG_GROUND
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -106,7 +105,7 @@ REAL, DIMENSION(SIZE(PT,1)) :: ZPEI ! internal energy of floor at time t+
 INTEGER :: ILAYER          ! number of floor layers
 INTEGER :: JLAYER          ! loop counter
 INTEGER :: JJ              ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('LAYER_E_BUDGET',0,ZHOOK_HANDLE)
 !

@@ -59,8 +59,7 @@ USE MODD_SURF_ATM,       ONLY : LVERTSHIFT
 !
 USE MODE_PREP_CTL, ONLY : PREP_CTL
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_CLEAN_PREP_OUTPUT_GRID
 !
@@ -93,7 +92,7 @@ INTEGER :: JMTH,INMTH
 INTEGER :: ILUOUT
 LOGICAL :: GFOUND         ! Return code when searching namelist
 INTEGER :: ILUNAM         ! logical unit of namelist file
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !-------------------------------------------------------------------------------------
 !

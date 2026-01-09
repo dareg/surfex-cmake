@@ -38,8 +38,7 @@ USE MODD_GRID_GRIB,  ONLY : CGRIB_FILE
 !
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -57,7 +56,7 @@ TYPE (DATE_TIME)                :: TZTIME_GRIB    ! current date and time
  CHARACTER(LEN=6)              :: YINMODEL ! model from which GRIB file originates
 REAL, DIMENSION(:)  , POINTER   :: ZMASK => NULL()          ! Land mask
 REAL, DIMENSION(:), POINTER :: ZFIELD => NULL()   ! field read
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

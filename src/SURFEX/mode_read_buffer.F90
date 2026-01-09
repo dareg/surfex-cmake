@@ -8,8 +8,7 @@ MODULE MODE_READ_BUFFER
 !
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 CONTAINS
 !-------------------------------------------------------------------
@@ -27,7 +26,7 @@ REAL, DIMENSION(:), POINTER       :: PMASK     ! Land mask
 !
 INTEGER                           :: IRET      ! return code
 REAL, DIMENSION(:), POINTER       :: ZFIELD    ! field read
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_BUFFER:READ_BUFFER_LAND_MASK',0,ZHOOK_HANDLE)
@@ -67,7 +66,7 @@ INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
 REAL, DIMENSION(:), POINTER       :: PFIELD    ! 
 !
 INTEGER                           :: IRET      ! return code
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 !
 !* Read orography
@@ -106,7 +105,7 @@ INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
 REAL, DIMENSION(:), POINTER       :: PFIELD    ! 
 !
 INTEGER                           :: IRET      ! return code
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 !
 !* Read orography
@@ -146,7 +145,7 @@ INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
 REAL, DIMENSION(:), POINTER       :: PFIELD    ! 
 !
 INTEGER                           :: IRET      ! return code
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 !
 !* Read orography
@@ -183,7 +182,7 @@ INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
 REAL, DIMENSION(:), POINTER       :: PFIELD    ! 
 !
 INTEGER                           :: IRET      ! return code
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 !
 !* Read surface temperature
@@ -218,7 +217,7 @@ INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
 REAL, DIMENSION(:), POINTER       :: PFIELD    ! 
 !
 INTEGER                           :: IRET      ! return code
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 !
 !* Read surface temperature
@@ -255,7 +254,7 @@ INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
 REAL, DIMENSION(:), POINTER       :: PFIELD    ! 
 !
 INTEGER                           :: IRET      ! return code
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 !
 !* Read surface temperature
@@ -333,7 +332,7 @@ REAL,  DIMENSION(:),   ALLOCATABLE:: ZSAND     ! sand fraction
 REAL,  DIMENSION(:),   ALLOCATABLE:: ZWWILT     ! wilting point
 REAL,  DIMENSION(:),   ALLOCATABLE:: ZWFC       ! field capacity
 REAL,  DIMENSION(:),   ALLOCATABLE:: ZWSAT      ! saturation
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -535,7 +534,7 @@ REAL,  DIMENSION(:),   ALLOCATABLE:: ZSAND     ! sand fraction
 REAL,  DIMENSION(:),   ALLOCATABLE:: ZWWILT     ! wilting point
 REAL,  DIMENSION(:),   ALLOCATABLE:: ZWFC       ! field capacity
 REAL,  DIMENSION(:),   ALLOCATABLE:: ZWSAT      ! saturation
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -715,7 +714,7 @@ REAL, DIMENSION(:,:), POINTER       :: PD        ! thickness of each layer
 !  ---------------
 !
 REAL,    DIMENSION(:), POINTER    :: ZFIELD    ! field to read
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !--------------------------------------------------------------------------------
 !
@@ -795,7 +794,7 @@ REAL, DIMENSION(:),   POINTER       :: PFIELD    ! field to initialize
 !  ---------------
 !
 INTEGER                           :: IRET      ! return code
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !
 !--------------------------------------------------------------------------------
@@ -854,7 +853,7 @@ REAL, DIMENSION(:),   POINTER       :: PFIELD    ! field to initialize
 !  ---------------
 !
 INTEGER                           :: IRET      ! return code
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !
 !--------------------------------------------------------------------------------
@@ -909,7 +908,7 @@ REAL, DIMENSION(:,:), POINTER       :: PD        ! normalized grid
 !  ---------------
 !
 REAL,    DIMENSION(:), POINTER    :: ZFIELD    ! field to read
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !--------------------------------------------------------------------------------
 !
@@ -985,7 +984,7 @@ REAL, DIMENSION(:,:), POINTER       :: PD        ! thickness of each layer
 !  ---------------
 !
 REAL,    DIMENSION(:), POINTER    :: ZFIELD    ! field to read
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !--------------------------------------------------------------------------------
 !

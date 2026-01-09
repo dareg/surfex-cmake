@@ -42,8 +42,7 @@
 !
 USE MODI_WRITE_SURF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_WRITE_GRIDTYPE_CARTESIAN
 !
@@ -84,7 +83,7 @@ INTEGER,            INTENT(OUT) :: KRESP      ! error return code
 !
  CHARACTER(LEN=100) :: YCOMMENT
  CHARACTER(LEN=1) :: YDIR
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !
 !*       1.    Write type of grid

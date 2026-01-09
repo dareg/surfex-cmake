@@ -102,8 +102,7 @@
 !
 USE MODD_SURF_PAR,  ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -143,7 +142,7 @@ REAL, DIMENSION(3) :: ZP
 REAL :: ZMAX, ZT     ! Max of 12 surrounding values
 REAL :: ZMIN      ! Min of 12 surrounding values
 INTEGER :: JL2    ! Dummy counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !------------------------------------------------------------------------------
 !
 !*     1. DETERMINATION  of the latitude of the poles (depending of the latitude

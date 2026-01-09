@@ -40,8 +40,7 @@
 USE MODD_CSTS,          ONLY : XPI, XDAY
 USE MODD_SURFEX_OMP, ONLY : NBLOCK, NBLOCKTOT
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 #ifdef AIX64
 !$ USE OMP_LIB
@@ -77,7 +76,7 @@ INTEGER, DIMENSION(0:11)                   :: IBIS, INOBIS ! Cumulative number o
 !                                            
 INTEGER                                    :: JI, JJ
 
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

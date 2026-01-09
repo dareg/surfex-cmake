@@ -100,8 +100,7 @@
 !
 USE MODD_SURF_PAR,  ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -133,7 +132,7 @@ INTEGER, DIMENSION(:), ALLOCATABLE :: IOFS     ! Offset of each parallel in the 
 !
 INTEGER :: IINLA
 INTEGER :: JL, IS1, IS2, JI
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------
 !
 !*     1. DETERMINATION  of the latitude of the poles (depending of the latitude

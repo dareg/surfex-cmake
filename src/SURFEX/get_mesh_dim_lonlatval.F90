@@ -37,8 +37,7 @@ USE MODD_CSTS, ONLY : XPI, XRADIUS
 USE MODE_GRIDTYPE_LONLATVAL
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -60,7 +59,7 @@ REAL, DIMENSION(KL) :: ZY       ! Y Lambert   coordinate
 REAL, DIMENSION(KL) :: ZLAT     ! latitude
 REAL, DIMENSION(KL) :: ZLON     ! longitude
 REAL, DIMENSION(KL) :: ZMAP     ! map factor
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !----------------------------------------------------------------------------
 !

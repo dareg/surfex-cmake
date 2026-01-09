@@ -55,8 +55,7 @@ USE MODE_GRIDTYPE_IGN
 !!
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -81,7 +80,7 @@ REAL, DIMENSION(KI)       :: ZXN, ZYN     ! isba nodes coordinates in the Lamber
 REAL, DIMENSION(KI)       :: ZDXI, ZDYI   ! Isba grid resolution in the conformal projection
 INTEGER                    :: IIMAX,IJMAX
 REAL :: ZLONMIN,ZLONMAX,ZLATMIN,ZLATMAX
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('READ_FILE_ISBAMAP',0,ZHOOK_HANDLE)
 !

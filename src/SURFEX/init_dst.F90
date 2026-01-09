@@ -19,8 +19,7 @@ USE MODI_GET_LUOUT
 USE MODI_GET_VEGTYPE_2_PATCH_MASK
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -44,7 +43,7 @@ INTEGER             :: JMODE                 ! Counter for dust modes
 INTEGER             :: JMODE_IDX             ! Index for dust modes
 INTEGER             :: ILUOUT
 INTEGER             :: ISIZE_LARGEST_DST
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !get output listing unit
 IF (LHOOK) CALL DR_HOOK('INIT_DST',0,ZHOOK_HANDLE)

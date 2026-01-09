@@ -10,8 +10,7 @@
 !############################################################################
 !############################################################################
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 CONTAINS
 !############################################################################
@@ -52,7 +51,7 @@ INTEGER,            INTENT(IN)  :: KL       ! number of points used
 REAL, DIMENSION(:), INTENT(IN)  :: PLON     ! longitudes of all points
 REAL, DIMENSION(:), INTENT(IN)  :: PLAT     ! latitudes  of all points
 REAL,   DIMENSION(:),POINTER    :: PGRID_PAR! parameters defining this grid
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !*       0.2   Declarations of local variables
@@ -119,7 +118,7 @@ REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PLAT     ! latitudes  of all points
 !
 INTEGER :: ILON, ILAT
 INTEGER :: IL
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_LONLAT_REG:GET_GRIDTYPE_LONLAT_REG',0,ZHOOK_HANDLE)
 ILON = NINT(PGRID_PAR(5))
@@ -183,7 +182,7 @@ REAL, DIMENSION(:), INTENT(OUT) :: PLON,PLAT
 INTEGER :: JLON, JLAT
 INTEGER :: JL
 INTEGER :: JC
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !--------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_LONLAT_REG:LATLON_LONLAT_REG',0,ZHOOK_HANDLE)

@@ -47,8 +47,7 @@ USE MODI_REGROT_LONLAT_ROT
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -75,7 +74,7 @@ INTEGER :: ILAT    ! number of points in latitude
 REAL, DIMENSION(KL) :: ZLON, ZLAT     ! rotated longitude, latitude
 INTEGER :: JLON, JLAT, JL
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !
 !*       1.    Grid parameters

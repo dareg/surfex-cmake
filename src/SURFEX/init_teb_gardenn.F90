@@ -69,8 +69,7 @@ USE MODI_INIT_FROM_DATA_TEB_VEG_n
 USE MODI_AVG_ALBEDO_EMIS_TEB_VEG
 USE MODI_DIAG_TEB_VEG_INIT_n
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -119,7 +118,7 @@ REAL, DIMENSION(KI,KSW)           :: ZSCA_ALB  ! diffuse albedo for each band
 REAL, DIMENSION(KI)               :: ZEMIS     ! emissivity
 REAL, DIMENSION(KI)               :: ZTSRAD    ! radiative temperature
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

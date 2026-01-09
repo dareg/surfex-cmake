@@ -63,8 +63,7 @@ USE MODD_ISBA_PAR, ONLY : XDENOM_MIN
 !               ------------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -139,7 +138,7 @@ REAL, DIMENSION(SIZE(PAN)) :: ZGSC, ZGS
 !
 INTEGER :: JJ, ITER
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

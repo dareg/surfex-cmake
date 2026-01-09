@@ -54,8 +54,7 @@ USE MODE_THERMOS
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -152,7 +151,7 @@ INTEGER                   ::  JITER
 !                                     iterations
 !
 INTEGER, PARAMETER        ::  IITERMAX = 10
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !                             IITERMAX = number of iterations
 !
 !-------------------------------------------------------------------------------

@@ -50,8 +50,7 @@ USE MODD_DATA_COVER,     ONLY : XDATA_SEA, XDATA_WATER, XDATA_NATURE, XDATA_TOWN
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -72,7 +71,7 @@ INTEGER :: I,IP
  CHARACTER(LEN=200):: YFMT  ! fortran format
 !
 LOGICAL           :: GLINE ! flag to write an additional horizontal line
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

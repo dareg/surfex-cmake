@@ -44,8 +44,7 @@ USE MODD_TEB_IRRIG_n, ONLY : TEB_IRRIG_t
 USE MODI_WRITE_SURF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -67,7 +66,7 @@ INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
 INTEGER           :: JLAYER         ! loop index
 INTEGER           :: JTIME          ! loop index
 REAL, DIMENSION(:), ALLOCATABLE :: ZWORK
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

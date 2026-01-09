@@ -53,8 +53,7 @@ USE MODI_ABOR1_SFX
 USE MODE_POS_SURF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -113,7 +112,7 @@ REAL,DIMENSION(NTIME_GR_MAX)               :: XUNIF_LAI_GR     ! LAI of green ro
  CHARACTER(LEN=6 ),DIMENSION(NLAYER_GR_MAX) :: CFTYP_SAND_GR    ! fraction of sand for the non-OM part of the green roof layer
  CHARACTER(LEN=6 ),DIMENSION(NTIME_GR_MAX)  :: CFTYP_LAI_GR     ! LAI  of green roof
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_DATA_TEB_GREENROOF/ NTIME_GR,NLAYER_GR,                                      &
                                  CTYP_GR,                                                 & 

@@ -51,8 +51,7 @@ USE MODI_INTERPOL_FIELD
 USE MODI_UNPACK_SAME_RANK
 USE MODI_PACK_SAME_RANK
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -80,7 +79,7 @@ INTEGER, DIMENSION(:), ALLOCATABLE :: NSIZE, NSIZE_TOT
 INTEGER                            :: INI, IVEGTYPE
 INTEGER                            :: JVEGTYPE  ! loop counter on vegtypes
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

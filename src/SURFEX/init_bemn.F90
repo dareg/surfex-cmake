@@ -58,8 +58,7 @@ USE MODI_STORES_HVAC_AUTOSIZE
 !
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -86,7 +85,7 @@ INTEGER                         :: JJ               ! counter
 INTEGER                         :: ILU              ! sizes of TEB arrays
 LOGICAL                         :: GPRINT           ! flag for warning prints in output file
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !         Initialisation for IO

@@ -59,8 +59,7 @@ USE MODI_OPEN_NAMELIST
 USE MODI_CLOSE_NAMELIST
 USE MODI_GRID_MODIF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_GET_LUOUT
 IMPLICIT NONE
@@ -94,7 +93,7 @@ INTEGER           :: IJMAX_LOC
 INTEGER           :: ILUOUT ! listing  file  logical unit
 INTEGER           :: ILUNAM ! namelist file  logical unit
 INTEGER           :: IRESP  ! return code
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*    0.3    Declaration of namelists
 !            ------------------------

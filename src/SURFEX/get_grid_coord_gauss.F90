@@ -39,8 +39,7 @@
 USE MODE_GRIDTYPE_GAUSS
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -59,7 +58,7 @@ REAL, DIMENSION(KL),        INTENT(OUT) :: PLAT_XY    ! pseudo-longitude (deg)
 REAL    :: ZLAPO   ! latitude  of the rotated pole (deg)
 REAL    :: ZLOPO   ! longitude of the rotated pole (deg)
 REAL    :: ZCODIL  ! stretching factor (must be greater than or equal to 1)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !---------------------------------------------------------------------------
 !

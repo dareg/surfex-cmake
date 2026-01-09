@@ -47,8 +47,7 @@ USE MODI_HYDRO_DT92
 !
 USE MODE_HYDRO_DIF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -100,7 +99,7 @@ REAL                                       :: ZTDIURN, ZSOILHEATCAP
 !                                             ZSOILHEATCAP = Total soil volumetric heat capacity [J/(m3 K)]
 !
 INTEGER                                    :: INJ, INL, JJ, JL, IDEPTH
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -397,7 +396,7 @@ WHERE (ZPG_INI(:)<0.0)
   DEK%XPFLOOD(:) = 0.0
 ENDWHERE
 !
-!*           4. infiltration rate from floodplains (à revoir pour DF !!!)
+!*           4. infiltration rate from floodplains (Ã  revoir pour DF !!!)
 !            -------------------------------------
 !
 IF(IO%LFLOOD)THEN

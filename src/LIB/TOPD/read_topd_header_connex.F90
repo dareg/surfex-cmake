@@ -53,8 +53,7 @@ USE MODI_CLOSE_FILE
 USE MODD_TOPD_PAR, ONLY : NUNIT
 USE MODD_TOPODYN, ONLY : NPMAX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -70,7 +69,7 @@ INTEGER,           INTENT(OUT) :: KNMC     ! number of pixels in a catchment
 !
 INTEGER                   :: JJ ! loop control 
 INTEGER                   :: ILUOUT      ! Unit of the files
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('READ_TOPD_HEADER_CONNEX',0,ZHOOK_HANDLE)
 !

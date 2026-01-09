@@ -52,8 +52,7 @@ USE MODD_TOPODYN, ONLY : NNCAT
 !
 USE MODE_POS_SURF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -77,7 +76,7 @@ REAL, DIMENSION(JPCAT)            :: XC_DEPTH_RATIO_BV
 INTEGER                           :: ILUOUT    ! output listing logical unit
 INTEGER                           :: ILUNAM    ! namelist file logical unit
 LOGICAL                           :: GFOUND    ! flag when namelist is present
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*    0.3    Declaration of namelists
 !  

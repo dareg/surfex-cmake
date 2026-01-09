@@ -11,8 +11,7 @@ SUBROUTINE TOWN_PRESENCE (HFILETYPE,OTEB,HDIR)
 !
 USE MODI_READ_SURF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -30,7 +29,7 @@ LOGICAL,            INTENT(OUT) :: OTEB      ! TRUE if TEB data exist in the fil
 INTEGER           :: IRESP     ! reading return code
  CHARACTER(LEN=6)  :: YTOWN     ! scheme for towns in input file
 INTEGER           :: IDIM_TOWN ! number of TEB points in input file
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 !*      1.     reads if TEB fields exist in the input file

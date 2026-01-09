@@ -34,8 +34,7 @@ USE MODI_READ_ISBA_CONF_n
 USE MODI_READ_NAM_PREP_ISBA_n
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -48,7 +47,7 @@ TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 INTEGER :: ILUNAM         ! logical unit of namelist file
 INTEGER :: ILUOUT
 LOGICAL :: GFOUND         ! Return code when searching namelist
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------
 !

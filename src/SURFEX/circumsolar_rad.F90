@@ -34,8 +34,7 @@ SUBROUTINE CIRCUMSOLAR_RAD(PDIR_SW, PSCA_SW, PZENITH, PF1_o_B)
 !!---------------------------------------------------------------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB      
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 USE MODD_CSTS ,ONLY : XPI
 
 IMPLICIT NONE
@@ -55,7 +54,7 @@ REAL, DIMENSION(SIZE(PZENITH)) :: ZF1 !factors depending on ZE and Z
 REAL, DIMENSION(SIZE(PZENITH)) :: ZF11, ZF13 !factors depending on ZE
 REAL, PARAMETER :: ZK = 1.041 !coef. from EP Engineering Reference 
 REAL, PARAMETER :: ZBMIN = 0.087 !coef. from EP Engineering Reference 
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 REAL, DIMENSION(SIZE(PZENITH)) :: ZELEV
 INTEGER :: JJ
 !-------------------------------------------------------------------------------

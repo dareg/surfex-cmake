@@ -56,8 +56,7 @@ USE MODI_CANOPY_EVOL_TEMP
 !
 USE MODE_SBLS
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -132,7 +131,7 @@ REAL, DIMENSION(KI,SB%NLVL) :: ZSFTH              ! heat flux at atmospheric for
 REAL, DIMENSION(KI,SB%NLVL) :: ZSFRV              ! vapor flux at atmospheric forcing level
 REAL                        :: ZZ0                ! a value of z0 just for first time-step init.
 REAL, DIMENSION(KI,SB%NLVL) :: ZRHOA              ! air density profile
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('CANOPY_EVOL',0,ZHOOK_HANDLE)
 !

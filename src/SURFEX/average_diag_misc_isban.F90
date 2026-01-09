@@ -60,8 +60,7 @@ USE MODD_CSTS,             ONLY : XRHOLW
 !
 USE MODI_COMPUT_COLD_LAYERS_THICK
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -87,7 +86,7 @@ INTEGER                         :: INI,INP,IDEPTH,IWORK, IMASK, JB
 !
 REAL, DIMENSION(SIZE(DM%XHV),IO%NGROUND_LAYER) :: ZPOND, ZTG, ZDG
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

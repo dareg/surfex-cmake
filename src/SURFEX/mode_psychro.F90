@@ -30,8 +30,7 @@ MODULE MODE_PSYCHRO
 !!      Original    12/04/11
 !!      J.Escobar   11/13 :  remove space in ELSEWHERE statement
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 interface PE_FROM_PQ
         module procedure PE_FROM_PQ_0D
@@ -64,7 +63,7 @@ function PE_FROM_PQ_0D(PP, PQ) RESULT(PE)
 REAL, INTENT(IN) :: PP !atmos. pressure (Pa)
 REAL, INTENT(IN) :: PQ !specific humidity (kg/kg)
 REAL :: PE !water vapour pressure (Pa)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('MODE_PSYCHRO:PE_FROM_PQ_0D',0,ZHOOK_HANDLE)
 PE = PQ * PP /(0.622 + 0.378 * PQ)
 IF (LHOOK) CALL DR_HOOK('MODE_PSYCHRO:PE_FROM_PQ_0D',1,ZHOOK_HANDLE)
@@ -75,7 +74,7 @@ function PE_FROM_PQ_1D(PP, PQ) RESULT(PE)
 REAL, DIMENSION(:), INTENT(IN) :: PP !atmos. pressure (Pa)
 REAL, DIMENSION(:), INTENT(IN) :: PQ !specific humidity (kg/kg)
 REAL, DIMENSION(SIZE(PQ))      :: PE !water vapour pressure (Pa)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('MODE_PSYCHRO:PE_FROM_PQ_1D',0,ZHOOK_HANDLE)
 PE(:) = PQ(:) * PP(:) /(0.622 + 0.378 * PQ(:))
 IF (LHOOK) CALL DR_HOOK('MODE_PSYCHRO:PE_FROM_PQ_1D',1,ZHOOK_HANDLE)
@@ -93,7 +92,7 @@ REAL :: PTD !Dew Point Air Temp. (K)
 !local variables
 REAL :: ALPHA
 REAL :: ZPE !water vapour pressure
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('MODE_PSYCHRO:TD_FROM_TQ_0D',0,ZHOOK_HANDLE)
 ZPE = PE_FROM_PQ(PT, PQ)
@@ -120,7 +119,7 @@ REAL, DIMENSION(SIZE(PQ))      :: PTD !Dew Point Air Temp. (K)
 !local variables
 REAL, DIMENSION(SIZE(PQ)) :: ALPHA
 REAL, DIMENSION(SIZE(PQ)) :: ZPE !water vapour pressure
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('MODE_PSYCHRO:TD_FROM_TQ_1D',0,ZHOOK_HANDLE)
 ZPE = PE_FROM_PQ(PT, PQ)
@@ -148,7 +147,7 @@ REAL, INTENT(IN) :: PP !Atmos. Pressure (Pa)
 REAL, INTENT(IN) :: PTWB !Wet Bulb Temp. (K)
 REAL :: PRV !water vapor mixing ratio (kg/kg)
 REAL :: ZRVSAT !saturation water vapor mixing ratio
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('MODE_PSYCHRO:RV_FROM_TPTWB_0D',0,ZHOOK_HANDLE)
 ZRVSAT = QSAT(PT, PP) / (1 - QSAT(PT, PP))
@@ -166,7 +165,7 @@ REAL, DIMENSION(:),INTENT(IN) :: PP !Atmos. Pressure (Pa)
 REAL, DIMENSION(:),INTENT(IN) :: PTWB !Wet Bulb Temp. (K)
 REAL, DIMENSION(SIZE(PT)) :: PRV !water vapor mixing ratio (kg/kg)
 REAL, DIMENSION(SIZE(PT)) :: ZRVSAT !saturation water vapor mixing ratio
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('MODE_PSYCHRO:RV_FROM_TPTWB_1D',0,ZHOOK_HANDLE)
 ZRVSAT = QSAT(PT, PP) / (1 - QSAT(PT, PP))
@@ -188,7 +187,7 @@ REAL :: PTWB !Wet Bulb Temp. (K)
 REAL :: ZTD !Dew Point Temp. (K)
 REAL :: ZTWBINF, ZTWBSUP, ZRV
 INTEGER :: JITER
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('MODE_PSYCHRO:TWB_FROM_TPQ_0D',0,ZHOOK_HANDLE)
 JITER = 1
 ZTD = TD_FROM_TQ(PT, PQ) 
@@ -219,7 +218,7 @@ REAL, DIMENSION(SIZE(PT)) :: PTWB !Wet Bulb Temp. (K)
 REAL, DIMENSION(SIZE(PT)) :: ZTD !Dew Point Temp. (K)
 REAL, DIMENSION(SIZE(PT)) :: ZTWBINF, ZTWBSUP, ZRV
 INTEGER :: JITER, JI
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('MODE_PSYCHRO:TWB_FROM_TPQ_1D',0,ZHOOK_HANDLE)
 ZTD = TD_FROM_TQ(PT, PQ) 
 !initial guess
@@ -296,7 +295,7 @@ REAL                           :: PENTH  ! Enthalpy (J/kg)
 !
 REAL        :: ZT                          ! Temperature (C)
 REAL        :: ZRV                         ! Mixing ratio (kg/kg_da)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
       IF (LHOOK) CALL DR_HOOK('MODE_PSYCHRO:ENTH_FN_T_Q',0,ZHOOK_HANDLE)
 ! calculate enthalpy
@@ -365,7 +364,7 @@ REAL                           :: PQ     ! Humidity content (kg/kg)
 !
 REAL        :: ZT                          ! Temperature (C)
 REAL        :: ZRV                         ! Mixing ratio (kg/kg_da)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
       IF (LHOOK) CALL DR_HOOK('MODE_PSYCHRO:Q_FN_T_ENTH',0,ZHOOK_HANDLE)
 !

@@ -41,8 +41,7 @@ USE MODD_DIAG_n, ONLY : DIAG_OPTIONS_t
 !
 USE MODI_PREP_CTRL
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -55,7 +54,7 @@ LOGICAL,  INTENT(INOUT) :: OSURF_EVAP_BUDGET  ! flag for surface evaporation bud
 LOGICAL,  INTENT(INOUT) :: OSURF_MISC_BUDGET  ! flag for surface miscellaneous budget
 LOGICAL,  INTENT(INOUT) :: OUTCI              ! flag for UTCI fields
 INTEGER,  INTENT(IN)    :: KLUOUT             ! unit number
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------

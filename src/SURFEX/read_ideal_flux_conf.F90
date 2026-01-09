@@ -50,8 +50,7 @@ USE MODI_CLOSE_NAMELIST
 !
 USE MODN_IDEAL_FLUX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 IMPLICIT NONE
@@ -67,7 +66,7 @@ IMPLICIT NONE
 LOGICAL           :: GFOUND         ! Return code when searching namelist
 INTEGER           :: ILUOUT         ! logical unit of output file
 INTEGER           :: INAM           ! logical unit of namelist file
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !* get output listing file logical unit

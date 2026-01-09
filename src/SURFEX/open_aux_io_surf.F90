@@ -38,8 +38,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE YOMHOOK ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 #ifdef SFX_ASC
 USE MODI_OPEN_AUX_IO_SURF_ASC
@@ -86,7 +85,7 @@ IMPLICIT NONE
 !              -------------------------------
 !
  CHARACTER(LEN=1) :: YDIR
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('OPEN_AUX_IO_SURF',0,ZHOOK_HANDLE)

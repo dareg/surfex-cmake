@@ -69,8 +69,7 @@ USE MODD_READ_NAMELIST, ONLY : LNAM_READ
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 USE MODI_ABOR1_SFX
 !
 IMPLICIT NONE
@@ -96,7 +95,7 @@ LOGICAL           :: GFOUND         ! Return code when searching namelist
 INTEGER           :: ILUOUT         ! logical unit of output file
 INTEGER           :: INAM           ! logical unit of namelist file
 INTEGER           :: IMI
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !* get output listing file logical unit

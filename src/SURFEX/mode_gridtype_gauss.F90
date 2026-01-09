@@ -10,7 +10,7 @@ MODULE MODE_GRIDTYPE_GAUSS
 !############################################################################
 !############################################################################
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 USE MODI_ABOR1_SFX
@@ -70,7 +70,7 @@ REAL,   DIMENSION(:),       INTENT(IN) :: PLATINF    ! Grid corner Latitude    |
 REAL,   DIMENSION(:),       INTENT(IN) :: PLONINF    ! Grid corner Longitude  Inf
 !
 REAL, DIMENSION(:), POINTER :: PGRID_PAR         ! parameters defining this grid
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !
@@ -157,7 +157,7 @@ REAL, DIMENSION(:), OPTIONAL, INTENT(OUT) :: PLONINF    ! Grid corner Longitude 
 !
 INTEGER :: IL
 INTEGER :: INLATI
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:GET_GRIDTYPE_GAUSS',0,ZHOOK_HANDLE)
 IF (PRESENT(KNLATI))  KNLATI = PGRID_PAR(1)
@@ -293,7 +293,7 @@ REAL,  DIMENSION(KL),      INTENT(OUT):: PLON    ! longitudes of points (deg)
 INTEGER :: JP
 REAL :: ZCLO3,ZCONR,ZINTERM,ZLAT1,ZLAT2,ZLAT3,ZLON1,ZLON2,ZLON3
 REAL :: ZLATP,ZLONP,ZSLA3,ZSLO3,ZR
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:LATLON_GAUSS',0,ZHOOK_HANDLE)
@@ -411,7 +411,7 @@ INTEGER :: JY ! latitude loop counter
 REAL                      :: ZRD, ZI
 REAL, DIMENSION(KNLATI)   :: ZNLOPA, ZSINLA, ZWG
 REAL, DIMENSION(KNLATI)   :: ZDSINLA
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:COMP_GRIDTYPE_GAUSS',0,ZHOOK_HANDLE)
@@ -434,7 +434,7 @@ END DO
 JL=0
 !* loop on latitudes (from north pole)
 DO JY=1,KNLATI
-!* loop on longitudes (from 0°, to the east)
+!* loop on longitudes (from 0Â°, to the east)
   DO JX=1,KNLOPA(JY)
     JL=JL+1
     PLAT_XY(JL) = ZWG(JY)*ZRD
@@ -501,7 +501,7 @@ INTEGER :: JY ! latitude loop counter
 REAL                    :: ZNLATI, ZRD
 REAL, DIMENSION(KNLATI) :: ZNLOPA, ZSINLA, ZWG
 REAL, DIMENSION(KNLATI) :: ZDSINLA
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:GAUSS_GRID_LIMITS',0,ZHOOK_HANDLE)
@@ -524,7 +524,7 @@ JL=0
 !
 !* loop on latitudes (from north pole)
 DO JY=1,KNLATI
-!* loop on longitudes (from 0°, to the east)
+!* loop on longitudes (from 0Â°, to the east)
   DO JX=1,KNLOPA(JY)
     JL=JL+1
     IF (JY==1) THEN
@@ -610,7 +610,7 @@ SUBROUTINE XY_GAUSS(PCODIL,KSIZE_DLAT,KSIZE_LON,PNODATA,PVALUE,PLAT_XY,PLON_XY)
   !
   INTEGER :: JJ, IDN, IDT
   !
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE_OMP
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE_OMP
   !--------------------------------------------------------------------------------
   !
   !*     1.     Preliminary calculations
@@ -735,7 +735,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:XY_GAUSS',1,ZHOOK_HANDLE_OMP)
     !
     REAL :: ZPI
     REAL :: ZDR
-    REAL(KIND=JPRB) :: ZHOOK_HANDLE
+    REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
     !-------------------------------------------------------------------------------
     !
     !*     1.     PRELIMINARY CALCULATION
@@ -855,7 +855,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:XY_GAUSS',1,ZHOOK_HANDLE_OMP)
   INTEGER :: JN, JGL, IODD, IK
   INTEGER :: INS2, IALLOW, ISYM, IFLAG, ITEMAX, JTER
 
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   !     ------------------------------------------------------------------
 
@@ -1072,7 +1072,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:XY_GAUSS',1,ZHOOK_HANDLE_OMP)
   INTEGER :: IL
   INTEGER :: JL       ! loop counter on number of points
   INTEGER :: JLTOT    ! loop counter on total number of points
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
   !
   !-------------------------------------------------------------------------------
   !

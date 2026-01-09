@@ -47,8 +47,7 @@ USE MODI_TEST_NAM_VAR_SURF
 USE MODE_POS_SURF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -70,7 +69,7 @@ LOGICAL                           :: GFOUND    ! flag when namelist is present
 !            ------------------------
 !
  CHARACTER(LEN=4)         :: CCH_EMIS
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_CH_EMISSIONS/ CCH_EMIS
 !

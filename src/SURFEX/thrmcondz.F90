@@ -56,8 +56,7 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_ISBA_PAR,   ONLY : XDRYWGHT, XSPHSOIL, XCONDQRTZ, XCONDOTH1, XCONDOTH2
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -74,7 +73,7 @@ REAL,   DIMENSION(:,:), INTENT(OUT):: PCONDSLD  ! soil solids thermal
 !*      0.2    declarations of local variables
 !
 REAL,    DIMENSION(SIZE(PSANDZ,1),SIZE(PSANDZ,2)) :: ZQUARTZ, ZGAMMAD
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-----------------------------------------------------------------
 !

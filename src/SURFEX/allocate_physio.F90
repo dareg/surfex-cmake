@@ -44,8 +44,7 @@ USE MODD_AGRI,        ONLY : LAGRIP
 !
 USE MODD_TREEDRAG,       ONLY : LTREEDRAG
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -61,7 +60,7 @@ INTEGER :: ISIZE
 INTEGER               :: ISIZE_LMEB_PATCH  ! Number of patches with MEB=true
 !
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

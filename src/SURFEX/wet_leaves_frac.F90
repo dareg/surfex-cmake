@@ -47,8 +47,8 @@
 USE MODD_SURF_ATM, ONLY : XDELTA_MAX
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB, JPRD
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
+USE PARKIND1  ,ONLY : JPRD
 !
 IMPLICIT NONE
 !
@@ -102,7 +102,7 @@ REAL, DIMENSION(SIZE(PVEG)) :: ZCOEF,          &
                                  ZDELTA_HIGH 
 REAL, DIMENSION(SIZE(PVEG)) :: PWRMAX_DP, PDELTA_DP  
 #endif
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !                                              ZDELTA_HIGH = fraction of the foliage covered
 !                                              by intercepted water for high vegetation
 

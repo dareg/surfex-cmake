@@ -36,8 +36,7 @@ USE MODI_TEST_NAM_VAR_SURF
 !
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
@@ -62,7 +61,7 @@ INTEGER                           :: JSNAP      ! loop counter on snaps
 REAL,    DIMENSION(KTPS)          :: ZSNAP_COEF ! snap temporal coefficient
 INTEGER                           :: ISNAP      ! snap number
 INTEGER                           :: ILUOUT     ! output listing
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 !*    1.      Open the file

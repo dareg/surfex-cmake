@@ -53,8 +53,7 @@ USE MODD_CSTS,     ONLY : XKARMAN
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -77,7 +76,7 @@ REAL, DIMENSION(:), INTENT(OUT)      :: PMER10M! meridian wind at 10 meters
 !
 REAL, DIMENSION(SIZE(PHW)) :: ZBN,ZBD,ZRU
 REAL, DIMENSION(SIZE(PHW)) :: ZLOGU,ZCORU,ZIV
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

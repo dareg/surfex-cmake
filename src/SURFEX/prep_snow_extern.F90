@@ -50,8 +50,7 @@ USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_CSTS,           ONLY : XTT
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_TOWN_PRESENCE
 USE MODI_ABOR1_SFX
@@ -114,7 +113,7 @@ INTEGER                           :: IPATCH         ! number of input patch
 INTEGER                           :: ITEB_PATCH     ! number of input patch for TEB
 INTEGER                           :: JP         ! loop on patch
 CHARACTER(LEN=6)                  :: YMASK          ! type of tile mask
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

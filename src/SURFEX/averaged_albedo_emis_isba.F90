@@ -62,7 +62,7 @@ USE MODI_UPDATE_RAD_ISBA_n
 USE MODI_ISBA_LWNET_MEB
 USE MODI_UNPACK_SAME_RANK
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 USE PARKIND1  ,ONLY : JPRB, JPRD
 !
 IMPLICIT NONE
@@ -127,7 +127,7 @@ LOGICAL :: LEXPLICIT_SNOW ! snow scheme key
 INTEGER :: JP, JI,ISIZE ! loop on patches
 INTEGER :: IMASK ! loop on patches
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*    0.      Init

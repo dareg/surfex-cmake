@@ -59,8 +59,7 @@ USE MODI_CH_AER_EMISSION
 !*       0.   DECLARATIONS
 !        -----------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -113,7 +112,7 @@ LOGICAL                          :: LIOINIT ! True if I/O init done
 INTEGER                          :: JW
 INTEGER                          :: ITIME
 LOGICAL                          :: GCO = .FALSE. ! switch if CO emission are available
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !

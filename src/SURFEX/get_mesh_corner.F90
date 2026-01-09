@@ -46,8 +46,7 @@ USE MODI_GET_MESH_CORNER_LONLATVAL
 !
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -66,7 +65,7 @@ REAL,    DIMENSION(:,:),         INTENT(OUT)   :: PCORNER_LON ! Grid corner Long
 !
 INTEGER :: IL, IC
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------------
 !

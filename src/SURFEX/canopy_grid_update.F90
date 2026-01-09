@@ -42,8 +42,7 @@ USE MODD_CANOPY_n, ONLY : CANOPY_t
 !              ------------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_CANOPY_GRID
 !
@@ -70,7 +69,7 @@ INTEGER :: JI                     ! loop counter on points
 REAL    :: ZZTOP                  ! altitude of top of the grid of the initial level
 !                                 ! just below forcing height
 REAL    :: ZDZ                    ! difference of height between new levels
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

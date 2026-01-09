@@ -41,8 +41,7 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_GRID_GRIB,      ONLY : CGRIB_FILE, NNI, CINMODEL
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -63,7 +62,7 @@ REAL, DIMENSION(:,:), POINTER   :: ZFIELD => NULL()         ! field read
 REAL, DIMENSION(:),   POINTER   :: ZFIELD1D => NULL()       ! field read
 REAL, DIMENSION(:,:), POINTER   :: ZD => NULL()             ! depth of field in the soil
 INTEGER                         :: JVEGTYPE       ! loop counter on vegtypes
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !
@@ -166,7 +165,7 @@ SUBROUTINE SOIL_PROFILE_GRIB
 !-------------------------------------------------------------------------------------
 !
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZOUT   ! work array
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

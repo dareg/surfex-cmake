@@ -63,8 +63,7 @@ USE MODD_ISBA_PAR, ONLY : XRS_MAX, XDENOM_MIN
 USE MODE_THERMOS
 !
 !
-USE YOMHOOK       ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1      ,ONLY : JPRB
+USE YOMHOOK       ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -103,7 +102,7 @@ REAL, PARAMETER                :: ZFACTR_MIN  = 1.E-3  ! minimum value for some 
 !                                                      ! to prevent from being too small 
 REAL, PARAMETER                :: ZRS_MIN     = 1.E-4  ! minimum canopy resistance (s m-1)
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

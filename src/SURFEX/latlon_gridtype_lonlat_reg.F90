@@ -45,8 +45,7 @@ USE MODE_GRIDTYPE_LONLAT_REG
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -70,7 +69,7 @@ INTEGER :: ILAT    ! number of points in latitude
 !
 REAL    :: ZDLAT   ! grid size in latitude  unit
 REAL    :: ZDLON   ! grid size in longitude unit
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !
 !*       1.    Grid parameters

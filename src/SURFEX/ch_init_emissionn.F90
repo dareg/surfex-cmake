@@ -44,8 +44,7 @@ USE MODI_CLOSE_NAMELIST
 USE MODI_READ_SURF_FIELD2D
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -90,7 +89,7 @@ CHARACTER(LEN=3)                  :: YSURF   ! surface type
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZWORK2D ! work array to read emission fields
 !
 INTEGER           :: IVERSION       ! version of surfex file being read
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('CH_INIT_EMISSION_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)

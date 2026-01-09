@@ -3,8 +3,7 @@ USE ABSTRACT_ICE
 USE MODE_SEAICE_SICE
 USE MODE_SEAICE_SICE_SNOW
 USE MODD_SURF_PAR, ONLY: XUNDEF
-USE YOMHOOK,       ONLY: LHOOK, DR_HOOK
-USE PARKIND1,      ONLY: JPRB
+USE YOMHOOK,       ONLY: LHOOK, DR_HOOK, JPHOOK
 IMPLICIT NONE
 
 TYPE, PUBLIC, EXTENDS(SEA_ICE_t) :: SICE_t
@@ -67,7 +66,7 @@ TYPE, PUBLIC, EXTENDS(SEA_ICE_t) :: SICE_t
     PROCEDURE, PRIVATE, PASS :: RUN_INTERNAL
     PROCEDURE, PRIVATE, PASS :: GROWTH
 
-    PROCEDURE, PRIVATE, NOPASS :: IO
+!   PROCEDURE, PRIVATE, NOPASS :: IO ! NOT DEFINED ???
 END TYPE SICE_t
 
 CONTAINS
@@ -76,7 +75,7 @@ SUBROUTINE INIT(THIS, HPROGRAM)
 IMPLICIT NONE
   CLASS(SICE_t) :: THIS
   CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('ICE_SICE:INIT', 0, ZHOOK_HANDLE)
 
@@ -133,7 +132,7 @@ IMPLICIT NONE
   LOGICAL :: LINIT_FROM_SST
   INTEGER :: NUM_LAYERS
   REAL :: XICE_THICKNESS
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   NAMELIST /NAM_PREP_SEAICE_SICE/  &
     XICE_TUNIF,                 &
@@ -214,7 +213,7 @@ IMPLICIT NONE
   REAL :: ZEDGE_THK ! Mean ice thickness along the old ice edge
   REAL :: Z_T0, Z_TF, Z_H, Z_P1X, Z_P1Y
   INTEGER :: JI
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('ICE_SICE:ASSIM', 0, ZHOOK_HANDLE)
 
@@ -317,7 +316,7 @@ IMPLICIT NONE
 
   INTEGER :: IMASK(THIS%NUM_POINTS)
   INTEGER :: JJ, ISIZE
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('ICE_SICE:RUN', 0, ZHOOK_HANDLE)
 
@@ -396,7 +395,7 @@ IMPLICIT NONE
       ZPEQ_A_COEF,                    &
       ZPEQ_B_COEF
   TYPE(SEA_ICE_FORCING_t) :: FORC
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('ICE_SICE:RUN:PACK_AND_RUN', 0, ZHOOK_HANDLE)
 
@@ -517,7 +516,7 @@ IMPLICIT NONE
   INTEGER :: I, N, M
   LOGICAL :: HAS_SNOW, HAS_SNOW_POINTS( THIS%NUM_POINTS )
   TYPE(SNOW_RESPONSE_t) :: SNOW_RESP
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF( LHOOK ) CALL DR_HOOK( 'ICE_SICE:RUN_INTERNAL', 0, ZHOOK_HANDLE )
 
@@ -754,7 +753,7 @@ IMPLICIT NONE
   REAL, INTENT(IN) :: PICECOND(M)
 
   REAL :: ZDHDT(M), ZICE_HEAT_FLUX(M), ZNEW_THK(M)
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('ICE_SICE:GROWTH', 0, ZHOOK_HANDLE)
 
@@ -773,7 +772,7 @@ END SUBROUTINE GROWTH
 SUBROUTINE DEALLOC(THIS)
 IMPLICIT NONE
   CLASS(SICE_t) :: THIS
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('ICE_SICE:DEALLOC', 0, ZHOOK_HANDLE)
 
@@ -821,7 +820,7 @@ IMPLICIT NONE
 
   REAL :: ZICE_THICKNESS(KLU)
   INTEGER :: IRESP
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('ICE_SICE:READSURF', 0, ZHOOK_HANDLE)
 
@@ -865,7 +864,7 @@ IMPLICIT NONE
 
   INTEGER :: IRESP
   CHARACTER(LEN=100) :: YCOMMENT
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('ICE_SICE:WRITESURF', 0, ZHOOK_HANDLE)
 
@@ -884,7 +883,7 @@ IMPLICIT NONE
   CLASS(SICE_t) :: THIS
   CHARACTER(LEN=*), INTENT(IN) :: HSELECT(:)
   CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('ICE_SICE:WRITE_DIAG', 0, ZHOOK_HANDLE)
 
@@ -906,7 +905,7 @@ IMPLICIT NONE
   REAL :: ZSNOW_TEMP(THIS%NUM_POINTS)
   REAL :: ZSNOW_ALB(THIS%NUM_POINTS)
   REAL :: ZICE_ALB(THIS%NUM_POINTS)
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('ICE_SICE:GET_RESPONSE', 0, ZHOOK_HANDLE)
 
@@ -951,7 +950,7 @@ IMPLICIT NONE
   CLASS(SICE_t) :: THIS
   TYPE(DIAG_MISC_SEAICE_t), INTENT(IN OUT) :: DGMSI
 
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('ICE_SICE:DIAG_MISC', 0, ZHOOK_HANDLE)
 
@@ -1026,7 +1025,7 @@ IMPLICIT NONE
   REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PRI       !< Richardson number
   REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PRESA     !< aerodynamical resistance
   REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PZ0H      !< heat roughness length over ice
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('ICE_SICE:COUPLING_ICEFLUX_SICE', 0, ZHOOK_HANDLE)
 
@@ -1055,7 +1054,7 @@ END SUBROUTINE COUPLING_ICEFLUX_SICE
 SUBROUTINE ALLOCA(THIS)
 IMPLICIT NONE
   CLASS(SICE_t) :: THIS
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('ICE_SICE:ALLOCA', 0, ZHOOK_HANDLE)
 
@@ -1104,7 +1103,7 @@ IMPLICIT NONE
       ZNEW_DZ,       &
       ZNEW_DIFF
 
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF( LHOOK ) CALL DR_HOOK( 'ICE_SICE:REGRID', 0, ZHOOK_HANDLE )
 
@@ -1145,7 +1144,7 @@ IMPLICIT NONE
   INTEGER, PARAMETER :: NUM_FIELDS = 6
 
   TYPE( MODEL_FIELD ), ALLOCATABLE :: SNOW_FIELDS(:)
-  REAL(KIND=JPRB)  :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK)  :: ZHOOK_HANDLE
 
   IF( LHOOK ) CALL DR_HOOK( 'ICE_SICE:GET_MODEL_FIELDS', 0, ZHOOK_HANDLE )
 
@@ -1156,32 +1155,44 @@ IMPLICIT NONE
   END IF
   ALLOCATE( MF(NUM_FIELDS + SIZE(SNOW_FIELDS)) )
 
-  MF(:NUM_FIELDS) = [MODEL_FIELD(                                       &
-      'TICE',                                                           &
-      'Ice temperature',                                                &
-      'K',                                                              &
-      [THIS%NUM_POINTS, THIS%NUM_LAYERS],                               &
-      P2 = THIS%T                                                       &
-    ),                                                                  &
-    MODEL_FIELD(                                                        &
-      'ICE_AGE',                                                        &
-      'Ice age',                                                        &
-      's',                                                              &
-      [THIS%NUM_POINTS, 0],                                             &
+  MF(1) = MODEL_FIELD(                                                  &
+      CNAME = 'TICE',                                                   &
+      CCOMMENT = 'Ice temperature',                                     &
+      CUNITS = 'K',                                                     &
+      LDIAG = .FALSE.,                                                  &
+      LINTERNAL = .FALSE.,                                              &
+      LDEPENDENT = .FALSE.,                                             &
+      NCONFIG=[THIS%NUM_POINTS, THIS%NUM_LAYERS],                       &
+      P2 = THIS%T,                                                      &
+      XDEFAULT = XUNDEF                                                 &
+    )
+  MF(2) = MODEL_FIELD(                                                  &
+      CNAME = 'ICE_AGE',                                                &
+      CCOMMENT = 'Ice age',                                             &
+      CUNITS = 's',                                                     &
+      LDIAG = .FALSE.,                                                  &
+      LINTERNAL = .FALSE.,                                              &
+      LDEPENDENT = .FALSE.,                                             &
+      NCONFIG=[THIS%NUM_POINTS, 0],                                     &
       P1 = THIS%AGE,                                                    &
+      P2 = NULL (),                                                     &
       XDEFAULT = 0.                                                     &
-    ),                                                                  &
-    MODEL_FIELD(                                                        &
-      'ICE_THK',                                                        &
-      'Ice thicknesses',                                                &
-      'm',                                                              &
-      [THIS%NUM_POINTS, 0],                                             &
+    )
+  MF(3) = MODEL_FIELD(                                                  &
+      CNAME = 'ICE_THK',                                                &
+      CCOMMENT = 'Ice thicknesses',                                     &
+      CUNITS = 'm',                                                     &
+      LDIAG = .FALSE.,                                                  &
+      LINTERNAL = .FALSE.,                                              &
+      NCONFIG=[THIS%NUM_POINTS, 0],                                     &
       P1 = THIS%THICKNESS,                                              &
-      LDEPENDENT = .TRUE.                                               &
-    ),                                                                  &
-    MODEL_FIELD( NCONFIG=[0,0], P2 = THIS%DZ,     LINTERNAL = .TRUE. ), &
-    MODEL_FIELD( NCONFIG=[0,0], P2 = THIS%Z_DIFF, LINTERNAL = .TRUE. ), &
-    MODEL_FIELD( NCONFIG=[0,0], P2 = THIS%Z,      LINTERNAL = .TRUE. )  ]
+      P2 = NULL (),                                                     &
+      LDEPENDENT = .TRUE.,                                              &
+      XDEFAULT = XUNDEF                                                 &
+    )
+  MF(4) = MODEL_FIELD(CNAME = '', CCOMMENT = '', CUNITS = '', NCONFIG=[0,0], P2 = THIS%DZ,     LDIAG = .FALSE., LINTERNAL = .TRUE., LDEPENDENT = .FALSE., XDEFAULT = XUNDEF)
+  MF(5) = MODEL_FIELD(CNAME = '', CCOMMENT = '', CUNITS = '', NCONFIG=[0,0], P2 = THIS%Z_DIFF, LDIAG = .FALSE., LINTERNAL = .TRUE., LDEPENDENT = .FALSE., XDEFAULT = XUNDEF)
+  MF(6) = MODEL_FIELD(CNAME = '', CCOMMENT = '', CUNITS = '', NCONFIG=[0,0], P2 = THIS%Z,      LDIAG = .FALSE., LINTERNAL = .TRUE., LDEPENDENT = .FALSE., XDEFAULT = XUNDEF)
 
   IF(SIZE(SNOW_FIELDS) > 0) THEN
     MF(NUM_FIELDS + 1 : NUM_FIELDS + SIZE(SNOW_FIELDS)) = SNOW_FIELDS(:)
@@ -1201,7 +1212,7 @@ IMPLICIT NONE
   REAL                :: ZK
   INTEGER             :: I, N
 
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF( LHOOK ) CALL DR_HOOK( 'ICE_SICE:LIN_SPACE', 0, ZHOOK_HANDLE )
 
@@ -1228,7 +1239,7 @@ IMPLICIT NONE
 
   INTEGER :: JI, IN, INPOINTS, INLAYER
 
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF( LHOOK ) CALL DR_HOOK( 'ICE_SICE:SET_GRID', 0, ZHOOK_HANDLE )
 

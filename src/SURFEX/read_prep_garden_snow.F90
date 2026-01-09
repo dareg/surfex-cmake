@@ -67,8 +67,7 @@ USE MODD_PREP_TEB_GARDEN, ONLY : CFILE_SNOW_GD, CTYPE_SNOW, CFILEPGD_SNOW_GD, &
 !
 USE MODD_PREP_SNOW,            ONLY : NSNOW_LAYER_MAX, LSNOW_PREP_PERM, NIMPUR, NIMPUR_MAX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -111,7 +110,7 @@ LOGICAL           :: LFILE
 LOGICAL           :: GFOUND         ! Return code when searching namelist
 INTEGER           :: ILUOUT         ! output file logical unit
 INTEGER           :: ILUNAM         ! namelist file logical unit
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 NAMELIST/NAM_PREP_ISBA_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW,        &
                             CFILEPGD_SNOW, CTYPEPGD_SNOW,                      & 

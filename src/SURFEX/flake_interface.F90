@@ -137,8 +137,7 @@ USE modd_flake_configure, ONLY : lflk_botsed_use
 !
 USE MODI_WIND_THRESHOLD
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 !
 IMPLICIT NONE
@@ -218,7 +217,7 @@ TYPE (opticpar_medium), DIMENSION(KI) ::  &
     opticpar_water                       ,  &! Optical characteristics of water
     opticpar_ice                         ,  &! Optical characteristics of ice
     opticpar_snow                            ! Optical characteristics of snow      
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 REAL, PARAMETER  :: ZTIMEMAX      = 300.  ! s  Maximum timescale without time spliting
 !

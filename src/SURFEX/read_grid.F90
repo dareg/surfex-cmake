@@ -47,8 +47,7 @@ USE MODI_READ_GRIDTYPE
 !
 USE MODD_ASSIM, ONLY : LREAD_ALL, LASSIM
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -67,7 +66,7 @@ REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PDIR ! heading of main axis of grid
 !
 LOGICAL :: GREAD_ALL
 INTEGER :: ILUOUT
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !
 !*       1.    Reading of type of grid

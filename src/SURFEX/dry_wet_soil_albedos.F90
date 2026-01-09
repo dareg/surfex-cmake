@@ -52,8 +52,7 @@ USE MODD_DATA_COVER_PAR, ONLY : NVT_PARK, NVT_TEBD, NVT_BONE, NVT_TRBE, NVT_TRBD
                                 NVT_C3, NVT_C4, NVT_IRR, NVT_GRAS, NVT_BOGR,      &
                                 NVT_TROG, NVT_C3W, NVT_C3S, NVT_FLTR, NVT_FLGR                 
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -64,7 +63,7 @@ TYPE(ISBA_K_t), INTENT(INOUT) :: KK
 !
 REAL :: ZSUM
 INTEGER :: JJ
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

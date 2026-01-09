@@ -90,8 +90,7 @@ USE MODI_DG_DFTO3L
 !
 USE MODE_SOIL
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -129,7 +128,7 @@ INTEGER                   :: ILUOUT          ! Logical unit for output filr
 !
 REAL, DIMENSION(U%NDIM_NATURE,3)  :: ZWG_3L, ZWGI_3L, ZDG_3L   
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('INIT_COUPL_TOPD',0,ZHOOK_HANDLE)
 !

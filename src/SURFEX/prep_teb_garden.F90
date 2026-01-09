@@ -68,8 +68,7 @@ USE MODE_PREP_CTL, ONLY : PREP_CTL
 USE MODN_PREP_ISBA
 USE MODE_POS_SURF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -103,7 +102,7 @@ INTEGER,            INTENT(IN)  :: KPATCH
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

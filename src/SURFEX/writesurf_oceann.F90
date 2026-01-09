@@ -48,8 +48,7 @@ USE MODD_OCEAN_GRID
 USE MODI_WRITE_SURF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -76,7 +75,7 @@ INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
 INTEGER :: JLEVEL ! loop counter on oceanic levels
 !
 REAL, DIMENSION(:), ALLOCATABLE :: ZWORK ! 1D array to write data in file
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('WRITESURF_OCEAN_N',0,ZHOOK_HANDLE)

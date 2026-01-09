@@ -52,8 +52,7 @@ USE MODD_PGD_GRID,        ONLY : LLATLONMASK, NL, NGRID_PAR
 USE MODI_PGD_GRID
 USE MODI_INI_CSTS
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_SURF_VERSION
 !
@@ -79,7 +78,7 @@ LOGICAL,              INTENT(IN)  :: OGRID    ! .true. if grid is imposed by atm
  CHARACTER(LEN=1) :: YDIR
  CHARACTER(LEN=100) :: YCOMMENT
 INTEGER :: IRESP ! error return code
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('PGD_GRID_SURF_ATM',0,ZHOOK_HANDLE)
 !

@@ -137,8 +137,7 @@ END MODULE MODI_TEST_NAM_VAR_SURF
 !             ------------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -160,7 +159,7 @@ INTEGER,          INTENT(IN)           ::KLUOUT   ! output listing logical unit
  CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE8  ! eightth possible value
  CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE9  ! nineth possible value
  CHARACTER(LEN=*) ,INTENT(IN), OPTIONAL ::HVALUE10 ! 10th possible value
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*      0.2   Declarations of local variables
 !
@@ -293,8 +292,7 @@ END SUBROUTINE TEST_NAM_VARC0_SURF
 !             ------------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -307,7 +305,7 @@ INTEGER,          INTENT(IN)           ::KLUOUT   ! output listing logical unit
 LOGICAL          ,INTENT(IN)           ::OVAR     ! variable to test
 
 LOGICAL          ,INTENT(IN), OPTIONAL ::OVALUE   ! possible value
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*      0.2   Declarations of local variables
 !
@@ -381,8 +379,7 @@ END SUBROUTINE TEST_NAM_VARL0_SURF
 !             ------------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -404,7 +401,7 @@ INTEGER          ,INTENT(IN), OPTIONAL ::KVALUE7  ! seventh possible value
 INTEGER          ,INTENT(IN), OPTIONAL ::KVALUE8  ! eightth possible value
 INTEGER          ,INTENT(IN), OPTIONAL ::KVALUE9  ! nineth possible value
 INTEGER          ,INTENT(IN), OPTIONAL ::KVALUE10 ! 10th possible value
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*      0.2   Declarations of local variables
 !
@@ -542,8 +539,7 @@ END SUBROUTINE TEST_NAM_VARN0_SURF
 !             ------------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -565,7 +561,7 @@ REAL             ,INTENT(IN), OPTIONAL ::PVALUE7  ! seventh possible value
 REAL             ,INTENT(IN), OPTIONAL ::PVALUE8  ! eightth possible value
 REAL             ,INTENT(IN), OPTIONAL ::PVALUE9  ! nineth possible value
 REAL             ,INTENT(IN), OPTIONAL ::PVALUE10 ! 10th possible value
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*      0.2   Declarations of local variables
 !

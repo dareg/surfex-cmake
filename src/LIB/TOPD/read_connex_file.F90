@@ -55,8 +55,7 @@ USE MODI_GET_LUOUT
 USE MODI_OPEN_FILE
 USE MODI_CLOSE_FILE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -75,7 +74,7 @@ INTEGER, DIMENSION(:),INTENT(OUT)  :: KLINE    ! second index of the pixel in th
 INTEGER                   :: JJ          ! loop control 
 INTEGER                   :: ILUOUT      ! Unit of the files
 INTEGER                   :: IINDEX      ! index of the pixel in the topo domain
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('READ_CONNEX_FILE',0,ZHOOK_HANDLE)
 !

@@ -64,8 +64,7 @@ USE MODD_SURF_ATM, ONLY : XCD_COEFF1, XCD_COEFF2, XRISHIFT, XZ0_OFFSET
 !
 USE MODE_THERMOS
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -92,7 +91,7 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PCDN     ! neutral drag coefficient for mom
 REAL                       :: ZZ0EFF, ZZ0H, ZMU,     &
                                ZCMSTAR, ZPM, ZCM, ZFM, ZRIMOD 
 INTEGER                    :: JJ
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 ! Functions :
 REAL :: X, CMSTAR, PM

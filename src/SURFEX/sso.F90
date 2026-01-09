@@ -45,8 +45,7 @@ USE MODD_PGDWORK,        ONLY : NSSO, XSSQO, LSSQO
 USE MODD_PGD_GRID,       ONLY : NL, CGRID
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -117,7 +116,7 @@ REAL, DIMENSION(NL) :: ZHXX       ! topographic gradient correlation tensor: x,x
 REAL, DIMENSION(NL) :: ZHXY       ! topographic gradient correlation tensor: x,y
 REAL, DIMENSION(NL) :: ZHYY       ! topographic gradient correlation tensor: y,y
 REAL, DIMENSION(NL) :: ZK, ZL, ZM ! diagonalised terms of the tensor
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------------
 !

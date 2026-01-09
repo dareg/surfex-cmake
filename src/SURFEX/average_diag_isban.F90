@@ -56,8 +56,7 @@ USE MODD_ISBA_n, ONLY : ISBA_NP_t
 USE MODD_SURF_PAR,    ONLY : XUNDEF
 USE MODD_SURF_ATM,    ONLY : XZ0_OFFSET
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -84,7 +83,7 @@ REAL, DIMENSION(:), INTENT(IN)       :: PTRAD  ! Radiative temperature (K)
 !
 INTEGER                              :: JP, JI, IMASK ! tile loop counter
 INTEGER                              :: JSWB   ! band loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -277,7 +276,7 @@ SUBROUTINE MAKE_AVERAGE(DA,NDA)
 TYPE(DIAG_t), INTENT(INOUT) :: DA
 TYPE(DIAG_NP_t), INTENT(INOUT) :: NDA
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('AVERAGE_DIAG_ISBA_N:MAKE_AVERAGE',0,ZHOOK_HANDLE)
 !
 DA%XRN   (:) = 0.

@@ -40,8 +40,7 @@ USE MODE_THERMOS
 USE MODI_PREP_VER_SNOW
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -63,7 +62,7 @@ REAL, DIMENSION(:), ALLOCATABLE :: ZT_LS     ! temperature at XZS_LS
 REAL, DIMENSION(:), ALLOCATABLE :: ZP        ! estimated pressure at XZS
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZGRID   ! wall or roof grid
 REAL, DIMENSION(:),   ALLOCATABLE :: ZD      ! wall or roof total thickness
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

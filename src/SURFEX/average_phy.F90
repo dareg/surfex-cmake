@@ -52,8 +52,7 @@ USE MODD_SURF_ATM,   ONLY : XZ0_OFFSET
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -83,7 +82,7 @@ REAL, DIMENSION(SIZE(PUREF)) :: ZWORK_Z0H      ! work array for roughness length
 !
 INTEGER :: INI, INP  ! dimenssion
 INTEGER ::  JI, JP    ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !       0.     Initialization

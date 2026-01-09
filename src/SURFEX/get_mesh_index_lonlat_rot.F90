@@ -34,8 +34,7 @@ USE MODD_GET_MESH_INDEX_LONLAT_ROT, ONLY : XLONLIM, XLATLIM, NLAT, NLON, XLON0, 
 USE MODE_GRIDTYPE_LONLAT_ROT
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !RJ: missing modi
 USE MODI_REGROT_LONLAT_ROT
 !
@@ -71,7 +70,7 @@ REAL    :: ZDLAT   ! Latitudal grid spacing  (degrees)
 !
 REAL, DIMENSION(SIZE(PLON)) :: ZLON
 REAL, DIMENSION(SIZE(PLAT)) :: ZLAT
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------------
 !

@@ -47,8 +47,7 @@
 !
 USE MODD_ISBA_PAR,       ONLY : XEMISSOIL, XEMISVEG
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -71,7 +70,7 @@ REAL, DIMENSION(SIZE(PPSN))        :: ZPN, ZEMISG, ZEMISN, ZSIGMA_FA
 !                                     ZEMISN    = snowpack surface emissivity for computing effective value (-)
 !                                     ZSIGMA_FA = zworking shading factor (-)
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*       0.     Initialization:

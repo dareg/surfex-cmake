@@ -41,8 +41,7 @@
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -59,7 +58,7 @@ LOGICAL,  INTENT(OUT) :: OSURF_VARS
 LOGICAL,  INTENT(OUT) :: OSURF_BUDGETC ! flag for cumulated surface budget
 LOGICAL,  INTENT(OUT) :: ORESET_BUDGETC! flag for cumulated surface budget
 REAL,     INTENT(OUT) :: PDIAG_TSTEP   ! time-step for writing
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------

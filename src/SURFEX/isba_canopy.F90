@@ -33,8 +33,7 @@ USE MODD_CANOPY_n, ONLY : CANOPY_t
 USE MODD_CSTS,         ONLY : XRD, XCPD, XP00, XG
 USE MODD_SURF_PAR,     ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_CANOPY
 !
@@ -69,7 +68,7 @@ REAL, DIMENSION(KI,SB%NLVL) :: ZDENSITY  ! vegetation density for each canopy le
 REAL, DIMENSION(KI,SB%NLVL) :: ZSV       ! vertical surface for each canopy level
 REAL, DIMENSION(KI,SB%NLVL) :: ZFORC
 REAL, DIMENSION(KI,SB%NLVL) :: ZAIRVOL   ! Fraction of air for each canopy level total volume
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

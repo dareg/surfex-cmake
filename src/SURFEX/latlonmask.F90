@@ -28,8 +28,7 @@
 !            -----------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_LATLONMASK_CONF_PROJ
 !
@@ -49,7 +48,7 @@ IMPLICIT NONE
 INTEGER                                  :: KGRID_PAR   ! size of PGRID_PAR
 REAL,    DIMENSION(:),       POINTER     :: PGRID_PAR   ! parameters defining this grid
 LOGICAL, DIMENSION(720,360), INTENT(OUT) :: OLATLONMASK ! mask where domain is
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('LATLONMASK',0,ZHOOK_HANDLE)

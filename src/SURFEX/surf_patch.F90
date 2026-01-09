@@ -82,8 +82,7 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODI_VEGTYPE_TO_PATCH
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -100,7 +99,7 @@ REAL, DIMENSION(:,:,:), OPTIONAL, INTENT(OUT) :: PVEGTYPE_PATCH  ! vegtype fract
 !
 !
 INTEGER                              ::JVEG, JPATCH  ! loop on patches
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODI_SURF_PATCH:SURF_PATCH_2D',0,ZHOOK_HANDLE)
@@ -185,8 +184,7 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODI_VEGTYPE_TO_PATCH
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -203,7 +201,7 @@ REAL, DIMENSION(:,:), OPTIONAL, INTENT(OUT) :: PVEGTYPE_PATCH  ! vegtype fractio
 !
 !
 INTEGER                              ::JVEG, JPATCH  ! loop on patches
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODI_SURF_PATCH:SURF_PATCH_1D',0,ZHOOK_HANDLE)

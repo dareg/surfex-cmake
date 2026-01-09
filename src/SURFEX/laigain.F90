@@ -52,8 +52,7 @@ USE MODD_ISBA_n, ONLY : ISBA_PE_t
 !
 USE MODD_CO2V_PAR, ONLY : XMC, XMCO2, XPCCO2
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -68,7 +67,7 @@ REAL,DIMENSION(:),INTENT(INOUT):: PBIOMASS ! total dry canopy biomass (kgDM m-2)
 !*      0.2    declarations of local variables
 !
 REAL :: ZBMCOEF
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 ! used to compute biomass change (working scalar)
 !
 !-----------------------------------------------------------------

@@ -9,8 +9,7 @@
 USE MODI_VEGTYPE_TO_PATCH
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -31,7 +30,7 @@ REAL, DIMENSION(KNI,KLAYER,KVEGTYPE), INTENT(OUT) :: PFIELD_VEGTYPE ! field for 
 !
 INTEGER :: IPATCH   ! patch   counter
 INTEGER :: JVEGTYPE ! vegtype counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------
 !

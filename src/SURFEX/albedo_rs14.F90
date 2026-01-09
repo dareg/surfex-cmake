@@ -47,8 +47,7 @@
 USE MODD_ALBEDO_RS14_PAR
 USE MODD_CSTS, ONLY : XPI
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -79,7 +78,7 @@ REAL:: ZR11, ZRW, ZRWDF, ZRDF                                                 ! 
 ! 
 REAL            :: ZWORK                                                                        ! dummy variable
 ! 
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

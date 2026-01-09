@@ -42,8 +42,7 @@ USE MODD_DIAG_n, ONLY : DIAG_OPTIONS_t
 !
 USE MODI_PREP_CTRL
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -54,7 +53,7 @@ IMPLICIT NONE
 TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
 LOGICAL,  INTENT(INOUT) :: ONOWRITE_TEXFILE    ! flag for surface variables
 INTEGER,  INTENT(IN)    :: KLUOUT        ! unit number
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------

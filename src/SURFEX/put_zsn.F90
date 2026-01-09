@@ -46,8 +46,7 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_PUT_ZS_INLAND_WATER_n
 !
@@ -82,7 +81,7 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PZS     ! orography
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('PUT_ZS_N',0,ZHOOK_HANDLE)
@@ -124,7 +123,7 @@ INTEGER, POINTER, DIMENSION(:)    :: KMASK
 !
 REAL, DIMENSION(KSIZE) :: ZP_ZS
 INTEGER :: JJ, ISIZE_FULL
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 ! input arguments:
 !

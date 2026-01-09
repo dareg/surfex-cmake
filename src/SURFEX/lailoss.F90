@@ -57,8 +57,7 @@ USE MODD_CO2V_PAR, ONLY: XMC, XMCO2, XPCCO2
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -73,7 +72,7 @@ REAL,   DIMENSION(:), INTENT(INOUT) :: PBIOMASS ! total dry canopy biomass
 !
 REAL,    DIMENSION(SIZE(PEK%XSEFOLD,1))  :: ZXSEFOLD, ZXM
 REAL                               :: ZBMCOEF
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-----------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('LAILOSS',0,ZHOOK_HANDLE)

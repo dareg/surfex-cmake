@@ -49,8 +49,7 @@ USE MODD_ATM_CST, ONLY : XCLIM_T_GRAD
 USE MODE_THERMOS
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -72,7 +71,7 @@ REAL, DIMENSION(SIZE(D%XQ2M  )) :: ZQA_2M_MIN   ! air humidity (kg/kg)
 REAL, DIMENSION(SIZE(D%XRHOA)) :: ZRHOA_2M     ! approximated density
 REAL, DIMENSION(SIZE(D%XRHOA)) :: ZRHOA_2M_MIN ! approximated density
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 ! ---------------------------------------------------------------------------
 !

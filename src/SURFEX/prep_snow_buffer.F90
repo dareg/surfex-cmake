@@ -54,8 +54,7 @@ USE MODD_SNOW_PAR,       ONLY : XANSMIN, XANSMAX, XRHOSMAX
 USE MODD_CSTS,           ONLY : XTT
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -87,7 +86,7 @@ REAL,ALLOCATABLE,DIMENSION(:)    :: ZLSM_NATURE
 LOGICAL,ALLOCATABLE,DIMENSION(:) :: OINTERP
 INTEGER                          :: II
 INTEGER,PARAMETER                :: IDIM2=10
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

@@ -49,8 +49,7 @@ FUNCTION UTCI_APPROX(PTA,PEHPA,PTMRT,PVA) RESULT(PUTCI_APPROX)
 !!    MODIFICATIONS
 !!    -------------
 !-------------------------------------------------------------------------------
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 implicit none
 !~ type of input of the argument list
@@ -71,7 +70,7 @@ ZS(Z0,Z1,Z2,Z3,Z4,Z5,Z6,ZF) = Z0 + Z1*ZF + Z2*ZF**2 + Z3*ZF**3 + Z4*ZF**4 + Z5*Z
 REAL, DIMENSION(SIZE(PTA),7) :: ZC_TA, ZC_VA, ZC_TMRT, ZC_PA
 INTEGER :: J1, J2, J3, J4, JJ                             
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !    
 IF (LHOOK) CALL DR_HOOK('UTCI_APPROX',0,ZHOOK_HANDLE)
 !

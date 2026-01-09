@@ -54,8 +54,7 @@ USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
 USE MODD_WATER_PAR,      ONLY : XALBWAT, XALBSCA_WAT, XEMISWAT
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -79,7 +78,7 @@ LOGICAL           :: GLINE ! flag to write an additional horizontal line
  CHARACTER(LEN=6), DIMENSION(6) :: YDATA_WATER   ! water parameters
 REAL,             DIMENSION(1) :: ZZENITH       ! zenithal angle
 REAL,             DIMENSION(1) :: ZALBEDO       ! direct albedo
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_COVER_TEX_WATER',0,ZHOOK_HANDLE)

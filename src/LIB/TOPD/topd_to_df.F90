@@ -48,8 +48,7 @@ USE MODD_SURF_PAR,      ONLY : XUNDEF, NUNDEF
 USE MODD_COUPLING_TOPD, ONLY : XTOTBV_IN_MESH, XFRAC_D3
 USE MODD_ISBA_PAR,      ONLY : XWGMIN
 !
-USE YOMHOOK   ,         ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,         ONLY : JPRB
+USE YOMHOOK   ,         ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -70,7 +69,7 @@ TYPE(ISBA_PE_t), POINTER :: PEK
 REAL                              :: ZWORK          ! numbers of layers in root and deep zones
 INTEGER                           :: IDEPTH, IMASK
 INTEGER                           :: JI, JL, JP ! loop indexes
-REAL(KIND=JPRB)                   :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK)                   :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('TOPD_TO_DF',0,ZHOOK_HANDLE)

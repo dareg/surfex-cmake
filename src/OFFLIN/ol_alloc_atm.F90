@@ -64,8 +64,7 @@ USE MODD_FORC_ATM,  ONLY: CSV       ,&! name of all scalar variables
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODN_IO_OFFLINE,ONLY : NIMPUROF
 !
@@ -76,7 +75,7 @@ IMPLICIT NONE
 INTEGER,            INTENT(IN)  :: KNI       ! grid dimension
 INTEGER,            INTENT(IN)  :: KBANDS    ! grid dimension
 INTEGER,            INTENT(IN)  :: KSCAL     ! grid dimension
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !*      0.2    declarations of local variables

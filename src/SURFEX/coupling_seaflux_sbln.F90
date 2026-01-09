@@ -67,8 +67,7 @@ USE MODI_CANOPY_GRID_UPDATE
 !
 USE MODI_COUPLING_SEAFLUX_n
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -208,7 +207,7 @@ REAL, DIMENSION(KI)   :: ZBETAQ   ! Q+(1) = - alfa rho w'q'(1) + beta
 !
 INTEGER :: JLAYER
  CHARACTER(LEN=1) :: GCOUPLING
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 !

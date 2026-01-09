@@ -62,8 +62,7 @@ USE MODD_DATA_COVER_PAR, ONLY : JPCOVER, NVEGTYPE, NVT_NO, NVT_ROCK,      &
 !
 USE MODD_REPROD_OPER,    ONLY : XEVERG_VEG, XEVERG_RSMIN
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -96,7 +95,7 @@ INTEGER           :: JVEGTYPE ! loop counter
 !
 !
 LOGICAL           :: GLINE ! flag to write an additional horizontal line
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

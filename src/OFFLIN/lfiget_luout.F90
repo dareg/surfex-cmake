@@ -38,8 +38,7 @@
 !              ------------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -53,7 +52,7 @@ INTEGER,           INTENT(OUT) :: KLUOUT   ! Logical unit of output listing
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears 
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
                                     ! at the open of the file in LFI  routines 
 !
 !-------------------------------------------------------------------------------

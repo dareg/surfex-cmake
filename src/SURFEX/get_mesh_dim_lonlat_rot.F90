@@ -37,8 +37,7 @@ USE MODD_CSTS, ONLY : XPI, XRADIUS
 USE MODE_GRIDTYPE_LONLAT_ROT
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -64,7 +63,7 @@ REAL    :: ZPOLAT  ! Latitude of rotated pole  (degrees)
 INTEGER :: ILON    ! number of points in longitude
 INTEGER :: ILAT    ! number of points in latitude
 INTEGER :: JLON, JLAT, JL
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !----------------------------------------------------------------------------
 !

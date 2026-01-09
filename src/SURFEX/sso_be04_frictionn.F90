@@ -41,8 +41,7 @@ USE MODD_CANOPY_TURB,    ONLY : XALPSBL
 USE MODD_CSTS,           ONLY : XKARMAN
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_CANOPY_EVOL
 USE MODI_CANOPY_GRID_UPDATE
@@ -103,7 +102,7 @@ REAL,    DIMENSION(SIZE(PU))       :: ZH        ! Canopy height     (m)
 REAL,    DIMENSION(SIZE(PU))       :: ZSFLUX_U  ! Surface flux u'w' (m2/s2)
 REAL,    DIMENSION(SIZE(PU))       :: ZALFAU   ! V+(1) = alfa u'w'(1) + beta ! not used
 REAL,    DIMENSION(SIZE(PU))       :: ZBETAU   ! V+(1) = alfa u'w'(1) + beta ! not used
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

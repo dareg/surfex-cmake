@@ -42,8 +42,7 @@ USE MODI_HOR_INTERPOL_CARTESIAN
 USE MODI_HOR_INTERPOL_LATLON
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -64,7 +63,7 @@ REAL, DIMENSION(:,:), INTENT(OUT)  :: PFIELDOUT ! interpolated field
 !*      0.2    declarations of local variables
 !
 INTEGER :: JL ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

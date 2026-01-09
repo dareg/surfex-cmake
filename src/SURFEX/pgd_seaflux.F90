@@ -64,8 +64,7 @@ USE MODI_PACK_PGD_SEAFLUX
 USE MODI_PGD_SEAFLUX_PAR
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -97,7 +96,7 @@ REAL, DIMENSION(NL)               :: ZSEABATHY ! bathymetry on all surface point
  CHARACTER(LEN=28)        :: YNCVARNAME        ! variable to read in netcdf
                                               ! file
 REAL                     :: XUNIF_SEABATHY    ! uniform value of bathymetry
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !-------------------------------------------------------------------------------

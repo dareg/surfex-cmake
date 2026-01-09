@@ -75,8 +75,7 @@ USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 USE MODI_FORCING_VERT_SHIFT
 USE MODI_COUPLING_ISBA_CANOPY_n
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -210,7 +209,7 @@ REAL, DIMENSION(KI)  ::  ZPET_B_COEF   ! 2nd explicit coefficient
 INTEGER                         :: ISWB    ! number of shortwave spectral bands
 INTEGER                         :: JSWB    ! loop on shortwave spectral bands
 INTEGER                         :: JSV     ! loop on scalar variables
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !        

@@ -61,7 +61,7 @@ INTEGER, ALLOCATABLE, DIMENSION(:,:):: NLINE    ! second index of the pixel in t
 REAL, ALLOCATABLE, DIMENSION(:,:)   :: XTANB    ! pixels topographic slope (Tan(Beta))
 REAL, ALLOCATABLE, DIMENSION(:,:)   :: XSLOP    ! pixels topographic slope/length flow
 
-!Variables à priori inutiles
+!Variables Ã  priori inutiles
 REAL, ALLOCATABLE, DIMENSION(:,:)   :: XDAREA   ! drainage area (aire drainee)
 
 ! Variables defining the catchments

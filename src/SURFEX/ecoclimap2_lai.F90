@@ -46,8 +46,7 @@ USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, JPCOVER
 
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -64,7 +63,7 @@ REAL, DIMENSION(36) :: ZLAI
 INTEGER :: IYEAR           ! year index
 INTEGER :: JCOVER,JVEGTYPE ! loop counters on covers and decades
 INTEGER :: JYEAR           ! loop counter on years
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

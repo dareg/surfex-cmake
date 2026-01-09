@@ -37,8 +37,7 @@ USE MODD_CSTS, ONLY : XPI, XRADIUS
 USE MODE_GRIDTYPE_GAUSS
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -68,7 +67,7 @@ REAL,  DIMENSION(KL) :: ZXSUP ! maximum pseudo longitude of the grid point (deg)
 REAL,  DIMENSION(KL) :: ZYINF ! minimum pseudo latitude  of the grid point (deg)
 REAL,  DIMENSION(KL) :: ZYSUP ! maximum pseudo latitude  of the grid point (deg)
 REAL,  DIMENSION(KL) :: ZMAP  ! map factor
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------------
 !

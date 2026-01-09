@@ -49,8 +49,7 @@ USE MODI_READ_SURF
 USE MODD_GRID_GAUSS, ONLY : XILA1, XILO1, XILA2, XILO2, NINLA, NINLO, NILEN, LROTPOLE, &
                             XCOEF, XLAP, XLOP, XILATARRAY
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -81,7 +80,7 @@ REAL    :: ZLOPO   ! longitude of the rotated pole (deg)
 REAL    :: ZCODIL  ! stretching factor (must be greater than or equal to 1)
 INTEGER, DIMENSION(:), ALLOCATABLE :: INLOPA ! number of pseudo-longitudes on each
                                              ! pseudo-latitude circle
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-----------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('PREP_GRID_GAUSS',0,ZHOOK_HANDLE)

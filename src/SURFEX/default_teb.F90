@@ -41,8 +41,7 @@
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -56,7 +55,7 @@ REAL,              INTENT(OUT) :: PTSTEP     ! time step for run
 REAL,              INTENT(OUT) :: POUT_TSTEP ! time step for writing
 REAL,              INTENT(OUT) :: PDT_RES    ! target temperature change when unoccupied (K) (residential buildings)
 REAL,              INTENT(OUT) :: PDT_OFF    ! target temperature change when unoccupied (K) (offices buildings)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------

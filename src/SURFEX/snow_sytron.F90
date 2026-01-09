@@ -411,7 +411,7 @@ REAL, INTENT(OUT)     :: PSNOWMOB,PSNOWDRIFT
 !
 !*      0.2    declarations of local variables
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('SYVPROT',0,ZHOOK_HANDLE)
 !

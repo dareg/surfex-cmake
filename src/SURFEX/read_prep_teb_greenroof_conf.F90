@@ -56,8 +56,7 @@ USE MODD_PREP_TEB_GREENROOF, ONLY : CFILE_GR, CTYPE, CFILEPGD_GR, CTYPEPGD, &
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -90,7 +89,7 @@ INTEGER           :: ILUNAM         ! Logical unit of namelist file
  CHARACTER(LEN=28) :: YNAMELIST      ! namelist file
 !
 LOGICAL           :: GFOUND         ! Return code when searching namelist
-REAL(KIND=JPRB)   :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK)   :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !

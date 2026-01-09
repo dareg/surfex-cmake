@@ -58,8 +58,7 @@ USE MODD_ISBA_PAR,        ONLY : XOPTIMGRID
 USE MODI_READ_PGD_TEB_GARDEN_PAR_n
 USE MODI_READ_SURF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_GET_TYPE_DIM_n
 !
@@ -91,7 +90,7 @@ INTEGER           :: IRESP          ! Error code after redding
  CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 !
 INTEGER           :: JLAYER         ! loop counter on layers
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

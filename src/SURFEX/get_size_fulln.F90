@@ -49,8 +49,7 @@ USE MODI_MNHGET_SIZE_FULL_n
 USE MODI_AROGET_SIZE_FULL_n
 #endif
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -67,7 +66,7 @@ INTEGER         ,  INTENT(OUT) :: KSIZE_FULL_OUT ! total number of points on thi
 !              -------------------------------
 !
 INTEGER :: J
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_SIZE_FULL_N',0,ZHOOK_HANDLE)

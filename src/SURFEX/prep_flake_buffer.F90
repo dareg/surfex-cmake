@@ -38,8 +38,7 @@ USE MODD_PREP,       ONLY : CINTERP_TYPE
 USE MODD_GRID_BUFFER,  ONLY : NNI
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -55,7 +54,7 @@ REAL,DIMENSION(:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
 TYPE (DATE_TIME)                :: TZTIME_BUF    ! current date and time
  CHARACTER(LEN=6)              :: YINMODEL ! model from which BUFFER file originates
 REAL, DIMENSION(:), POINTER :: ZFIELD   ! field read
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

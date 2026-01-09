@@ -43,8 +43,7 @@ USE MODI_READ_NAM_PREP_WATFLUX_n
 !--------------------------------------------------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -54,7 +53,7 @@ TYPE(SURFEX_t), INTENT(INOUT) :: YSC
  CHARACTER(LEN=3),   INTENT(IN)  :: HINIT     ! choice of fields to initialize
 LOGICAL,INTENT(IN)              :: ONAM_READ
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !----------------------------------------
 !namelists always read here

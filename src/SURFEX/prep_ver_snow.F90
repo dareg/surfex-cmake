@@ -43,8 +43,7 @@ USE MODI_MKFLAG_SNOW
 !
 USE MODE_SNOW3L
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -72,7 +71,7 @@ REAL, DIMENSION(:,:), ALLOCATABLE :: ZDZSN     ! snow layer thickness
 !
 INTEGER                             :: JL    ! loop counter on snow layers
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

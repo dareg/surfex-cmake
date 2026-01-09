@@ -39,7 +39,7 @@
 !!     
 !!    AUTHOR
 !!    ------
-!!     C. Lebeaupin  *Météo-France* 
+!!     C. Lebeaupin  *MÃ©tÃ©o-France* 
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -62,8 +62,7 @@ USE MODI_ICE_SEA_FLUX
 USE MODI_ECUMEV6_FLUX
 USE MODI_ECUME_FLUX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -110,7 +109,7 @@ REAL, DIMENSION(:), INTENT(OUT)      :: PZ0HSEA ! heat roughness length
 INTEGER, DIMENSION(KSIZE_WATER) :: IR_WATER
 INTEGER, DIMENSION(KSIZE_ICE)   :: IR_ICE
 INTEGER                         :: J1,J2,JJ
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -202,7 +201,7 @@ REAL, DIMENSION(SIZE(KMASK))      :: ZW_RI   ! Richardson number
 REAL, DIMENSION(SIZE(KMASK))      :: ZW_RESA ! aerodynamical resistance
 REAL, DIMENSION(SIZE(KMASK))      :: ZW_Z0HSEA ! heat roughness length
 REAL ::  ZCOEFF
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ECUME_SEAFLUX:TREAT_SURF',0,ZHOOK_HANDLE)
 DO JJ=1, SIZE(KMASK)

@@ -83,8 +83,7 @@ END MODULE MODI_READ_BUFFER
 USE MODI_GET_LUOUT
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -104,7 +103,7 @@ INTEGER,                      INTENT(OUT)  :: KRET      !  error code
 !              -------------------------------
 !
 INTEGER                                    :: ILUOUT ! Listing file number
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -165,8 +164,7 @@ END SUBROUTINE READ_BUFC0
 USE MODI_GET_LUOUT
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -186,7 +184,7 @@ INTEGER,                      INTENT(OUT)  :: KRET      !  error code
 !              -------------------------------
 !
 INTEGER                                    :: ILUOUT ! Listing file number
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -247,8 +245,7 @@ END SUBROUTINE READ_BUFN0
 USE MODI_GET_LUOUT
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -268,7 +265,7 @@ INTEGER,                      INTENT(OUT)  :: KRET      !  error code
 !              -------------------------------
 !
 INTEGER                                    :: ILUOUT ! Listing file number
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -329,8 +326,7 @@ END SUBROUTINE READ_BUFN1
 USE MODI_GET_LUOUT
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -350,7 +346,7 @@ INTEGER,                      INTENT(OUT)  :: KRET      !  error code
 !              -------------------------------
 !
 INTEGER                                    :: ILUOUT ! Listing file number
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -411,8 +407,7 @@ END SUBROUTINE READ_BUFX0
 USE MODI_GET_LUOUT
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -432,7 +427,7 @@ INTEGER,                      INTENT(OUT)  :: KRET      !  error code
 !              -------------------------------
 !
 INTEGER                                    :: ILUOUT ! Listing file number
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

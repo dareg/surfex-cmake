@@ -59,8 +59,7 @@
 USE MODD_CSTS,ONLY : XLVTT
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -81,7 +80,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PLE_ROAD     ! latent heat flux over road
 !
 REAL, DIMENSION(:), INTENT(OUT)   :: PRUNOFF_STRLROOF ! runoff (kg/m2/s)
 REAL, DIMENSION(:), INTENT(OUT)   :: PRUNOFF_ROAD ! runoff (kg/m2/s)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*      0.2    declarations of local variables
 !

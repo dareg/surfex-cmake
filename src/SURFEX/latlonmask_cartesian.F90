@@ -48,8 +48,7 @@
 USE MODE_GRIDTYPE_CARTESIAN
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -68,7 +67,7 @@ REAL, DIMENSION(720,360)          :: ZLON_MASK! mask points longitudes
 REAL, DIMENSION(720,360)          :: ZLAT_MASK! mask points latitudes
 REAL                              :: ZLAT0    ! reference latitude
 REAL                              :: ZLON0    ! reference longitude
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('LATLONMASK_CARTESIAN',0,ZHOOK_HANDLE)

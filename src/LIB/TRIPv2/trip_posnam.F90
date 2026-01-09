@@ -33,8 +33,7 @@
 !
 USE MODI_ABORT_TRIP
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -60,7 +59,7 @@ LOGICAL            :: LLOPENED
      'i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'/)
  CHARACTER(LEN=1),DIMENSION(26) :: YUP=(/'A','B','C','D','E','F','G','H', &
      'I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'/)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*       1.    POSITION FILE
 !              -------------

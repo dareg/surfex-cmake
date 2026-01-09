@@ -43,8 +43,7 @@
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -63,7 +62,7 @@ INTEGER, INTENT(OUT) :: KNBIOMASS     ! number of biomass pools
 INTEGER, INTENT(OUT) :: KNLITTER      ! number of litter pools
 INTEGER, INTENT(OUT) :: KNLITTLEVS    ! number of litter levels
 INTEGER, INTENT(OUT) :: KNSOILCARB    ! number of soil carbon pools
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !*       0.2   Declarations of local variables

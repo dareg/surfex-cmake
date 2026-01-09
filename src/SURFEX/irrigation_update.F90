@@ -42,8 +42,7 @@ USE MODD_AGRI_n, ONLY : AGRI_NP_t
 !
 USE MODD_AGRI,   ONLY   : JPSTAGE, XTHRESHOLD
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -56,7 +55,7 @@ INTEGER, INTENT(IN)  :: KMONTH, KDAY
 !
 INTEGER              :: JI, JP
 LOGICAL              :: GMASK
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*       0.1   Declarations of arguments
 !-------------------------------------------------------------------------------

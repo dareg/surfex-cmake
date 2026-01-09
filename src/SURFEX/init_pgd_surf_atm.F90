@@ -36,8 +36,7 @@ USE MODD_SURFEX_n, ONLY : SURFEX_t
 USE MODD_TYPE_DATE_SURF, ONLY : DATE
 USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_INIT_SURF_ATM_n
 !
@@ -75,7 +74,7 @@ REAL,             DIMENSION(0)  :: ZEMIS     ! emissivity
 REAL,             DIMENSION(0)  :: ZTSRAD    ! radiative temperature
 REAL,             DIMENSION(0)  :: ZTSURF    ! radiative temperature
 TYPE(SURF_ATM_TURB_t) :: AT         ! atmospheric turbulence parameters
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 !* initialization of PGD fields of output domain

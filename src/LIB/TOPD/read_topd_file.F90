@@ -54,8 +54,7 @@ USE MODD_TOPD_PAR, ONLY : NUNIT
 USE MODD_TOPODYN, ONLY : NPMAX
 USE MODD_SURF_PAR,  ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -71,7 +70,7 @@ REAL, DIMENSION(:), INTENT(OUT) :: PTOPD_READ ! Topographic parameter read on fi
 !
 INTEGER                   :: JJ,JI  ! loop control
 INTEGER                   :: ILUOUT ! Unit of the files
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('READ_TOPD_FILE',0,ZHOOK_HANDLE)
 !

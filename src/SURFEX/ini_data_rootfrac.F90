@@ -59,8 +59,7 @@
 USE MODD_SURF_PAR, ONLY : XUNDEF, NUNDEF
 USE MODD_ISBA_PAR, ONLY : NOPTIMLAYER, XOPTIMGRID
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -87,7 +86,7 @@ REAL               :: ZROOTFRGV ! Fraction of patch root depth given to
 INTEGER            :: INI,INL
 INTEGER            :: JJ,JL
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !        0.     Initialization
 !               --------------

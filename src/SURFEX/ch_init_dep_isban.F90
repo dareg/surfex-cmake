@@ -82,8 +82,7 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -114,7 +113,7 @@ REAL             , DIMENSION(:), ALLOCATABLE :: ZRESISVAL
 ! chemical reactivity factor value
 !
 INTEGER :: JI, JNREAL, JP ! loop control variables
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !=============================================================================
 !

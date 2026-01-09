@@ -49,8 +49,7 @@ USE MODI_ABOR1_SFX
 USE MODI_WRITE_FILE_VECMAP
 USE MODI_WRITE_FILE_MAP
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -94,7 +93,7 @@ INTEGER              :: INAS    ! number of saturated pixels
 INTEGER              :: INAD    ! number of dry pixels
 INTEGER :: I_DIM
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-----------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('TOPODYN_LAT',0,ZHOOK_HANDLE)
 !

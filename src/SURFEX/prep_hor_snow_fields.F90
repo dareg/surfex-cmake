@@ -70,8 +70,7 @@ USE MODI_OPEN_AUX_IO_SURF
 USE MODI_READ_SURF
 USE MODI_CLOSE_AUX_IO_SURF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -141,7 +140,7 @@ CHARACTER(LEN=16)                   :: YRECFM    ! record name
 INTEGER                             :: IRESP     ! error return code
 LOGICAL                             :: GGLACIER
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 
 !---------------------------------------------------------------------------

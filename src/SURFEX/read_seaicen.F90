@@ -59,8 +59,7 @@ USE MODI_INTERPOL_SST_MTH
 USE MODI_GET_LUOUT
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -95,7 +94,7 @@ INTEGER :: JX,JK,JL                 ! loop counter on ice categories and layers 
 INTEGER :: inl_in_file,int_in_file  ! file values for ice catgories and layers numbers
 REAL :: ZFSIT
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('READ_SEAICE_n',0,ZHOOK_HANDLE)
@@ -223,7 +222,7 @@ REAL, DIMENSION(:), INTENT(IN) :: PFIELD
 REAL            :: ZMAX,ZMIN
 INTEGER         :: JI, IERRC
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_SEAICE_n:CHECK_SEAICE',0,ZHOOK_HANDLE)
 !

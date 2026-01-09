@@ -43,8 +43,7 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODI_PACK_SAME_RANK
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_GET_SURF_MASK_n
 !
@@ -64,7 +63,7 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PFIELDOUT ! interpolated field
 !
 INTEGER, DIMENSION(:), ALLOCATABLE :: IMASKOUT ! output mask
 INTEGER                         :: INO      ! output number of points
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !

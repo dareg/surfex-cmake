@@ -53,8 +53,7 @@ USE MODI_GET_LUOUT
 USE MODI_ABOR1_SFX
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -92,7 +91,7 @@ INTEGER            :: IHYP                ! kept hypothese for equipment
 INTEGER            :: IRES                ! index for residential use
  CHARACTER(LEN=10)  :: YTYPE_OF_DATA       ! 'STRUCTURE', 'EQUIPMENT'
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------

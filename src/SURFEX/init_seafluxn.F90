@@ -105,8 +105,7 @@ USE MODI_ABOR1_SFX
 !
 USE MODI_SET_SURFEX_FILEIN
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 !
 IMPLICIT NONE
@@ -157,7 +156,7 @@ CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 
 INTEGER           :: ILU    ! sizes of SEAFLUX arrays
 INTEGER           :: ILUOUT ! unit of output listing file
 INTEGER           :: IRESP  ! return code
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

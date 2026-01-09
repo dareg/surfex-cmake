@@ -50,8 +50,7 @@ USE MODI_GET_LUOUT
 USE MODI_OPEN_FILE
 USE MODI_CLOSE_FILE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -70,7 +69,7 @@ INTEGER                    :: ILUOUT
 REAL                       :: ZOUT ! pixel not included in the catchment
 REAL                       :: ZMIN,ZMAX
 REAL                       :: ZX1, ZY1, ZX2, ZY2 ! left top and right bottom pixels coordinates
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('WRITE_FILE_MAP',0,ZHOOK_HANDLE)
 !

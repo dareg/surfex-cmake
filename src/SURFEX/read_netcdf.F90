@@ -39,8 +39,7 @@ USE MODI_PT_BY_PT_TREATMENT
 USE MODE_READ_CDF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_GET_LUOUT
 IMPLICIT NONE
@@ -74,7 +73,7 @@ REAL, DIMENSION(:),ALLOCATABLE :: ZLATI    ! array of values extract from netcdf
 INTEGER      :: ILUOUT                     ! output listing
 INTEGER      :: JLOOP                      ! loop indice
 INTEGER      :: JDIMENSION                 ! dimensions of ZVALU,ZLAT, 
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
                                            ! and ZLON arrays
 !----------------------------------------------------------------------------
 !

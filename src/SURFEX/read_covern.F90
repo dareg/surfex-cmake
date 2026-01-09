@@ -62,8 +62,7 @@ USE MODI_READ_LCOVER
 USE MODI_READ_SURF
 USE MODI_CONVERT_COVER_FRAC
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -87,7 +86,7 @@ INTEGER           :: IVERSION       ! surface version
 LOGICAL :: GREAD_ALL
 !
  CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

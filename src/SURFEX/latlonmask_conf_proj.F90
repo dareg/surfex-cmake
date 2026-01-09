@@ -48,8 +48,7 @@
 USE MODE_GRIDTYPE_CONF_PROJ
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -100,7 +99,7 @@ REAL                              :: ZLATOR   ! latitude  of point of coordinate
 REAL                              :: ZLONOR   ! longitude of point of coordinates X=0, Y=0
 !
 INTEGER                           :: IVERB=1  ! verbosity level
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('LATLONMASK_CONF_PROJ',0,ZHOOK_HANDLE)

@@ -47,8 +47,7 @@
 USE MODD_SURF_PAR, ONLY : NUNDEF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_ABOR1_SFX
@@ -120,7 +119,7 @@ INTEGER     :: JI,JJ         ! loop controls relatively to modified grid
 INTEGER     :: JIBOX,JJBOX   ! grid mesh relatively to initial grid
 REAL        :: ZCOEF         ! ponderation coefficient for linear interpolation
 #endif
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 INTEGER :: IMI
 INTEGER :: IINFO_ll
 INTEGER :: IXDOMAINS, IYDOMAINS               ! number of subdomains in X and Y directions

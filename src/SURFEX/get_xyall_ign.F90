@@ -34,8 +34,7 @@ SUBROUTINE GET_XYALL_IGN(PX,PY,PDX,PDY,PXALL,PYALL,KDIMX,KDIMY)
 !!      Original    07/2011 
 !-------------------------------------------------------------------------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -55,7 +54,7 @@ INTEGER, INTENT(OUT) :: KDIMY
 !              -------------------------------
 !
 REAL, DIMENSION(MAX(SIZE(PXALL),SIZE(PYALL))*3) :: ZALL
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------------
 !
@@ -85,7 +84,7 @@ INTEGER, INTENT(INOUT) :: KSIZE
 REAL, DIMENSION(SIZE(POUT)) :: ZDOUT, ZOUT, ZDOUT2
 REAL :: ZMAX, ZMIN
 INTEGER :: I, J, IDMIN, ICPT, ISIZE
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('GET_XYALL_IGN:GET_COORD',0,ZHOOK_HANDLE)
 !

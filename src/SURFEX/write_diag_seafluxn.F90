@@ -45,8 +45,7 @@ USE MODI_WRITE_DIAG_MISC_SEAICE_n
 USE MODI_INIT_IO_SURF_n
 USE MODI_END_IO_SURF_n
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -60,7 +59,7 @@ TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
  CHARACTER(LEN=3),   INTENT(IN)  :: HWRITE   ! 'PGD' : only physiographic fields are written
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !                                           ! 'ALL' : all fields are written
 !
 !*      0.2    declarations of local variables

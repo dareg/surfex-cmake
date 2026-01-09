@@ -55,8 +55,7 @@
 USE MODD_SURF_PAR
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -80,7 +79,7 @@ REAL,    INTENT(OUT):: PDIST   ! temporal distance in secunds between the final
 !
 INTEGER :: IDAYS  ! number of days between the two dates
 INTEGER :: JMONTH,JYEAR ! loop index on months or years 
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

@@ -41,8 +41,7 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -88,7 +87,7 @@ REAL, DIMENSION(:), ALLOCATABLE :: ZY
 REAL, DIMENSION(:), ALLOCATABLE :: ZGRID_PAR
 INTEGER                     :: IGRID_PAR
 INTEGER                     :: IL
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_GRID_COORD',0,ZHOOK_HANDLE)

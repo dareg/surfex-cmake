@@ -43,8 +43,7 @@ USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
 !
 USE MODI_ARRANGE_COVER
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -62,7 +61,7 @@ REAL, DIMENSION(:), INTENT(IN)  :: PDATA_WALL_O_HOR
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('UPDATE_DATA_FRAC_n',0,ZHOOK_HANDLE)

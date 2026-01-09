@@ -42,8 +42,7 @@
 !
 USE MODD_GRID_CONF_PROJ_n, ONLY :GRID_CONF_PROJ_t
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -77,7 +76,7 @@ INTEGER,           INTENT(OUT)  :: KL         ! number of points
 !            ------------------------------
 !
  CHARACTER(LEN=1) :: YDIR
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_NAM_GRIDTYPE',0,ZHOOK_HANDLE)

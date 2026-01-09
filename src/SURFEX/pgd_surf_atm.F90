@@ -75,8 +75,7 @@ USE MODI_PGD_CHEMISTRY_SNAP
 USE MODI_WRITE_COVER_TEX_END
 USE MODI_INIT_READ_DATA_COVER
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -97,7 +96,7 @@ LOGICAL,              INTENT(IN)  :: OZS      ! .true. if orography is imposed b
 INTEGER :: ISIZE_FULL, JI, IDIM_FULL
 INTEGER :: ILUOUT ! logical unit of output listing file
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('PGD_SURF_ATM',0,ZHOOK_HANDLE)

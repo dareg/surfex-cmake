@@ -51,8 +51,7 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
 USE MODI_FLAG_GR_SNOW
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -72,7 +71,7 @@ INTEGER, INTENT(IN) :: KFLAG ! 1 : to put physical values to run ISBA afterwards
 !
 REAL :: ZWR, ZTG, ZWG, ZRESA, ZANFM, ZDEF
 INTEGER :: JL1, JL2 ! loop counter on layers
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

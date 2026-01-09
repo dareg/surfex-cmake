@@ -42,8 +42,7 @@ USE MODI_ABORT_TRIP
 USE MODI_READ_DIMLEN
 USE MODI_READ_FORCING_DATE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -84,7 +83,7 @@ INTEGER :: IMONTH
 INTEGER :: IDAY
 REAL    :: ZTIME
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 ! Read the configuration of the run

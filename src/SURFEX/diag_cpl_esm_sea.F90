@@ -40,8 +40,7 @@ USE MODD_WATER_PAR, ONLY : XEMISWATICE
 !
 USE MODD_SFX_OASIS, ONLY : LCPL_SEAICE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -73,7 +72,7 @@ INTEGER                      :: JSWB ! loop counter on number of SW bands
 INTEGER                      :: INI  ! number of points
 INTEGER                      :: JI   ! loop counter on number of points
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_CPL_ESM_SEA',0,ZHOOK_HANDLE)
 !

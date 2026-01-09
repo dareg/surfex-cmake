@@ -33,8 +33,7 @@ USE MODD_CSTS, ONLY : XPI, XAVOGADRO, XG
 USE MODE_DSLT_SURF
 USE MODI_DSLT_VELGRAV1D
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 USE MODD_SURF_PAR , ONLY : XSURF_TINY
 !
 IMPLICIT NONE
@@ -75,7 +74,7 @@ INTEGER,DIMENSION(KPMODE) :: NM0                 ! [idx] index for Mode 0 in pas
 INTEGER,DIMENSION(KPMODE) :: NM3                 ! [idx] indexes for Mode 3 in passed variables
 INTEGER,DIMENSION(KPMODE) :: NM6                 ! [idx] indexes for Mode 6 in passed variables
 INTEGER :: JN, J0
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !============================================================================
 !

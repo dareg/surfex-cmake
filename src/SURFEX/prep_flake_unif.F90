@@ -48,8 +48,7 @@ USE MODD_PREP_FLAKE,   ONLY : XTS_UNIF, &
                                   XUNIF_H_B1         
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -58,7 +57,7 @@ IMPLICIT NONE
 INTEGER,            INTENT(IN)  :: KLUOUT    ! output listing logical unit
  CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
 REAL, POINTER, DIMENSION(:,:)   :: PFIELD    ! field to interpolate horizontally
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*      0.2    declarations of local variables
 !

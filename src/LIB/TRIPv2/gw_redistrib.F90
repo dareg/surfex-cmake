@@ -47,8 +47,7 @@ USE MODD_TRIP_PAR, ONLY : XUNDEF
 !
 USE MODI_ABORT_TRIP
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -85,7 +84,7 @@ REAL :: ZBILAN
 !
 INTEGER :: JBAS, JLON, JLAT
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

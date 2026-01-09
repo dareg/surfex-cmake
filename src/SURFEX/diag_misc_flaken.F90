@@ -34,8 +34,7 @@ USE MODD_DIAG_MISC_FLAKE_n, ONLY : DIAG_MISC_FLAKE_t
 USE MODD_SURF_PAR,           ONLY : XUNDEF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -51,7 +50,7 @@ REAL, DIMENSION(SIZE(DMF%XZW_PROFILE),SIZE(F%XT_WML)) :: ZCSI      ! Vertical no
 REAL, DIMENSION(SIZE(DMF%XZW_PROFILE),SIZE(F%XT_WML)) :: ZSHAPE    ! Shape function
 !
 INTEGER         :: IZW
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

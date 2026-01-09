@@ -44,8 +44,7 @@ USE MODE_GRIDTYPE_GAUSS
 USE MODD_CSTS, ONLY : XRADIUS, XPI
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -56,7 +55,7 @@ TYPE(GRID_t), INTENT(INOUT) :: G
 !
 INTEGER,                    INTENT(IN)  :: KL         ! number of points
 REAL, DIMENSION(KL),        INTENT(OUT) :: PDIR ! direction of main grid Y axis (deg. from N, clockwise)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------

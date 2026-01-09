@@ -101,8 +101,7 @@ USE MODI_LAYER_E_BUDGET
 USE MODI_LAYER_E_BUDGET_GET_COEF
 USE MODE_CONV_DOE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -183,7 +182,7 @@ REAL, DIMENSION(SIZE(PTA)) :: ZCHTC_IN_ROOF      ! Indoor roof convec heat trans
 INTEGER :: JJ
 INTEGER :: IROOF_LAYER           ! number of roof layers
 INTEGER :: JLAYER                ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('ROOF_LAYER_E_BUDGET',0,ZHOOK_HANDLE)

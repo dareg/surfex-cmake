@@ -36,8 +36,7 @@ USE MODI_PACK_SAME_RANK
 USE MODE_GRIDTYPE_LONLATVAL
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -66,7 +65,7 @@ REAL, DIMENSION(:), ALLOCATABLE   :: ZDY2     ! Y grid mesh size
 
 INTEGER                           :: IL1        ! number of points of input grid
 REAL, DIMENSION(:), POINTER       :: ZGRID_PAR2 ! parameters of output grid
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 !*    2.     Computes grid parameters

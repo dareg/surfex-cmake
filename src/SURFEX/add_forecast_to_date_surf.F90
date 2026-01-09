@@ -48,8 +48,7 @@
 !              ------------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -64,7 +63,7 @@ REAL,    INTENT(INOUT) :: PSEC   ! number of seconds since date at 00 UTC
 !              ------------------------------
 !
 INTEGER :: IDAYS ! number of days in KMONTH
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*       1.    Return condition: less than one day to add

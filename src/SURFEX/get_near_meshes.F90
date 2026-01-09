@@ -35,8 +35,7 @@
 !            -----------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_GET_NEAR_MESHES_CARTESIAN
 USE MODI_GET_NEAR_MESHES_CONF_PROJ
@@ -56,7 +55,7 @@ INTEGER,                         INTENT(IN)    :: KL        ! number of points
 INTEGER,                         INTENT(IN)    :: KNEAR_NBR ! number of nearest points wanted
 REAL,    DIMENSION(KGRID_PAR),   INTENT(IN)    :: PGRID_PAR ! grid parameters
 INTEGER, DIMENSION(:,:),POINTER :: KNEAR     ! near mesh indices
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*    0.2    Declaration of other local variables
 !            ------------------------------------

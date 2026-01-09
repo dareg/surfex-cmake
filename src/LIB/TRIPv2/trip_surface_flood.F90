@@ -51,8 +51,7 @@ USE MODD_TRIP_PAR,    ONLY : XRHOLW, XM, XUNDEF
 USE MODI_ABORT_TRIP
 USE MODI_FLOOD_UPDATE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -68,7 +67,7 @@ REAL,DIMENSION(:,:,:), INTENT(IN)    :: PTAB_F  ! Flood fraction array
 REAL,DIMENSION(:,:,:), INTENT(IN)    :: PTAB_H  ! Topo height array
 REAL,DIMENSION(:,:,:), INTENT(IN)    :: PTAB_VF ! Flood volume array
 !
-REAL,DIMENSION(:,:), INTENT(IN)      :: PAREA      ! Grid-cell area    [m²]
+REAL,DIMENSION(:,:), INTENT(IN)      :: PAREA      ! Grid-cell area    [mÂ²]
 REAL,DIMENSION(:,:), INTENT(IN)      :: PVEL       ! river velocity    [m/s]
 REAL,DIMENSION(:,:), INTENT(IN)      :: PLEN       ! river length       [m] 
 REAL,DIMENSION(:,:), INTENT(IN)      :: PWIDTH     ! river widths                 [m]
@@ -117,7 +116,7 @@ REAL    :: ZAREA
 !
 INTEGER :: ILON, ILAT, JLON, JLAT
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 ! * Init

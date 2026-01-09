@@ -54,8 +54,7 @@ USE MODD_SURF_ATM, ONLY : XRIMAX
 USE MODI_WIND_THRESHOLD
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -89,7 +88,7 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PRI      ! Richardson number
 !
 REAL, DIMENSION(SIZE(PTG))   :: ZTHVA, ZTHVS
 REAL, DIMENSION(SIZE(PVMOD)) :: ZVMOD
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !       1.     Richardson number

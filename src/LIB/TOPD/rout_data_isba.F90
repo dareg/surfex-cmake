@@ -73,8 +73,7 @@ USE MODD_COUPLING_TOPD,  ONLY : NMASKT, XRUNOFF_TOP, XATOP, NNPIX,&
 !
 USE MODD_SURF_PAR,         ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -108,7 +107,7 @@ REAL, DIMENSION(KI)           :: ZDRAINC_FULLM  ! Cumulated drainage from Isba o
 REAL, DIMENSION(KI)           :: ZDRAIN_ISBA    ! Drainage from Isba (m3/s)
 REAL, DIMENSION(NNCAT,NMESHT) :: ZRUNOFF_TOPD   ! Runoff on the Topodyn grid (m3/s)
 REAL, DIMENSION(NNCAT,NMESHT) :: ZDRAIN_TOPD    ! Drainage from Isba on Topodyn grid (m3/s)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ROUT_DATA_ISBA',0,ZHOOK_HANDLE)
 !

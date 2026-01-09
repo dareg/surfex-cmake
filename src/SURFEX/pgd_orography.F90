@@ -87,8 +87,7 @@ USE MODD_IO_SURF_LFI, ONLY : CFILEIN_LFI
 !
 USE MODI_EXPLICIT_SLOPE
 
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 
 USE MODI_ABOR1_SFX
@@ -153,7 +152,7 @@ LOGICAL                  :: GEXPLICIT_SLOPE ! Slope is computed from explicit ZS
 !                                          'SENKOVA' = Senkova et al. 2007
 !                                          'MANNERS' = Manners et al. 2012
 LOGICAL                  :: GFSSOSVF     ! compute SVF on fractional slopes if possible
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

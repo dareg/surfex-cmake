@@ -55,8 +55,7 @@ USE MODI_CLOSE_FILE
 USE MODD_TOPD_PAR, ONLY : NUNIT
 USE MODD_TOPODYN, ONLY : NPMAX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -76,7 +75,7 @@ REAL,              INTENT(OUT) :: PDXT       ! catchment rid mesh size
 !
 INTEGER                   :: JJ          ! loop control 
 INTEGER                   :: ILUOUT      ! Unit of the files
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('READ_TOPD_HEADER_DTM',0,ZHOOK_HANDLE)
 !

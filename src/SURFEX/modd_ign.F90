@@ -61,21 +61,21 @@ REAL, DIMENSION(6) :: XC = (/ 11603796.98,11745793.39,11947992.52,    &
 !
 REAL, DIMENSION(6) :: XXS= (/ 600000.,600000.,600000.,                &
                                 234.358,600000.,700000. /)  
-                              ! coordonnée X en projection du Pôle (Xs) (m)
+                              ! coordonnÃ©e X en projection du PÃ´le (Xs) (m)
 !
 REAL, DIMENSION(6) :: XYS= (/ 5657616.674, 6199695.768,6791905.085,   &
                                 7239161.542, 8199695.768,12655612.050 /)  
-                              ! coordonnée Y en projection du Pôle (Ys) (m)
+                              ! coordonnÃ©e Y en projection du PÃ´le (Ys) (m)
 !
 REAL, DIMENSION(6) :: XLONP= (/ 2.33722917, 2.33722917, 2.33722917, &
                                 2.33722917, 2.33722917, 3.         /)
-                              ! longitude de référence (deg)
-                              ! Méridien de Paris pour L1,L2,L3,L4,L2E
-                              ! 3° Est Greenwitch pour L93
+                              ! longitude de rÃ©fÃ©rence (deg)
+                              ! MÃ©ridien de Paris pour L1,L2,L3,L4,L2E
+                              ! 3Â° Est Greenwitch pour L93
 !
 REAL, DIMENSION(6) :: XECC= (/ 0.08248325676, 0.08248325676, 0.08248325676, &
                                0.08248325676, 0.08248325676, 0.08181919112  /)
-                              ! premiere excentricité de l'ellispoide terrestre
+                              ! premiere excentricitÃ© de l'ellispoide terrestre
 !
 REAL, DIMENSION(6) :: XA= (/ 6378249.2, 6378249.2, 6378249.2, &
                              6378249.2, 6378249.2, 6378137.0  /)

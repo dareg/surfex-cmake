@@ -50,8 +50,7 @@ USE MODI_TEMPORAL_DISTS
 USE MODI_TEMPORAL_LTS
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -70,7 +69,7 @@ INTEGER                                  :: JXP
 REAL, DIMENSION(SIZE(PSST))              :: ZSST, ZSST0
 REAL                                     :: ZSDTJX
 REAL                                     :: ZDT, ZALPHA
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-----------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('SST_UPDATE',0,ZHOOK_HANDLE)

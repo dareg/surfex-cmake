@@ -43,8 +43,7 @@
 !
 USE MODD_TRIP_PAR, ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -56,7 +55,7 @@ REAL, INTENT(IN)                     :: PTSTEP
 !
 LOGICAL, INTENT(IN)                  :: OPRINT   !Printable budget key 
 !
-REAL,    DIMENSION(:,:), INTENT(IN)  :: PAREA      ! Grid-cell area    [m²]
+REAL,    DIMENSION(:,:), INTENT(IN)  :: PAREA      ! Grid-cell area    [mÂ²]
 LOGICAL, DIMENSION(:,:), INTENT(IN)  :: OMASK_GW   !Groundwater mask
 !
 REAL, DIMENSION(:,:), INTENT(IN)     :: PDRAIN, PTAUG
@@ -83,7 +82,7 @@ REAL, DIMENSION(SIZE(PGROUND_STO,1),SIZE(PGROUND_STO,2)) :: ZDRAIN_NEG
 !
 INTEGER :: ILON, ILAT, JLON, JLAT
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------

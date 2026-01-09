@@ -117,8 +117,7 @@ END MODULE MODI_UNPACK_SAME_RANK
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -134,7 +133,7 @@ REAL, OPTIONAL,       INTENT(IN) :: PMISS
 !              -------------------------------
 !
 INTEGER :: JI ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -194,8 +193,7 @@ END SUBROUTINE UNPACK_SAME_RANK_FROM1D
 USE MODD_SURF_PAR,   ONLY : NUNDEF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -211,7 +209,7 @@ INTEGER, OPTIONAL,       INTENT(IN) :: KMISS
 !              -------------------------------
 !
 INTEGER :: JI ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -269,8 +267,7 @@ END SUBROUTINE UNPACK_SAME_RANK_FROM1DI
 !
 USE MODD_SURF_PAR,   ONLY : NUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -286,7 +283,7 @@ REAL, OPTIONAL,         INTENT(IN) :: PMISS
 !              -------------------------------
 !
 INTEGER :: JI, JJ ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -347,8 +344,7 @@ END SUBROUTINE UNPACK_SAME_RANK_FROM2DI
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -364,7 +360,7 @@ LOGICAL, OPTIONAL,       INTENT(IN) :: OMISS
 !              -------------------------------
 !
 INTEGER :: JI ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -424,8 +420,7 @@ END SUBROUTINE UNPACK_SAME_RANK_FROM1DL
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -441,7 +436,7 @@ REAL, OPTIONAL,         INTENT(IN) :: PMISS
 !              -------------------------------
 !
 INTEGER :: JI, JJ ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -505,8 +500,7 @@ END SUBROUTINE UNPACK_SAME_RANK_FROM2D
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -522,7 +516,7 @@ REAL, OPTIONAL,          INTENT(IN) :: PMISS
 !              -------------------------------
 !
 INTEGER :: JI, JJ, JK ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -587,8 +581,7 @@ END SUBROUTINE UNPACK_SAME_RANK_FROM3D
 USE MODD_SURF_PAR,   ONLY : NUNDEF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -604,7 +597,7 @@ REAL, OPTIONAL,          INTENT(IN) :: KMISS
 !              -------------------------------
 !
 INTEGER :: JI, JJ, JK ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -669,8 +662,7 @@ END SUBROUTINE UNPACK_SAME_RANK_FROM3DI
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -687,7 +679,7 @@ REAL, OPTIONAL,           INTENT(IN) :: PMISS
 !
 !
 INTEGER :: JI, JJ, JK, JL ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

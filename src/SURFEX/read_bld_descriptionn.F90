@@ -45,8 +45,7 @@ USE MODI_READ_SURF
 USE MODI_ABOR1_SFX
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -64,7 +63,7 @@ TYPE(BLD_DESC_t), INTENT(INOUT) :: BDD
 !*    0.2    Declaration of local variables
 !      ------------------------------
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 REAL, DIMENSION(:), ALLOCATABLE :: ZWORK
 INTEGER                         :: IRESP

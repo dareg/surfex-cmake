@@ -62,8 +62,7 @@ USE MODI_GET_LUOUT
 USE MODI_OPEN_FILE
 USE MODI_CLOSE_FILE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -84,7 +83,7 @@ REAL, DIMENSION(NNCAT,NNB_TOPD_STEP+NNB_STP_RESTART) :: ZRUN_TOROUT,ZDR_TOROUT !
                                                    ! water of runoff and drainage resp. still in the river 
                                                    ! and added to the discharge for the current simulation
  CHARACTER(LEN=3)                  :: YSTEP
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ROUTING',0,ZHOOK_HANDLE)
 !

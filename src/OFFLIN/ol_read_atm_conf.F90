@@ -49,8 +49,7 @@ USE MODI_OL_READ_ATM_CONF_ASCII
 USE MODD_SURF_CONF,      ONLY : CPROGNAME
 !==================================================================
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -70,7 +69,7 @@ REAL, DIMENSION(:),  POINTER  :: PLAT, PLON
 REAL, DIMENSION(:),  POINTER  :: PZS
 REAL, DIMENSION(:),  POINTER  :: PZREF, PUREF
 INTEGER,          INTENT(OUT) :: KTIMESTARTINDEX ! index from which we start reading FORCING.nc
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !==================================================================
 !

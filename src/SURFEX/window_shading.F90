@@ -50,8 +50,7 @@ SUBROUTINE WINDOW_SHADING(PSHGC, PSHGC_SH, O_SHADE, PALB_WALL,      &
 !!                  from window
 !-------------------------------------------------------------------------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 !
 REAL,    DIMENSION(:), INTENT(IN) :: PSHGC     !Window solar heat gain coefficient
@@ -65,7 +64,7 @@ REAL, DIMENSION(:), INTENT(OUT) :: PALB_WIN  !Albedo of the ensemble window + sh
 REAL, DIMENSION(:), INTENT(INOUT) :: PTRAN_WIN !Window transmitivity
 !
 !local variables
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('WINDOW_SHADING',0,ZHOOK_HANDLE)
 !

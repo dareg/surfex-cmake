@@ -50,7 +50,7 @@ USE MODD_OFF_SURFEX_n
 USE MODE_MODELN_SURFEX_HANDLER
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, WLOG_MPI, PREP_LOG_MPI, NPROC, NCOMM,   &
-                            NINDEX, NSIZE_TASK, END_LOG_MPI, NSIZE
+                            NINDEX, NSIZE_TASK, END_LOG_MPI, NSIZE, LSFX_MPI
 !
 USE MODD_MASK, ONLY: NMASK_FULL
 !
@@ -143,8 +143,7 @@ USE MODI_WRITE_HEADER_MNH
 !
 USE MODE_EKF, ONLY : GET_FILE_NAME, SET_FILEIN
 !
-USE YOMHOOK,             ONLY : LHOOK,DR_HOOK
-USE PARKIND1,            ONLY : JPRB
+USE YOMHOOK,             ONLY : LHOOK,DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -244,7 +243,7 @@ LOGICAL :: GFRAC, GDIAG_GRID, GSURF_BUDGET, GRAD_BUDGET, GCOEF,    &
 !
 TYPE(SURF_ATM_TURB_t) :: AT         ! atmospheric turbulence parameters
 !
-REAL(KIND=JPRB)                  :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK)                  :: ZHOOK_HANDLE
 ! ******************************************************************************************
 !
 INFOMPI=1
@@ -564,7 +563,7 @@ DO NIFIC = 1,INB,1
     ELSE
       ! First read first guess
 
-      CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, CSURF_FILETYPE,'NATURE','ISBA ','READ ')
+      CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, CSURF_FILETYPE,'NATURE','ISBA  ','READ ')
 
       XF_GUESS(:,:,:) = XUNDEF
       DO IOBS = 1,NOBSTYPE
@@ -1002,8 +1001,8 @@ DO IENS = 1,ISIZE
       IDATEF(6)= NINT(ZTIME) - IDATEF(4) * 3600 - IDATEF(5) * 60
       IDATEF(7:11) = 0
       NUNIT_FA = 19
-      CALL FAREGI ('SURF', +1, 1)   !ANTMPTEST
-      CALL FAREGI ('ZEPS', -9, 1)   !ANTMPTEST
+      CALL FAREGI ('SURF', +1, 1)
+      CALL FAREGI ('ZEPS', -9, 1)
       CALL FAITOU(IRET,NUNIT_FA,.TRUE.,CFILEOUT_FA,'UNKNOWN',.TRUE.,.FALSE.,IVERBFA,0,INB,CDNOMC)
       CALL FANDAR(IRET,NUNIT_FA,IDATEF)
 #endif      

@@ -8,8 +8,7 @@
 !!
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 INTERFACE POS
 !!
@@ -78,7 +77,7 @@ LOGICAL            :: LLOPENED
      'i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'/)
  CHARACTER(LEN=1),DIMENSION(26) :: YUP=(/'A','B','C','D','E','F','G','H', &
      'I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'/)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*       1.    POSITION FILE
 !              -------------
@@ -194,7 +193,7 @@ INTEGER,                    INTENT(IN) :: KLUOUT
 !
  CHARACTER(LEN=120) :: YLINE
 INTEGER            :: ILEN1,ILEN2,IRET
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*       1.    POSITION FILE
 !              -------------

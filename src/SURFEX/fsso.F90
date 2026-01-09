@@ -47,8 +47,7 @@ USE MODI_GET_ADJACENT_MESHES
 USE MODI_GATHER_AND_WRITE_MPI
 USE MODI_READ_AND_SEND_MPI
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -104,7 +103,7 @@ INTEGER :: IT, IB, IL, IR
 INTEGER :: JI, JJ, JK     ! indexes
 INTEGER :: JL           ! loop index on grid meshs
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------------
 !

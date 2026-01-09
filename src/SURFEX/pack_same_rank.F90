@@ -105,8 +105,7 @@ END MODULE MODI_PACK_SAME_RANK
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -121,7 +120,7 @@ REAL, DIMENSION(:),   INTENT(OUT):: P1D_OUT
 !              -------------------------------
 !
 INTEGER :: JI ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -173,8 +172,7 @@ END SUBROUTINE PACK_SAME_RANK_FROM1D
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -189,7 +187,7 @@ INTEGER, DIMENSION(:),   INTENT(OUT):: K1D_OUT
 !              -------------------------------
 !
 INTEGER :: JI ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -240,8 +238,7 @@ END SUBROUTINE PACK_SAME_RANK_FROM1DI
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -256,7 +253,7 @@ INTEGER, DIMENSION(:,:),   INTENT(OUT):: K2D_OUT
 !              -------------------------------
 !
 INTEGER :: JI, JJ ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -309,8 +306,7 @@ END SUBROUTINE PACK_SAME_RANK_FROM2DI
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -325,7 +321,7 @@ INTEGER, DIMENSION(:,:,:),   INTENT(OUT):: K3D_OUT
 !              -------------------------------
 !
 INTEGER :: JI, JJ, JK ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -380,8 +376,7 @@ END SUBROUTINE PACK_SAME_RANK_FROM3DI
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -396,7 +391,7 @@ LOGICAL, DIMENSION(:),   INTENT(OUT):: O1D_OUT
 !              -------------------------------
 !
 INTEGER :: JI ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -448,8 +443,7 @@ END SUBROUTINE PACK_SAME_RANK_FROM1DL
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -464,7 +458,7 @@ REAL, DIMENSION(:,:),   INTENT(OUT):: P2D_OUT
 !              -------------------------------
 !
 INTEGER :: JI, JJ ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -519,8 +513,7 @@ END SUBROUTINE PACK_SAME_RANK_FROM2D
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -535,7 +528,7 @@ REAL, DIMENSION(:,:,:),  INTENT(OUT):: P3D_OUT
 !              -------------------------------
 !
 INTEGER :: JI, JJ, JK ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -591,8 +584,7 @@ END SUBROUTINE PACK_SAME_RANK_FROM3D
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -608,7 +600,7 @@ REAL, DIMENSION(:,:,:,:), INTENT(OUT):: P4D_OUT
 !
 !
 INTEGER :: JI, JJ, JK, JL ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

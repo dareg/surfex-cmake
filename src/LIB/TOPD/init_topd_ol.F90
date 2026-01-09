@@ -73,8 +73,7 @@ USE MODI_READ_CONNEX_FILE
 USE MODI_OPEN_FILE
 USE MODI_CLOSE_FILE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -97,7 +96,7 @@ REAL   :: ZTMP !Temporary variable read
 REAL :: ZDHIL  ! distance along slope
 REAL :: ZDRIV  ! distance along rivers
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('INIT_TOPD_OL',0,ZHOOK_HANDLE)
 !

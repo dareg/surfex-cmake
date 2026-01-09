@@ -40,8 +40,7 @@ USE MODI_PREP_TOWN
 !
 USE MODE_READ_GRIB
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_SURF_VERSION
 !
@@ -63,7 +62,7 @@ TYPE (PREP_CTL),   INTENT(INOUT) :: YDCTL
  CHARACTER(LEN=6)                :: YATMFILETYPE! type of the Atmospheric file
  CHARACTER(LEN=28)               :: YPGDFILE    ! name of the Atmospheric file
  CHARACTER(LEN=6)                :: YPGDFILETYPE! type of the Atmospheric file
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !
 !-------------------------------------------------------------------------------------

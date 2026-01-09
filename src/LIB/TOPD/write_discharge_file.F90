@@ -55,8 +55,7 @@ USE MODI_GET_LUOUT
 USE MODI_OPEN_FILE
 USE MODI_CLOSE_FILE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -80,7 +79,7 @@ INTEGER                   :: ILUOUT      ! Unit of the files
 !
  CHARACTER(LEN=28) :: YFILE
  CHARACTER(LEN=40) :: YFORM          ! Writing format
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('WRITE_DISCHARGE_FILE',0,ZHOOK_HANDLE)
 !

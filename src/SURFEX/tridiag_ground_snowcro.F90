@@ -100,8 +100,7 @@ END MODULE MODI_TRIDIAG_GROUND_SNOWCRO
 !
 !*       0. DECLARATIONS
 !
-USE YOMHOOK , ONLY : LHOOK,   DR_HOOK
-USE PARKIND1, ONLY : JPRB
+USE YOMHOOK , ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -127,7 +126,7 @@ REAL, DIMENSION(SIZE(PA,1)           ) :: ZDET ! work array
 INTEGER           :: JL, JJ            ! vertical loop control
 INTEGER           :: INL               ! number of vertical levels
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 ! ---------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('TRIDIAG_GROUND_SNOWCRO_1D',0,ZHOOK_HANDLE)
@@ -253,8 +252,7 @@ END SUBROUTINE TRIDIAG_GROUND_SNOWCRO_1D
 !
 !*       0. DECLARATIONS
 !
-USE YOMHOOK , ONLY : LHOOK,   DR_HOOK
-USE PARKIND1, ONLY : JPRB
+USE YOMHOOK , ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -280,7 +278,7 @@ REAL :: ZDET ! work array
 INTEGER           :: JL, JJ, JB     ! vertical loop control
 INTEGER           :: INL, INB            ! number of vertical levels
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 ! ---------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('TRIDIAG_GROUND_SNOWCRO_2D',0,ZHOOK_HANDLE)

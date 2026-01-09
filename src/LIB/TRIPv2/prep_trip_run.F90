@@ -65,8 +65,7 @@ USE MODI_GET_LONLAT_TRIP
 !
 USE MODI_GWF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -167,7 +166,7 @@ LOGICAL :: LMASKLON, LMASKLAT, LWORK
 !                    YTITLE    = Title of each output file
 !                    YTIMEUNIT = Time unit in each output file if present
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !Initilyse TRIP

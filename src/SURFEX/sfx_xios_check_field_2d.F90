@@ -45,7 +45,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE YOMHOOK    , ONLY         : LHOOK,   DR_HOOK
+USE YOMHOOK    , ONLY         : LHOOK,   DR_HOOK, JPHOOK
 USE PARKIND1   , ONLY         : JPRB
 !
 USE MODD_SURF_ATM_n, ONLY     : SURF_ATM_t
@@ -80,7 +80,7 @@ CHARACTER(LEN=100) :: YUNITS
 REAL(KIND=JPRB), DIMENSION(:),ALLOCATABLE :: ZAXIS
 INTEGER            :: IDIM        ! for additonal dim
 CHARACTER(LEN=3)   :: YIDIM       ! for additonal dim  
-REAL(KIND=JPRB)    :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK)    :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('SFX_XIOS_CHECK_FIELD_2D',0,ZHOOK_HANDLE)
 !

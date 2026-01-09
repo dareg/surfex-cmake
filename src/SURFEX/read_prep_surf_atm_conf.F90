@@ -44,8 +44,7 @@ USE MODE_POS_SURF
 !
 USE MODN_PREP_SURF_ATM
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -77,7 +76,7 @@ INTEGER           :: ILUNAM         ! Logical unit of namelist file
  CHARACTER(LEN=28) :: YNAMELIST      ! namelist file
 !
 LOGICAL           :: GFOUND         ! Return code when searching namelist
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !

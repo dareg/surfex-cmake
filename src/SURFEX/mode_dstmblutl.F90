@@ -5,8 +5,7 @@
 ! ######spl
 MODULE MODE_DSTMBLUTL ! [mdl] Mobilization utilities
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -39,7 +38,7 @@ REAL :: ZICF_FCT    ! Interparticle cohesive forces factor for saltation calcula
 REAL :: ZTMP        ! Factor in saltation computation
 INTEGER :: I        ! [idx] Counting index
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE   
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE   
 !
 IF (LHOOK) CALL DR_HOOK('MODE_DSTMBLUTL:WND_FRC_THR_SLT_GET',0,ZHOOK_HANDLE)
 !
@@ -88,7 +87,7 @@ REAL,    DIMENSION(:), INTENT(OUT):: PGWC_SFC ! [kg kg-1] Gravimetric water cont
 ! Local
 REAL, DIMENSION(SIZE(PVWC_SAT)) :: ZDNS_BLK_DRY ! [kg m-3] Bulk density of dry surface soil
 INTEGER :: I
-REAL(KIND=JPRB) :: ZHOOK_HANDLE 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE 
 ! Main Code
 IF (LHOOK) CALL DR_HOOK('MODE_DSTMBLUTL:VWC2GWC',0,ZHOOK_HANDLE)
 !
@@ -119,7 +118,7 @@ REAL,    DIMENSION(:), INTENT(IN) :: PGWC_SFC         ! [kg kg-1] Gravimetric wa
 REAL,    DIMENSION(:), INTENT(OUT):: PFRC_THR_NCR_WTR ! [frc] Factor by which moisture increases threshold friction velocity
 ! Local
 INTEGER :: I ! [idx] Counting index
-REAL(KIND=JPRB) :: ZHOOK_HANDLE 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE 
 
 IF (LHOOK) CALL DR_HOOK('MODE_DSTMBLUTL:FRC_THR_NCR_WTR_GET',0,ZHOOK_HANDLE)
 ! Main Code
@@ -156,7 +155,7 @@ REAL, INTENT(IN) :: PRGH_MMN_SMT                   ! [m] Smooth roughness length
 REAL, INTENT(OUT):: PFRC_THR_NCR_DRG ! [frc] Factor by which roughness increases threshold friction velocity
 ! Local
 REAL :: ZWND_FRC_FSH_FRC     ! [frc] Efficient fraction of wind friction
-REAL(KIND=JPRB) :: ZHOOK_HANDLE 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE 
 !
 IF (LHOOK) CALL DR_HOOK('MODE_DSTMBLUTL:FRC_THR_NCR_DRG_GET',0,ZHOOK_HANDLE)
 ! Main Code
@@ -192,7 +191,7 @@ REAL,    DIMENSION(:), INTENT(OUT):: PWND_FRC_SLT     ! O [m s-1] Saltating fric
 REAL :: ZWND_RFR_DLT     ! [m s-1] Reference windspeed excess over threshold
 REAL :: ZWND_FRC_SLT_DLT ! [m s-1] Friction velocity increase from saltation
 INTEGER :: I             ! [idx] Counting index
-REAL(KIND=JPRB) :: ZHOOK_HANDLE 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE 
 !
 IF (LHOOK) CALL DR_HOOK('MODE_DSTMBLUTL:WND_FRC_SLT_GET',0,ZHOOK_HANDLE)   
 ! Main Code
@@ -236,7 +235,7 @@ REAL,    DIMENSION(:), INTENT(OUT):: PFLX_MSS_HRZ_SLT_TTL ! O [kg m-1 s-1] Verti
 ! Local
 REAL :: ZWND_FRC_RAT ! [frc] Ratio of wind friction threshold to wind friction
 INTEGER :: I    ! [idx] Counting index for lon
-REAL(KIND=JPRB) :: ZHOOK_HANDLE 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE 
 !
 IF (LHOOK) CALL DR_HOOK('MODE_DSTMBLUTL:FLX_MSS_HRZ_SLT_TTL_WHI79_GET',0,ZHOOK_HANDLE)   
 ! Main Code
@@ -275,7 +274,7 @@ REAL,    DIMENSION(:), INTENT(OUT):: PFLX_MSS_VRT_DST_TTL ! O [kg m-2 s-1] Total
 ! Local
 REAL :: ZMSS_FRC_CLY_VLD ! [frc] Mass fraction clay limited to 0.20
 INTEGER :: I             ! [idx] Counting index for lon
-REAL(KIND=JPRB) :: ZHOOK_HANDLE 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE 
 !
 IF (LHOOK) CALL DR_HOOK('MODE_DSTMBLUTL:FLX_MSS_VRT_DST_TTL_MAB95_GET',0,ZHOOK_HANDLE)  
 !
@@ -311,7 +310,7 @@ REAL,    DIMENSION(:), INTENT(OUT):: PFLX_MSS_VRT_DST_TTL ! O [kg m-2 s-1] Total
 REAL, DIMENSION(SIZE(PDNS_MDP)) :: ZROP_ROA  ! [frc] ratio of particle densite to Midlayer density
 REAL :: ZEXPDD, ZLNDS, ZBETA, ZBGXG
 INTEGER :: I
-REAL(KIND=JPRB) :: ZHOOK_HANDLE 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE 
 !
 IF (LHOOK) CALL DR_HOOK('MODE_DSTMBLUTL:FLX_MSS_VRT_DST_AUST_GET',0,ZHOOK_HANDLE)  
 !
@@ -359,7 +358,7 @@ REAL :: ZDM1, ZDM2
 INTEGER :: IMOD  ! Counter for number of mode
 INTEGER :: IDP   ! Counter for number of particle
 INTEGER :: ITEX  ! Counter for number of texture
-REAL(KIND=JPRB) :: ZHOOK_HANDLE 
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE 
 !
 IF (LHOOK) CALL DR_HOOK('MODE_DSTMBLUTL:DISTRIBUTION',0,ZHOOK_HANDLE)  
 !

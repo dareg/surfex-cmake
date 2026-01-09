@@ -40,8 +40,7 @@
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -56,7 +55,7 @@ INTEGER,           INTENT(OUT):: KUNIT    ! logical unit
  CHARACTER(LEN=9),  INTENT(IN) :: HACTION  ! action
  CHARACTER(LEN=6),  INTENT(IN) :: HACCESS  ! access type
 INTEGER,           INTENT(IN) :: KRECL    ! record length
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------

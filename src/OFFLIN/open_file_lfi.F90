@@ -41,8 +41,7 @@
 USE MODD_IO_SURF_LFI, ONLY : CLUOUT_LFI
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -65,7 +64,7 @@ INTEGER,           INTENT(IN) :: KRECL    ! record length
 !
 INTEGER :: ILUOUT
 INTEGER :: IRESP
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 LOGICAL :: LEXIST
 !-------------------------------------------------------------------------------
 !

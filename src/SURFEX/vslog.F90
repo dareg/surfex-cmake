@@ -4,8 +4,7 @@
 !SFX_LIC for details. version 1.
       SUBROUTINE VSLOG(PA,PLOG,N)
 !
-      USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-      USE PARKIND1  ,ONLY : JPRB
+      USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 !
 !
@@ -18,7 +17,7 @@
       REAL :: PA(N), PLOG(N)
 
       INTEGER :: J
-      REAL(KIND=JPRB) :: ZHOOK_HANDLE
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
       IF (LHOOK) CALL DR_HOOK('VSLOG',0,ZHOOK_HANDLE)
       DO J=1,N

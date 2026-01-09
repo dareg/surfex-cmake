@@ -13,8 +13,7 @@
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
@@ -50,7 +49,7 @@ INTEGER, OPTIONAL,       INTENT(IN)   :: KNPTS    ! number of points to interpol
 REAL, DIMENSION(SIZE(PFIELD),1) :: ZFIELD
 REAL, DIMENSION(1)              :: ZDEF
 INTEGER                         :: INPTS          ! number of points to interpolate with
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('INTERPOL_FIELD',0,ZHOOK_HANDLE)

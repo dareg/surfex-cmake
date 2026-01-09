@@ -51,8 +51,7 @@ USE MODI_INTERPOL_FIELD
 USE MODI_UNPACK_SAME_RANK
 USE MODI_PACK_SAME_RANK
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -97,7 +96,7 @@ INTEGER                            :: INI, IPATCH, IFULL, INPTS, JI
 INTEGER                            :: JP, IMASK0  ! loop counter on patch
 REAL                               :: ZRATIO_TOT
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 ! (1) & (2) INTERPOL FILED

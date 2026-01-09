@@ -30,8 +30,7 @@ USE MODE_TRIP_NETCDF
 !
 USE MODI_INIT_TRIP_PAR
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -52,7 +51,7 @@ INTEGER            :: ITIME
 !
 INTEGER            :: IC, IDATEID, INCID
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

@@ -52,8 +52,7 @@ USE MODI_GET_MESH_INDEX
 USE MODD_POINT_OVERLAY
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -81,7 +80,7 @@ REAL, DIMENSION(SIZE(PLAT)) :: ZVALUE
 REAL :: ZNODATA
 INTEGER :: JL, JOV, JCOV, IFOUND, ICOV, IND        ! loop index on input arrays
 INTEGER :: ICOVERCLASS  ! class of cover type
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 !

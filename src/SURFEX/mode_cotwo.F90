@@ -94,8 +94,7 @@ SUBROUTINE GAULEG(PX1,PX2,PX,PW,KN)
 !
 USE MODD_CSTS, ONLY : XPI
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -125,7 +124,7 @@ INTEGER IM                                   !
 !
 REAL ZXM, ZXL, ZZ, ZP1, ZP2, ZP3, ZPP, ZZ1   ! dummy variables needed for 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !                                              computation of the gaussian weights
 !
 !-------------------------------------------------------------------------------

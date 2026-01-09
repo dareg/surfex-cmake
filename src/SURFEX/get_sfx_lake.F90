@@ -48,8 +48,7 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 USE MODI_UNPACK_SAME_RANK
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -68,7 +67,7 @@ REAL, DIMENSION(:), INTENT(OUT) :: PLAKE_WATF  ! Cumulated Net water flux       
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('GET_SFX_LAKE',0,ZHOOK_HANDLE)

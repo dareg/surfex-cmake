@@ -43,8 +43,7 @@ USE MODD_SURF_PAR, ONLY   : NUNDEF, XUNDEF
 USE MODD_SURFEX_MPI, ONLY : NINDEX
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -58,7 +57,7 @@ REAL, OPTIONAL, INTENT(IN) :: PDLAT       ! input file mesh size (in latitude,  
 REAL, OPTIONAL, INTENT(IN) :: PDLON       ! input file mesh size (in longitude, degrees)
 
 INTEGER :: IDIMF
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------------
 !

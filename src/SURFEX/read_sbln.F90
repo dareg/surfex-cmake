@@ -52,8 +52,7 @@ USE MODI_READ_SURF
 USE MODI_CANOPY_GRID
 USE MODI_GET_TYPE_DIM_n
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -82,7 +81,7 @@ INTEGER :: JLAYER  ! loop counter on layers
 INTEGER :: ILU     ! 1D physical dimension
 INTEGER :: IRESP   ! Error code after redding
 INTEGER           :: IVERSION, IBUGFIX   ! surface version
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !* 1D physical dimension

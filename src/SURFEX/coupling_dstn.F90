@@ -51,8 +51,7 @@ USE MODI_CLS_T
 USE MODI_DUSTFLUX_GET     ! Dust mobilization routines
 USE MODI_DUSTFLUX_GET_MB  ! Dust mobilization routines (M. Mokhtari)  
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 
@@ -81,7 +80,7 @@ REAL, DIMENSION(KI,KDST), INTENT(OUT) :: PSFDST      !O [kg/m2/sec] flux of dust
 !LOCAL VARIABLES
 REAL, DIMENSION(KI,NVEGNO_DST,NDSTMDE) :: ZSFDST_TILE  ![kg/m2] flux of dust for each vegetation types and each mode
 INTEGER                            :: JVEG           ![idx] counter for vegetation types
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 
 !Initialize output which is total flux of dust (kg/m2/sec) from this patch
@@ -174,7 +173,7 @@ REAL, DIMENSION(5)   :: ZSEUIL
 REAL, DIMENSION(6,2) :: ZPCEN
 INTEGER                :: JJ, JS            !Counter for vector points
 INTEGER                :: JMODE         
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('COUPLING_DST_n:TREAT_SURF',0,ZHOOK_HANDLE)
 
@@ -401,7 +400,7 @@ INTEGER                 :: JMODE                    ! Counter for modes
 INTEGER                 :: JSV_IDX                  ! Index for scalar variable
 INTEGER                 :: NMOMENT                  ! Number of moments
 REAL                    :: VEGFRAC_IN_PATCH         ! fraction of total vegetation in this patch (m^2_{patch}/m^2_{nature})
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !Remember: XP_VEGTYPE_PATCH is m^2_{emittersurface}/m^{nature}
 !The goal is to obtain PSFDST in kg_{dust}/m^2_{patch}

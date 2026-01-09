@@ -30,8 +30,7 @@ CONTAINS
   SUBROUTINE FAECR_I(KREP,KN,CNOMC,KDATA)
 ! #############################################################
 !
-    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-    USE PARKIND1  ,ONLY : JPRB
+    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
     IMPLICIT NONE
 !
@@ -42,7 +41,7 @@ CONTAINS
 !
     REAL(KIND=8), DIMENSION(1)        :: ZDONNE
     INTEGER                           :: IL
-    REAL(KIND=JPRB)                   :: ZHOOK_HANDLE
+    REAL(KIND=JPHOOK)                   :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
     IF (LHOOK) CALL DR_HOOK('MODE_FASURFEX:FAECR_I',0,ZHOOK_HANDLE)
@@ -60,8 +59,7 @@ CONTAINS
   SUBROUTINE FAECR_I_D(KREP,KN,CNOMC,KSIZE,KDATA)
 ! #############################################################
 !
-    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-    USE PARKIND1  ,ONLY : JPRB
+    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
     IMPLICIT NONE
 !
@@ -73,7 +71,7 @@ CONTAINS
 !
     REAL(KIND=8),DIMENSION(KSIZE)      :: ZDONNE
     INTEGER                            :: I
-    REAL(KIND=JPRB)                    :: ZHOOK_HANDLE
+    REAL(KIND=JPHOOK)                    :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
     IF (LHOOK) CALL DR_HOOK('MODE_FASURFEX:FAECR_I_D',0,ZHOOK_HANDLE)
@@ -92,8 +90,7 @@ CONTAINS
   SUBROUTINE FAECR_R(KREP,KN,CNOMC,PDATA)
 ! #############################################################
 !
-    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-    USE PARKIND1  ,ONLY : JPRB
+    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
     IMPLICIT NONE
 !
@@ -104,7 +101,7 @@ CONTAINS
 !
     REAL(KIND=8), DIMENSION(1)        :: ZDONNE
     INTEGER                           :: IL
-    REAL(KIND=JPRB)                   :: ZHOOK_HANDLE
+    REAL(KIND=JPHOOK)                   :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
     IF (LHOOK) CALL DR_HOOK('MODE_FASURFEX:FAECR_R',0,ZHOOK_HANDLE)
@@ -122,8 +119,7 @@ CONTAINS
   SUBROUTINE FAECR_R_D(KREP,KN,CNOMC,KSIZE,PDATA)
 ! #############################################################
 !
-    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-    USE PARKIND1  ,ONLY : JPRB
+    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
     IMPLICIT NONE
 !
@@ -135,7 +131,7 @@ CONTAINS
 !
     REAL(KIND=8),DIMENSION(KSIZE)     :: ZDONNE
     INTEGER                           :: I
-    REAL(KIND=JPRB)                   :: ZHOOK_HANDLE
+    REAL(KIND=JPHOOK)                   :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
     IF (LHOOK) CALL DR_HOOK('MODE_FASURFEX:FAECR_R_D',0,ZHOOK_HANDLE)
@@ -154,8 +150,7 @@ CONTAINS
   SUBROUTINE FAECR_L(KREP,KN,CNOMC,LDATA)
 ! #############################################################
 !
-    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-    USE PARKIND1  ,ONLY : JPRB
+    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
     IMPLICIT NONE
 !
@@ -166,7 +161,7 @@ CONTAINS
 !
     REAL(KIND=8),DIMENSION(1)         :: ZDONNE
     INTEGER                           :: IL
-    REAL(KIND=JPRB)                   :: ZHOOK_HANDLE
+    REAL(KIND=JPHOOK)                   :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
     IF (LHOOK) CALL DR_HOOK('MODE_FASURFEX:FAECR_L',0,ZHOOK_HANDLE)
@@ -188,8 +183,7 @@ CONTAINS
   SUBROUTINE FAECR_L_D(KREP,KN,CNOMC,KSIZE,LDATA)
 ! #############################################################
 !
-    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-    USE PARKIND1  ,ONLY : JPRB
+    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
     IMPLICIT NONE
 !
@@ -201,7 +195,7 @@ CONTAINS
 !
     REAL(KIND=8),DIMENSION(KSIZE)     :: ZDONNE
     INTEGER                           :: I
-    REAL(KIND=JPRB)                   :: ZHOOK_HANDLE
+    REAL(KIND=JPHOOK)                   :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
     IF (LHOOK) CALL DR_HOOK('MODE_FASURFEX:FAECR_L_D',0,ZHOOK_HANDLE)
@@ -224,8 +218,7 @@ CONTAINS
   SUBROUTINE FAECR_C(KREP,KN,CNOMC,KSIZE,CDATA)
 ! #############################################################
 !
-    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-    USE PARKIND1  ,ONLY : JPRB
+    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
     IMPLICIT NONE
 !
@@ -237,7 +230,7 @@ CONTAINS
 !
     REAL(KIND=8),DIMENSION(KSIZE)     :: ZDONNE
     INTEGER                           :: I
-    REAL(KIND=JPRB)                   :: ZHOOK_HANDLE
+    REAL(KIND=JPHOOK)                   :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
     IF (LHOOK) CALL DR_HOOK('MODE_FASURFEX:FAECR_C',0,ZHOOK_HANDLE)
@@ -256,8 +249,7 @@ CONTAINS
   SUBROUTINE FALIT_I_D(KREP,KN,CNOMC,KSIZE,KDATA)
 ! #############################################################
 !
-    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-    USE PARKIND1  ,ONLY : JPRB
+    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
     IMPLICIT NONE
 !
@@ -269,7 +261,7 @@ CONTAINS
 !
     REAL(KIND=8),DIMENSION(KSIZE)     :: ZDONNE
     INTEGER                           :: I
-    REAL(KIND=JPRB)                   :: ZHOOK_HANDLE
+    REAL(KIND=JPHOOK)                   :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
     IF (LHOOK) CALL DR_HOOK('MODE_FASURFEX:FALIT_I_D',0,ZHOOK_HANDLE)
@@ -288,8 +280,7 @@ CONTAINS
   SUBROUTINE FALIT_I(KREP,KN,CNOMC,KDATA)
 ! #############################################################
 !
-    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-    USE PARKIND1  ,ONLY : JPRB
+    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
     IMPLICIT NONE
 !
@@ -300,7 +291,7 @@ CONTAINS
 !
     REAL(KIND=8), DIMENSION(1)        :: ZDONNE
     INTEGER                           :: IL
-    REAL(KIND=JPRB)                   :: ZHOOK_HANDLE
+    REAL(KIND=JPHOOK)                   :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
     IF (LHOOK) CALL DR_HOOK('MODE_FASURFEX:FALIT_I',0,ZHOOK_HANDLE)
@@ -318,8 +309,7 @@ CONTAINS
   SUBROUTINE FALIT_R_D(KREP,KN,CNOMC,KSIZE,PDATA)
 ! #############################################################
 !
-    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-    USE PARKIND1  ,ONLY : JPRB
+    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
     IMPLICIT NONE
 !
@@ -331,7 +321,7 @@ CONTAINS
 !
     REAL(KIND=8),DIMENSION(KSIZE)     :: ZDONNE
     INTEGER                           :: I
-    REAL(KIND=JPRB)                   :: ZHOOK_HANDLE
+    REAL(KIND=JPHOOK)                   :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
     IF (LHOOK) CALL DR_HOOK('MODE_FASURFEX:FALIT_R_D',0,ZHOOK_HANDLE)
@@ -350,8 +340,7 @@ CONTAINS
   SUBROUTINE FALIT_R(KREP,KN,CNOMC,PDATA)
 ! #############################################################
 !
-    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-    USE PARKIND1  ,ONLY : JPRB
+    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
     IMPLICIT NONE
 !
@@ -362,7 +351,7 @@ CONTAINS
 !
     REAL(KIND=8), DIMENSION(1)        :: ZDONNE
     INTEGER                           :: IL
-    REAL(KIND=JPRB)                   :: ZHOOK_HANDLE
+    REAL(KIND=JPHOOK)                   :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
     IF (LHOOK) CALL DR_HOOK('MODE_FASURFEX:FALIT_R',0,ZHOOK_HANDLE)
@@ -380,8 +369,7 @@ CONTAINS
   SUBROUTINE FALIT_L_D(KREP,KN,CNOMC,KSIZE,LDATA)
 ! #############################################################
 !
-    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-    USE PARKIND1  ,ONLY : JPRB
+    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
     IMPLICIT NONE
 !
@@ -393,7 +381,7 @@ CONTAINS
 !
     REAL(KIND=8),DIMENSION(KSIZE)     :: ZDONNE
     INTEGER                           :: I
-    REAL(KIND=JPRB)                   :: ZHOOK_HANDLE
+    REAL(KIND=JPHOOK)                   :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
     IF (LHOOK) CALL DR_HOOK('MODE_FASURFEX:FALIT_L_D',0,ZHOOK_HANDLE)
@@ -412,8 +400,7 @@ CONTAINS
   SUBROUTINE FALIT_L(KREP,KN,CNOMC,LDATA)
 ! #############################################################
 !
-    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-    USE PARKIND1  ,ONLY : JPRB
+    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
     IMPLICIT NONE
 !
@@ -425,7 +412,7 @@ CONTAINS
 !
     REAL(KIND=8), DIMENSION(1)        :: ZDONNE
     INTEGER                           :: IL
-    REAL(KIND=JPRB)                   :: ZHOOK_HANDLE
+    REAL(KIND=JPHOOK)                   :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
     IF (LHOOK) CALL DR_HOOK('MODE_FASURFEX:FALIT_L',0,ZHOOK_HANDLE)
@@ -443,8 +430,7 @@ CONTAINS
   SUBROUTINE FALIT_C(KREP,KN,CNOMC,KSIZE,CDATA)
 ! #############################################################
 !
-    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-    USE PARKIND1  ,ONLY : JPRB
+    USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
     IMPLICIT NONE
 !
@@ -456,7 +442,7 @@ CONTAINS
 !
     REAL(KIND=8),DIMENSION(KSIZE)     :: ZDONNE
     INTEGER                           :: I,J
-    REAL(KIND=JPRB)                   :: ZHOOK_HANDLE
+    REAL(KIND=JPHOOK)                   :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
     IF (LHOOK) CALL DR_HOOK('MODE_FASURFEX:FALIT_C',0,ZHOOK_HANDLE)

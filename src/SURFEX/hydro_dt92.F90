@@ -62,8 +62,7 @@
 USE MODD_CSTS,ONLY : XRHOLW
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -102,7 +101,7 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PRUISDT
 !
 ! 
 REAL, DIMENSION(SIZE(PRUNOFFD))    :: ZPAS, ZPG_INI, ZWG2
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !                                     ZWG2   = Total vol. water content
 !                                              of layer for calculating runoff (m3 m-3)
 !

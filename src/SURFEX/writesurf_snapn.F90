@@ -17,8 +17,7 @@ USE MODI_GET_LUOUT
 USE MODI_WRITE_SURF
 USE MODI_WRITE_SURF_FIELD2D
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -40,7 +39,7 @@ INTEGER             :: IRESP    ! I/O error code
 INTEGER             :: ILUOUT   ! Unit number for prints
 INTEGER             :: JSPEC    ! Loop index for emission species
 INTEGER             :: JSNAP    ! Loop index for SNAP categories
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('WRITESURF_SNAP_n',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)

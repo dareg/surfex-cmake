@@ -54,8 +54,7 @@ USE MODD_PREP_TEB_GREENROOF, ONLY : XGRID_SOIL, XWR_DEF
 USE MODD_DATA_COVER_PAR,     ONLY : NVEGTYPE
 USE MODD_SURF_PAR,           ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_PUT_ON_ALL_VEGTYPES
 !
@@ -102,7 +101,7 @@ LOGICAL                         :: GOLD_NAME      ! old name flag for temperatur
 LOGICAL                         :: GGREENROOF     ! T if gardens are present in the file
 LOGICAL                         :: GDIM
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !

@@ -44,8 +44,7 @@ USE MODI_CLS_TQ_DIAN
 USE MODI_CLS_WIND
 USE MODI_DIAG_SURF_BUDGET_ISBA
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -79,7 +78,7 @@ REAL, DIMENSION(:), INTENT(IN)       :: PSFTQ    ! water flux (kg/m2/s)
 !*      0.2    declarations of local variables
 !
 REAL, DIMENSION(SIZE(PTA)) :: ZH
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_ISBA_N',0,ZHOOK_HANDLE)

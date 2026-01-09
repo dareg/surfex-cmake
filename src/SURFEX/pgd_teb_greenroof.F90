@@ -54,8 +54,7 @@ USE MODD_DATA_COVER_PAR,       ONLY : NVEGTYPE
 !
 USE MODI_PGD_TEB_GREENROOF_PAR
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -86,7 +85,7 @@ INTEGER, INTENT(IN) :: KDIM
 !*    0.3    Declaration of namelists
 !            ------------------------
 !
-REAL(KIND=JPRB)          :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK)          :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

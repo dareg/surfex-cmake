@@ -60,8 +60,7 @@ USE MODD_PREP_TEB, ONLY : XWSNOW_ROOF_p=>XWSNOW_ROOF, XTSNOW_ROOF_p=>XTSNOW_ROOF
 !
 USE MODD_PREP_SNOW, ONLY : NSNOW_LAYER_MAX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -88,7 +87,7 @@ REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW_ROAD, XRSNOW_ROAD, XTSNOW_ROAD, XLWCS
 LOGICAL           :: GFOUND         ! Return code when searching namelist
 INTEGER           :: ILUOUT         ! output file logical unit
 INTEGER           :: ILUNAM         ! namelist file logical unit
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 NAMELIST/NAM_PREP_TEB_SNOW/CSNOW_ROOF, CSNOW_ROAD, CFILE_SNOW_TEB, CTYPE_SNOW, &
                            LSNOW_IDEAL_TEB, CFILEPGD_SNOW_TEB, CTYPEPGD_SNOW,      & 

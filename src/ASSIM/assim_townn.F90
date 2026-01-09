@@ -40,8 +40,7 @@ USE MODD_CSTS,          ONLY : XPI
 USE MODN_IO_OFFLINE,    ONLY : CSURF_FILETYPE
 !
 !
-USE YOMHOOK,            ONLY : LHOOK,   DR_HOOK
-USE PARKIND1,           ONLY : JPRB
+USE YOMHOOK,            ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 USE MODI_ASSIM_TEB_n
@@ -65,7 +64,7 @@ CHARACTER(LEN=2),   INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !-------------------------------------------------------------------------------------
 !
-REAL(KIND=JPRB)                    :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK)                    :: ZHOOK_HANDLE
 INTEGER                            :: ILUOUT
 
 IF (LHOOK) CALL DR_HOOK('ASSIM_TOWN_N',0,ZHOOK_HANDLE)

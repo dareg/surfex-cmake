@@ -54,8 +54,7 @@ USE MODD_CO2V_PAR,   ONLY : XK_SUP, XK_INF, XXSI_SUP, XXSI_INF ! clumping index 
 USE MODD_SURFEX_MPI, ONLY : NRANK
 USE MODI_CCETR_PAIR  
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 !*       0.     DECLARATIONS
 !               ------------
@@ -110,7 +109,7 @@ REAL                           :: ZABC, ZWEIGHT, ZCOEF, ZSUP, ZINF, &
 !                                 ZSUP, ZINF = d_sup and d_inf from Table 1. Carrer et al.
 !
 INTEGER                        :: JINT, I ! index for loops
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('FAPAIR',0,ZHOOK_HANDLE)
 !

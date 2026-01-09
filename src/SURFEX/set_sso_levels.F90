@@ -37,8 +37,7 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
 USE MODI_PREP_SBL
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -55,7 +54,7 @@ INTEGER, INTENT(IN) :: KDIM ! 1D physical dimension
 INTEGER :: JLAYER
 INTEGER :: ILU      ! number of points
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

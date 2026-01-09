@@ -10,8 +10,7 @@
 !############################################################################
 !############################################################################
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 CONTAINS
 !############################################################################
@@ -57,7 +56,7 @@ REAL, DIMENSION(:), POINTER     :: PGRID_PAR! parameters defining this grid
 !              -------------------------------
 !
 INTEGER                         :: IL       ! number of points
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CARTESIAN:PUT_GRIDTYPE_CARTESIAN',0,ZHOOK_HANDLE)
 IL = SIZE(PX)
@@ -117,7 +116,7 @@ INTEGER,            INTENT(OUT), OPTIONAL :: KL       ! number of points
 !              -------------------------------
 !
 INTEGER :: IL
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CARTESIAN:GET_GRIDTYPE_CARTESIAN',0,ZHOOK_HANDLE)
 IF (PRESENT(PLAT0))  PLAT0 = PGRID_PAR(1)
@@ -186,7 +185,7 @@ IMPLICIT NONE
 REAL,                 INTENT(IN) :: PLAT0  ! Reference latitude
 REAL,                 INTENT(IN) :: PLON0  ! Reference longitude
 REAL, DIMENSION(:),   INTENT(OUT):: PLAT,PLON    
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
                                            ! returned geographic latitudes and 
                                            ! longitudes of the processed points 
                                            ! (degrees).

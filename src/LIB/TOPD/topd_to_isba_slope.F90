@@ -54,8 +54,7 @@ USE MODD_TOPODYN,       ONLY : NNCAT, NNMC, XTANB
 USE MODD_COUPLING_TOPD, ONLY : NMASKT,NNPIX
 USE MODD_SURF_PAR,        ONLY : NUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -73,7 +72,7 @@ INTEGER                :: JCAT,JPIX,JJ          ! loop control
 REAL, DIMENSION(KI)    :: ZCOUNT                ! TOPO pixel number in an ISBA pixel
                                                 ! on the full grid
 REAL, DIMENSION(KI)    :: ZSSO_SLOPE
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('TOPD_TO_ISBA_SLOPE',0,ZHOOK_HANDLE)

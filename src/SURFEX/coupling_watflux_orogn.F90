@@ -55,8 +55,7 @@ USE MODI_FORCING_VERT_SHIFT
 !
 USE MODI_COUPLING_WATFLUX_SBL_n
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -151,7 +150,7 @@ REAL, DIMENSION(KI)  :: ZLW    ! LW rad      at forcing height above surface oro
 REAL, DIMENSION(KI)  :: ZRAIN  ! Rainfall    at forcing height above surface orography
 REAL, DIMENSION(KI)  :: ZSNOW  ! Snowfall    at forcing height above surface orography
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 ! Preliminaries:
 !-------------------------------------------------------------------------------------

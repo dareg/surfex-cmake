@@ -40,8 +40,7 @@ USE MODI_CLS_WIND
 USE MODI_CLS_TQ
 USE MODI_WATER_FLUX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -97,7 +96,7 @@ REAL, DIMENSION(SIZE(PTA))   :: ZHU
 INTEGER                      :: J
 INTEGER                      :: JLAYER
 LOGICAL                      :: GHANDLE_SIC = .FALSE. ! no sea-ice model
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 !*     1.2     Initialisation at first time step

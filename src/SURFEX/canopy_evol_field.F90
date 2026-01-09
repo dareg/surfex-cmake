@@ -42,8 +42,7 @@
 !
 USE MODI_TRIDIAG_SURF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -96,7 +95,7 @@ REAL, DIMENSION(KI)         :: ZDFADT  ! dTHa/dt   at forcing level
 REAL, DIMENSION(KI)         :: ZDWFDZ  ! dw'Th'/dz at forcing level
 REAL, DIMENSION(KI)         :: ZALFA, ZBETA
 LOGICAL                     :: LIMPL
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

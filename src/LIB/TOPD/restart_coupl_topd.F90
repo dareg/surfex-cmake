@@ -53,8 +53,7 @@ USE MODI_PACK_SAME_RANK
 USE MODI_OPEN_FILE
 USE MODI_CLOSE_FILE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -80,7 +79,7 @@ REAL, DIMENSION(:),ALLOCATABLE              :: ZWTOPT   ! Initial water content 
 LOGICAL                                     :: LSTOCK, LWG, LASAT
 REAL                                        :: ZCORR_STOCK ! used to avoid to lose stock
 REAL                                        :: ZCNT_UNDEF,ZSUM1,ZSUM2, ZDENOM ! used to correct budget
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('RESTART_COUPL_TOPD',0,ZHOOK_HANDLE)
 !

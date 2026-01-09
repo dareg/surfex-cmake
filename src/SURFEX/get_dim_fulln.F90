@@ -37,8 +37,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -47,7 +46,7 @@ IMPLICIT NONE
 !
 INTEGER, INTENT(IN) :: KDIM_FULL_IN
 INTEGER, INTENT(OUT) :: KDIM_FULL_OUT ! total number of points
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 !*       0.2   Declarations of local variables

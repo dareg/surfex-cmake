@@ -51,8 +51,7 @@
 !
 USE MODD_TRIP_PAR, ONLY : XUNDEF, XRAD, XPI
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -86,7 +85,7 @@ REAL                                  :: ZRAD
 INTEGER                               :: ISCAN          ! number of points to scan
 INTEGER, DIMENSION(KNI)               :: IINDEX       ! list of index to scan
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

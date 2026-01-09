@@ -60,8 +60,7 @@ END MODULE MODI_INTERP_GRID
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -82,7 +81,7 @@ REAL :: ZCOEFLIN ! interpolation coefficients
 INTEGER :: IKLIN    ! lower interpolating level of
 INTEGER :: ILEVEL, IS1
 !                                                     ! grid 1 for each level of grid 2 
-REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !-----------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODI_INTERP_GRID:INTERP_GRID_1D_1',0,ZHOOK_HANDLE)
 !
@@ -153,8 +152,7 @@ END SUBROUTINE INTERP_GRID_1D
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -174,7 +172,7 @@ REAL :: ZCOEFLIN ! interpolation coefficients
 INTEGER :: JI, JK, JK2 ! loop counter
 INTEGER :: IKLIN    ! lower interpolating level of
 INTEGER :: ILEVEL, IS1
-REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !-----------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODI_INTERP_GRID:INTERP_GRID_2D_1',0,ZHOOK_HANDLE)
 !

@@ -52,8 +52,7 @@ USE MODI_CLOSE_NAMELIST
 !
 USE MODE_POS_SURF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -92,7 +91,7 @@ REAL, DIMENSION(NTIME_MAX)     :: XUNIF_DHUGRD
 !
 ! name of files containing data
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_DATA_TSZ0/NTIME, XUNIF_DTS, XUNIF_DHUGRD  
 !-------------------------------------------------------------------------------

@@ -46,8 +46,7 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_ATM,   ONLY : LCPL_GCM
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_GET_LUOUT
 USE MODI_ABOR1_SFX
@@ -74,7 +73,7 @@ REAL, DIMENSION(KI),     INTENT(OUT) :: PQSURF   ! specific humidity at surface 
 !
 INTEGER :: ILUOUT
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('GET_CPL_GCM_N',0,ZHOOK_HANDLE)

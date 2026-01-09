@@ -50,8 +50,7 @@ USE MODD_CSTS,       ONLY : XTT, XTTS, XICEC
 USE MODI_PACK_SAME_RANK
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -80,7 +79,7 @@ REAL, DIMENSION(:), INTENT(IN) :: PSEAICE_ALB
 !
 CHARACTER(LEN=50)     :: YCOMMENT
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -128,7 +127,7 @@ REAL                    :: ZTMIN    ! Minimum temperature over this proc
 REAL                    :: ZTMAX    ! Maximum temperature over this proc
 CHARACTER(LEN=50)       :: YCOMMENT
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('PUT_SFX_SEA:TREAT_SEA',0,ZHOOK_HANDLE)
 !
@@ -205,7 +204,7 @@ REAL                    :: ZTMIN    ! Minimum temperature over this proc
 REAL                    :: ZTMAX    ! Maximum temperature over this proc
 CHARACTER(LEN=50)       :: YCOMMENT
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('PUT_SFX_SEA:TREAT_WATER',0,ZHOOK_HANDLE)
 !
@@ -264,7 +263,7 @@ IMPLICIT NONE
 CHARACTER(LEN=*),   INTENT(IN) :: HCOMMENT
 REAL, DIMENSION(:), INTENT(IN) :: PFIELD
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('PUT_SFX_SEA:CHECK_SEA',0,ZHOOK_HANDLE)
 !

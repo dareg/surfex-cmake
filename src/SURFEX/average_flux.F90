@@ -53,8 +53,7 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -82,7 +81,7 @@ REAL, DIMENSION(:),   INTENT(OUT):: PSFV       ! meridian momentum flux (pa)
 !
 INTEGER :: JSV   ! scalar loop counter
 INTEGER :: JTILE ! tile loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !       0.     Initialization

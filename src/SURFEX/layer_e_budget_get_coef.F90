@@ -70,8 +70,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -101,7 +100,7 @@ REAL, DIMENSION(SIZE(PT,1),SIZE(PT,2)) :: ZHC_D
 INTEGER :: ILAYER          ! number of floor layers
 INTEGER :: JLAYER          ! loop counter
 INTEGER :: JJ              ! loop counter
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('LAYER_E_BUDGET_GET_COEF',0,ZHOOK_HANDLE)
 !

@@ -63,8 +63,7 @@ USE MODI_IO_BUFF
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_GET_TYPE_DIM_n
 USE MODD_SURF_PAR, ONLY : XUNDEF
@@ -104,7 +103,7 @@ LOGICAL           :: GOLD_NAME      ! name of temperatures in old versions of SU
 LOGICAL           :: GKNOWN
 !
 INTEGER :: JLAYER, JI  ! loop counter on layers
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

@@ -82,8 +82,7 @@ USE MODD_IO_SURF_FA,  ONLY : CFILEIN_FA
 USE MODD_IO_SURF_LFI, ONLY : CFILEIN_LFI
 #endif
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -130,7 +129,7 @@ INTEGER :: ILUOUT    ! output listing logical unit
 !
 CHARACTER(LEN=6  ) :: YFILETYPE, YSCHEME, YSUBROUTINE
 CHARACTER(LEN=20)  :: YFIELD        ! Name of the field.
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -457,8 +456,7 @@ SUBROUTINE CTIREG(OREG,OREG10,OREG2)
 USE MODI_OPEN_NAMELIST
 USE MODI_CLOSE_NAMELIST
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -501,7 +499,7 @@ CHARACTER(LEN=10)          :: YINTERNALFORMAT ! format to read YVAL in real ZVAL
 !
 REAL    :: Z1000M, Z100M, Z10M
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

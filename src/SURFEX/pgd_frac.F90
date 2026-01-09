@@ -63,8 +63,7 @@ USE MODI_SUM_ON_ALL_PROCS
 USE MODE_POS_SURF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -121,7 +120,7 @@ INTEGER               :: ICOVER       ! 0 if cover is not present, >1 if present
 !                                     ! (even on another processor)
 INTEGER               :: ICPT
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 NAMELIST/NAM_FRAC/ LECOCLIMAP, LECOSG,                               &

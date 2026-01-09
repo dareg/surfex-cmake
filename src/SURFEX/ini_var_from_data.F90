@@ -137,8 +137,7 @@ USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 USE MODI_INI_VAR_FROM_DATA_0D
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -169,7 +168,7 @@ REAL, DIMENSION(SIZE(PPAR_VEGTYPE,1)) :: ZMASK
  CHARACTER(LEN=40) :: YNAME
 INTEGER            :: JV, JV2  ! loop counter on vegtypes
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 
 !-------------------------------------------------------------------------------
@@ -279,8 +278,7 @@ USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 USE MODI_INI_VAR_FROM_DATA_0D
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -310,7 +308,7 @@ LOGICAL, INTENT(OUT) :: OPRESENT
 LOGICAL, DIMENSION(SIZE(PFIELD,2)) :: LPRESENT 
 INTEGER               :: JV, JJ  ! loop counter on vegtypes
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 
 !-------------------------------------------------------------------------------
@@ -369,8 +367,7 @@ USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 USE MODI_ABOR1_SFX
 USE MODI_INI_VAR_FROM_DATA_0D
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -403,7 +400,7 @@ INTEGER               :: JV, JJ, JV2  ! loop counter on vegtypes
 INTEGER               :: JTIME
 INTEGER               :: ITIME, ISIZE_V, IDX
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 
 !-------------------------------------------------------------------------------
@@ -552,8 +549,7 @@ USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 USE MODI_INI_VAR_FROM_DATA_0D
 USE MODI_PUT_IN_TIME
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -587,7 +583,7 @@ INTEGER               :: JV, JJ  ! loop counter on vegtypes
 INTEGER               :: JTIME
 INTEGER               :: ITIME
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 
 !-------------------------------------------------------------------------------

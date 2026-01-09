@@ -56,8 +56,7 @@
 !
 USE MODD_CSTS,          ONLY : XPI, XDAY
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 #ifdef AIX64
 !$ USE OMP_LIB
@@ -107,7 +106,7 @@ REAL                                       :: ZTSIDER, &
 !                                            
 INTEGER                                    :: JI, JJ, INKPROMA
 INTEGER    :: IINDX1, IINDX2
-REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !
 !-------------------------------------------------------------------------------
 !

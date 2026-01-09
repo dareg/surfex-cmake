@@ -41,8 +41,7 @@ USE MODD_IO_SURF_LFI,  ONLY : CLUOUT_LFI
 !
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -56,7 +55,7 @@ INTEGER, INTENT(IN) :: KTEX  ! logical unit to close
 !
  CHARACTER(LEN=20) :: YTEX           ! name of tex file
 INTEGER :: IRESP
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*       5.     Prints of cover parameters in a tex file

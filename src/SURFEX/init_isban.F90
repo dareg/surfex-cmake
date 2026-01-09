@@ -129,8 +129,7 @@ USE MODI_SET_SURFEX_FILEIN
 !
 USE MODI_END_IO_SURF_n
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -198,7 +197,7 @@ INTEGER             :: ISIZE_LMEB_PATCH   ! Number of patches where multi-energy
  CHARACTER(LEN=3) :: YSNOW_SCHEME
 INTEGER :: ISNOW_NLAYER, JP
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

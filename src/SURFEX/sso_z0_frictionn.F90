@@ -46,8 +46,7 @@ USE MODD_SURF_ATM,         ONLY : XZ0_OFFSET
 USE MODD_SURF_PAR,         ONLY : XUNDEF, XSURF_EPSILON
 USE MODD_CSTS,             ONLY : XKARMAN, XPI
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -80,7 +79,7 @@ REAL, DIMENSION(SIZE(PU))    :: ZSSO_SFU! zonal orographic momentum flux
 REAL, DIMENSION(SIZE(PU))    :: ZSSO_SFV! meridian orographic momentum flux
 LOGICAL, DIMENSION(SIZE(PU)) :: GMASK   ! mask where SSO exists
 INTEGER                      :: II
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
 !-------------------------------------------------------------------------------------
 !

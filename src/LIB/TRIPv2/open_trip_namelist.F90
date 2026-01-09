@@ -35,8 +35,7 @@
 !
 USE MODN_TRIP_RUN, ONLY : CNAMELIST
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -48,7 +47,7 @@ INTEGER, INTENT(OUT) :: KLUNAM   ! logical unit of namelist
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('OPEN_TRIP_NAMELIST',0,ZHOOK_HANDLE)

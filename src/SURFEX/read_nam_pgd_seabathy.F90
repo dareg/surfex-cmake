@@ -49,8 +49,7 @@ USE MODI_CLOSE_NAMELIST
 !
 USE MODE_POS_SURF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -80,7 +79,7 @@ LOGICAL                           :: GFOUND    ! flag when namelist is present
  CHARACTER(LEN=28)        :: YNCVARNAME        ! variable to read in netcdf
                                               ! file
 REAL                     :: XUNIF_SEABATHY    ! uniform value of bathymetry
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_SEABATHY/ YSEABATHY, YSEABATHYFILETYPE, YNCVARNAME, XUNIF_SEABATHY
 !

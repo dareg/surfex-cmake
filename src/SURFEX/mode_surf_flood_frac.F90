@@ -40,8 +40,7 @@ MODULE MODE_SURF_FLOOD_FRAC
 !-------------------------------------------------------------------------------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 CONTAINS
 !-------------------------------------------------------------------------------
@@ -53,7 +52,7 @@ CONTAINS
 REAL, DIMENSION(:), INTENT(IN)  :: PPSNG   ! Snow fraction over the ground
 REAL, DIMENSION(:), INTENT(IN)  :: PFFLOOD ! Effective floodplain fraction
 REAL, DIMENSION(SIZE(PPSNG))    :: PFFG    ! Floodplain fraction over the ground
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_SURF_FLOOD_FRAC:FLOOD_FRAC_GROUND',0,ZHOOK_HANDLE)
 PFFG(:) = PFFLOOD(:)
@@ -75,7 +74,7 @@ REAL, DIMENSION(:), INTENT(IN)  :: PLAI    ! leaf area index
 REAL, DIMENSION(:), INTENT(IN)  :: PPSNV   ! Snow fraction over the vegetation
 REAL, DIMENSION(:), INTENT(IN)  :: PFFLOOD ! Effective floodplain fraction
 REAL, DIMENSION(SIZE(PPSNV))    :: PFFV    ! Floodplain fraction over vegetation
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_SURF_FLOOD_FRAC:FLOOD_FRAC_VEG',0,ZHOOK_HANDLE)
 PFFV(:)=PFFLOOD(:)*MIN(1.0,XCFFV/MAX(PLAI(:),0.1))  
@@ -96,7 +95,7 @@ REAL, DIMENSION(:), INTENT(IN)  :: PFFG    ! Floodplain fraction over the ground
 REAL, DIMENSION(:), INTENT(IN)  :: PFFV    ! Floodplain fraction over vegetation
 REAL, DIMENSION(:), INTENT(IN)  :: PFFLOOD ! Effective floodplain fraction
 REAL, DIMENSION(SIZE(PVEG))     :: PFF     ! Floodplain fraction at the surface
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_SURF_FLOOD_FRAC:FLOOD_FRAC_NAT',0,ZHOOK_HANDLE)
 PFF(:) = PVEG(:)*PFFV(:) + (1-PVEG(:))*PFFG(:)

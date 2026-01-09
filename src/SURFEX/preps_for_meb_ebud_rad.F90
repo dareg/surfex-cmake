@@ -64,8 +64,7 @@ USE MODE_SNOW3L,              ONLY : SNOW3LTHRM, SNOW3LSCAP, SNOW3LFALL,        
 !
 USE MODE_MEB,                 ONLY : MEB_SHIELD_FACTOR
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -96,7 +95,7 @@ INTEGER, DIMENSION(SIZE(PTA))                      :: NMASK      ! indices corre
 REAL, DIMENSION(SIZE(PLAICV,1))                    :: ZPSNA
 REAL, DIMENSION(SIZE(PTA))                         :: ZSNOW, ZSNOWFALL
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------
 ! 0) Initialization
 !
@@ -207,7 +206,7 @@ REAL, DIMENSION(KSIZE1)        :: ZP_TA
 REAL, DIMENSION(KSIZE1)        :: ZP_VMOD
 !
 INTEGER         :: JWRK, JJ, JI
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------
 !

@@ -46,8 +46,7 @@ USE MODI_READ_BUFFER
 USE MODD_GRID_BUFFER,  ONLY : NNI
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -64,7 +63,7 @@ TYPE (DATE_TIME)                :: TPTIME_BUF    ! current date and time
 !* 0.2 Declaration of local variables
 !      ------------------------------
 INTEGER                           :: IRET      ! return code
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !---------------------------------------------------------------------------------------
 !

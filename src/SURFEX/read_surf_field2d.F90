@@ -57,8 +57,7 @@ USE MODI_GET_NB_PROCIO_READ_MNH
 #endif
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -88,7 +87,7 @@ INTEGER           :: INB_PROCIO     ! number of processes used for Z-parallel IO
 !
 CHARACTER(LEN=1)   :: YDIR
 INTEGER :: JPATCH  ! loop counter on patches
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !

@@ -42,8 +42,7 @@ USE MODD_TYPE_EFUTIL
 !*       0.   DECLARATIONS
 !        -----------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -74,7 +73,7 @@ LOGICAL :: GFOUND
 CHARACTER(LEN=16), DIMENSION(:),POINTER :: CNAMES
 TYPE(PRONOSVAR_T),             POINTER :: HEAD,CURRENT
 INTEGER :: IEQ
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -246,7 +245,7 @@ IMPLICIT NONE
 !
  CHARACTER, PARAMETER :: YPTAB = CHAR(9) ! TAB character is ASCII : 9
 INTEGER              :: JI
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !

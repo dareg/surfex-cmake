@@ -70,8 +70,7 @@ USE MODI_GET_AOS_n
 USE MODI_GET_SSO_n
 USE MODI_PACK_PGD_ISBA
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -119,7 +118,7 @@ REAL, DIMENSION(:), ALLOCATABLE   :: ZHO2JP    ! h/2 j+ on all surface points
 REAL, DIMENSION(:), ALLOCATABLE   :: ZHO2JM    ! h/2 j- on all surface points
 REAL, DIMENSION(:), ALLOCATABLE   :: ZSSO_SLOPE! subgrid slope on all surface points
 REAL, DIMENSION(:), ALLOCATABLE   :: ZSSO_DIR
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_ISBA',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)

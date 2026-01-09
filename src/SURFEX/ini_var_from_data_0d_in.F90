@@ -55,8 +55,7 @@ USE MODD_PGDWORK,       ONLY : CATYPE
 USE MODI_PGD_FIELD
 USE MODI_READ_FROM_SURFEX_FILE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -85,7 +84,7 @@ REAL, DIMENSION(:,:), OPTIONAL, INTENT(IN) :: PVEGTYPE
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 
 !-------------------------------------------------------------------------------

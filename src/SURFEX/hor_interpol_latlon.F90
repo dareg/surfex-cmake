@@ -45,8 +45,7 @@ USE MODI_HORIBL_SURF_GRIDIN
 USE MODI_HORIBL_SURF_VALUE
 USE MODI_HORIBL_SURF_EXTRAP
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -69,7 +68,7 @@ INTEGER, DIMENSION(SIZE(NP,1),SIZE(NP,2)) :: IP
 INTEGER                            :: INO, INL     ! output number of points
 INTEGER                            :: JL, JI       ! loop counter
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !*      1.    Allocations

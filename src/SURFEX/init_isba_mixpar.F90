@@ -64,8 +64,7 @@ USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE, XDATA_VEG,         &
 USE MODI_INI_DATA_PARAM
 USE MODI_AV_PGD
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -101,7 +100,7 @@ INTEGER               :: ISIZE_LMEB_PATCH  ! Number of patches with MEB=true
 !*    0.3    Declaration of namelists
 !            ------------------------
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

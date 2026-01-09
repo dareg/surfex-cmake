@@ -28,8 +28,7 @@ SUBROUTINE SM10(PZ,PBLD_HEIGHT,PLAMBDA_F,PL)
 !!---------------------------------------------------------------
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -53,7 +52,7 @@ REAL, PARAMETER                       :: ZALPHA_CAN = 1.12  ! value to compute l
 
 INTEGER                               :: JLAYER             ! vertical loop counter
 INTEGER                               :: ILVL               ! number of layers
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !* Preliminaries:

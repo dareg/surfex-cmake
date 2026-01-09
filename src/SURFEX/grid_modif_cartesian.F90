@@ -50,8 +50,7 @@ USE MODE_POS_SURF
 USE MODE_GRIDTYPE_CARTESIAN
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_REGULAR_GRID_SPAWN
 !
@@ -107,7 +106,7 @@ INTEGER :: IXSIZE = -999       ! number of grid meshes in initial grid to be
 INTEGER :: IYSIZE = -999       ! covered by the modified grid
 INTEGER :: IDXRATIO = 1        ! resolution ratio between modified grid
 INTEGER :: IDYRATIO = 1        ! and initial grid
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !
 NAMELIST/NAM_INIFILE_CARTESIAN/IXOR,IYOR,IXSIZE,IYSIZE,IDXRATIO,IDYRATIO

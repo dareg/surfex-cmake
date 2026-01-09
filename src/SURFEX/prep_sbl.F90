@@ -32,8 +32,7 @@ SUBROUTINE PREP_SBL (KDIM, SB)
 !
 USE MODD_CANOPY_n, ONLY : CANOPY_t
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -48,7 +47,7 @@ TYPE(CANOPY_t), INTENT(INOUT) :: SB
 INTEGER :: JLAYER
 !
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZZF ! altitudes at half levels
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !

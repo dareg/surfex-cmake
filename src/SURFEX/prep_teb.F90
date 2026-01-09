@@ -68,8 +68,7 @@ USE MODD_PREP_TEB_GREENROOF, ONLY : XWSNOW_GR, XRSNOW_GR, XTSNOW_GR, XLWCSNOW_GR
 !
 USE MODD_SURF_ATM,   ONLY : LVERTSHIFT
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_CLEAN_PREP_OUTPUT_GRID
 !
@@ -105,7 +104,7 @@ TYPE (PREP_CTL),    INTENT(INOUT) :: YDCTL
 !
 INTEGER :: ILUOUT
 INTEGER :: JP         ! TEB patch number
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 !*      1.     Default of configuration

@@ -54,8 +54,7 @@ USE MODI_WRITE_BLD_DESCRIPTION_n
 USE MODI_WRITESURF_PGD_TEB_IRRIG_n
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -87,7 +86,7 @@ INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
 INTEGER           :: JL         ! loop index
 INTEGER           :: JTIME          ! loop index
 REAL, DIMENSION(:), ALLOCATABLE :: ZWORK
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

@@ -62,8 +62,7 @@ USE MODI_OL_WRITE_COORD
 USE MODI_OL_WRITE_PROJ
 USE MODD_TYPE_SNOW,ONLY : SURF_SNOW
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE NETCDF
 !
@@ -101,7 +100,7 @@ INTEGER                          :: IDIM1, IDIM2, INDIMS
 INTEGER                          :: INI, JFILE
 INTEGER                          :: JRET
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 

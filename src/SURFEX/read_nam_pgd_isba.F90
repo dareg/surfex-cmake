@@ -64,8 +64,7 @@ USE MODI_CLOSE_NAMELIST
 USE MODE_POS_SURF
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -174,7 +173,7 @@ REAL                     :: XUNIF_SOC_TOP ! uniform value of organic carbon (kg/
 REAL                     :: XUNIF_SOC_SUB ! uniform value of organic carbon (kg/m2)
 LOGICAL                  :: LIMP_SOC      ! Imposed maps of organic carbon
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_ISBA/ NPATCH, NGROUND_LAYER, CISBA, CPEDO_FUNCTION, CPHOTO,   &
                    LTR_ML, CALBEDO, XRM_PATCH, YCLAY, YCLAYFILETYPE, XUNIF_CLAY,  &

@@ -52,8 +52,7 @@ USE MODI_WRITE_SURF
 USE MODI_WRITESURF_GR_SNOW
 USE MODD_DST_SURF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -86,7 +85,7 @@ INTEGER :: JL, JI ! loop counter on soil layers
 REAL, DIMENSION(:),ALLOCATABLE  :: ZWORK      ! 2D array to write data in file
 !
 INTEGER :: JNBIOMASS
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !

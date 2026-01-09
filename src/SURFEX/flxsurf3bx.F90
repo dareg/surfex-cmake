@@ -25,8 +25,7 @@
      &                   TG , QG , H , Z0 , Z0T,                        &
      &                   LZZ0, LZZ0T, FM, FH, N )
 !
-      USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-      USE PARKIND1  ,ONLY : JPRB
+      USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !RJ: added modi, after freeform conversion
       USE MODI_VSLOG
 !
@@ -168,7 +167,7 @@
       REAL :: ZB,DD,ILMOX
       REAL :: DF,ZZ,betsasx
       REAL :: aa,bb,cc
-      REAL(KIND=JPRB) :: ZHOOK_HANDLE
+      REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
       DF(ZZ)=(1-ZZ*hi)*sqrt(1+4*AS*BETA*unsl*ZZ/(1-ZZ*hi))
       CS=AS*2.5

@@ -64,8 +64,7 @@ USE MODI_OPEN_FILE
 USE MODI_CLOSE_FILE
 USE MODI_TOPD_TO_ISBA_SLOPE
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -108,7 +107,7 @@ REAL                              :: ZBETA    ! angle between grid and reference
 REAL                              :: ZLATOR   ! latitude  of point of coordinates X=0, Y=0
 REAL                              :: ZLONOR   ! longitude of point of coordinates X=0, Y=0!
 REAL, DIMENSION(:), ALLOCATABLE   :: ZF_PARAM,ZC_DEPTH_RATIO  !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('PGD_TOPD',0,ZHOOK_HANDLE)
 !

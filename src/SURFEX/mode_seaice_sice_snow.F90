@@ -1,7 +1,6 @@
 MODULE MODE_SEAICE_SICE_SNOW
 USE MODE_SEAICE_SICE
-USE YOMHOOK,   ONLY : LHOOK,   DR_HOOK
-USE PARKIND1,  ONLY : JPRB
+USE YOMHOOK,   ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 PRIVATE
 
@@ -58,7 +57,7 @@ IMPLICIT NONE
   CLASS(SICE_SNOW_t) ::THIS
   CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM
 
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('SEAICE_SICE_SNOW:INIT', 0, ZHOOK_HANDLE)
   THIS%NUM_LAYERS = 12
@@ -77,7 +76,7 @@ IMPLICIT NONE
   CHARACTER(LEN=28),  INTENT(IN)  :: HPGDFILE    !< name of the PGD file
   CHARACTER(LEN=6),   INTENT(IN)  :: HPGDFILETYPE!< type of the PGD file
 
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('SEAICE_SICE_SNOW:PREP', 0, ZHOOK_HANDLE)
 
@@ -130,7 +129,7 @@ IMPLICIT NONE
     ZSNOWH1, &
     ZSNOWSWE_1D
 
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('SEAICE_SICE_SNOW:RUN', 0, ZHOOK_HANDLE)
 
@@ -280,7 +279,7 @@ IMPLICIT NONE
 
   TYPE(DATE_TIME) :: TPTIME
 
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('SEAICE_SICE_SNOW:RUN_INTERNAL', 0, ZHOOK_HANDLE)
 
@@ -436,7 +435,7 @@ IMPLICIT NONE
     PEVAP
   LOGICAL :: LREMOVE_SNOW(FORC%KSIZE)
 
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('SEAICE_SICE_SNOW:POST_RUN', 0, ZHOOK_HANDLE)
 
@@ -497,7 +496,7 @@ IMPLICIT NONE
 
   REAL, PARAMETER :: ZCHECK_TEMP = 50.0
   INTEGER :: JWRK, JJ
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('SEAICE_SICE_SNOW:SAFETY_GUARD', 0, ZHOOK_HANDLE)
 
@@ -523,7 +522,7 @@ IMPLICIT NONE
 
   INTEGER :: JJ, JWRK
   REAL :: ZSNOWD(THIS%NUM_POINTS)
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('SEAICE_SICE_SNOW:EXISTS', 0, ZHOOK_HANDLE)
 
@@ -542,7 +541,7 @@ END FUNCTION EXISTS
 SUBROUTINE DEALLOC(THIS)
 IMPLICIT NONE
   CLASS(SICE_SNOW_t) :: THIS
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('SEAICE_SICE_SNOW:DEALLOC', 0, ZHOOK_HANDLE)
 
@@ -573,7 +572,7 @@ IMPLICIT NONE
   REAL, INTENT(OUT), OPTIONAL :: PTSUR(M)
   REAL, INTENT(OUT), OPTIONAL :: PALB(M)
   REAL, INTENT(OUT), OPTIONAL :: PDEPTH(M) !< Total snow thickness
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('SEAICE_SICE_SNOW:GET_RESPONSE', 0, ZHOOK_HANDLE)
 
@@ -601,7 +600,7 @@ END SUBROUTINE GET_RESPONSE
 SUBROUTINE ALLOCA(THIS)
 IMPLICIT NONE
   CLASS(SICE_SNOW_t) :: THIS
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('SEAICE_SICE_SNOW:ALLOCA', 0, ZHOOK_HANDLE)
 
@@ -634,57 +633,63 @@ IMPLICIT NONE
 
   INTEGER, PARAMETER :: NUM_FIELDS = 12
 
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
   IF( LHOOK ) CALL DR_HOOK( 'SEAICE_SICE_SNOW:GET_MODEL_FIELDS', 0, ZHOOK_HANDLE )
 
   ALLOCATE( MF(NUM_FIELDS) )
 
-  MF(:) = [MODEL_FIELD(                      &
+  MF(1) = MODEL_FIELD(                       &
       'WSN_ICE',                             &
       'Snow water equivalent',               &
       'Kg/m2',                               &
       [THIS%NUM_POINTS, THIS%NUM_LAYERS],    &
       P2 = THIS%SWE,                         &
       XDEFAULT = 0.                          &
-    ),                                       &
-    MODEL_FIELD(                             &
+    )
+
+  MF(2) = MODEL_FIELD(                       &
       'RSN_ICE',                             &
       'Snow density',                        &
       'Kg/m3',                               &
       [THIS%NUM_POINTS, THIS%NUM_LAYERS],    &
       P2 = THIS%RHO,                         &
       XDEFAULT = XRHOSMIN_ES                 &
-    ),                                       &
-    MODEL_FIELD(                             &
+    )
+
+  MF(3) = MODEL_FIELD(                       &
       'HSN_ICE',                             &
       'Snow heat content',                   &
       'Kg/m3',                               &
       [THIS%NUM_POINTS, THIS%NUM_LAYERS],    &
       P2 = THIS%HEAT,                        &
       XDEFAULT = 0.                          &
-    ),                                       &
-    MODEL_FIELD(                             &
+    )
+
+  MF(4) = MODEL_FIELD(                       &
       'GSN_ICE',                             &
       'Snow age',                            &
       's',                                   &
       [THIS%NUM_POINTS, THIS%NUM_LAYERS],    &
       P2 = THIS%AGE                          &
-    ),                                       &
-    MODEL_FIELD(                             &
+    )
+
+  MF(5) = MODEL_FIELD(                       &
       'ASN_ICE',                             &
       'Snow albedo',                         &
       'dimensionless',                       &
       [THIS%NUM_POINTS, 0],                  &
       P1 = THIS%ALBEDO                       &
-    ),                                       &
-    MODEL_FIELD(                             &
+    )
+
+  MF(6) = MODEL_FIELD(                       &
       'TSN_ICE',                             &
       'Snow temperature',                    &
       'K',                                   &
       [THIS%NUM_POINTS, THIS%NUM_LAYERS],    &
       P2 = THIS%T                            &
-    ),                                       &
-    MODEL_FIELD(                             &
+    )
+
+  MF(7) = MODEL_FIELD(                       &
       'DSN_ICE',                             &
       'Snow thickness',                      &
       'm',                                   &
@@ -692,8 +697,9 @@ IMPLICIT NONE
       .TRUE.,                                &
       P2 = THIS%DZ,                          &
       XDEFAULT = 0.                          &
-    ),                                       &
-    MODEL_FIELD(                             &
+    )
+
+  MF(8) = MODEL_FIELD(                       &
       'LWSN_ICE',                            &
       'Snow liquid water',                   &
       'm',                                   &
@@ -701,8 +707,9 @@ IMPLICIT NONE
       .TRUE.,                                &
       P2 = THIS%LIQ_WATER,                   &
       XDEFAULT = 0.                          &
-    ),                                       &
-    MODEL_FIELD(                             &
+    )
+
+  MF(9) = MODEL_FIELD(                       &
       'DSN_T_ICE',                           &
       'Total snow thickness',                &
       'm',                                   &
@@ -710,11 +717,12 @@ IMPLICIT NONE
       .TRUE.,                                &
       P1 = THIS%DZ_TOT,                      &
       XDEFAULT = 0.                          &
-    ),                                       &
-    MODEL_FIELD( NCONFIG=[0,0], P1 = THIS%THRUFAL,   LINTERNAL = .TRUE., XDEFAULT = 0. ), &
-    MODEL_FIELD( NCONFIG=[0,0], P1 = THIS%GRND_FLUX, LINTERNAL = .TRUE., XDEFAULT = 0. ), &
-    MODEL_FIELD( NCONFIG=[0,0], P1 = THIS%EVAP_COR,  LINTERNAL = .TRUE., XDEFAULT = 0. )  &
-  ]
+    )
+
+  MF(10) = MODEL_FIELD( NCONFIG=[0,0], P1 = THIS%THRUFAL,   LINTERNAL = .TRUE., XDEFAULT = 0. )
+  MF(11) = MODEL_FIELD( NCONFIG=[0,0], P1 = THIS%GRND_FLUX, LINTERNAL = .TRUE., XDEFAULT = 0. )
+  MF(12) = MODEL_FIELD( NCONFIG=[0,0], P1 = THIS%EVAP_COR,  LINTERNAL = .TRUE., XDEFAULT = 0. )  
+
   IF( LHOOK ) CALL DR_HOOK( 'SEAICE_SICE_SNOW:GET_MODEL_FIELDS', 1, ZHOOK_HANDLE )
 END SUBROUTINE GET_MODEL_FIELDS
 END MODULE MODE_SEAICE_SICE_SNOW

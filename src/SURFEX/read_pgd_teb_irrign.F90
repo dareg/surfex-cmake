@@ -50,8 +50,7 @@ USE MODI_READ_SURF
 USE MODI_GET_LUOUT
 USE MODI_ABOR1_SFX
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -78,7 +77,7 @@ INTEGER           :: JLAYER         ! loop index
 INTEGER           :: IVERSION       ! surface version
 INTEGER           :: IBUGFIX        ! surface bugfix version
 REAL, DIMENSION(G%NDIM) :: ZWORK      ! work array
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('READ_PGD_TEB_IRRIG_N',0,ZHOOK_HANDLE)

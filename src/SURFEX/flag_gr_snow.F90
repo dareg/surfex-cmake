@@ -46,8 +46,7 @@ USE MODD_PREP_SNOW, ONLY : NIMPUR
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -63,7 +62,7 @@ TYPE(SURF_SNOW), INTENT(INOUT) :: TPSNOW   ! snow characteristics
 !
 REAL            :: ZVAL
 INTEGER         :: JLAYER,JIMP
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('FLAG_GR_SNOW',0,ZHOOK_HANDLE)
 !

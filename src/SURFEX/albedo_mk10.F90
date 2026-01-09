@@ -42,8 +42,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -54,7 +53,7 @@ REAL, DIMENSION(:), INTENT(IN)  :: PZENITH     ! zenithal angle (radian)
 !
 REAL, DIMENSION(SIZE(PZENITH))  :: PDIR_ALB    ! direct albedo on water
 REAL, DIMENSION(SIZE(PZENITH))  :: ZCOSZRS     ! Cosine of solar zenith angle
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !

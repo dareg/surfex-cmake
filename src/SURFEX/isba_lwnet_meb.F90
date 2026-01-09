@@ -63,8 +63,7 @@ USE MODD_ISBA_PAR,       ONLY : XEMISSOIL, XEMISVEG
 !
 USE MODE_MEB,  ONLY : MEB_SHIELD_FACTOR
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -120,7 +119,7 @@ REAL, PARAMETER             :: ZTGRAD_MAX = 60. ! K When Tn-Tv approaches this d
 REAL, PARAMETER             :: ZTGRAD_DIF = 10. ! K This is the range in Tn-Tv over which dLWnet_n/dTn 
                                                 !   linearly vanishes. See below for details.
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*       0.     Initialization:
@@ -250,7 +249,7 @@ REAL, DIMENSION(:),   INTENT(OUT) :: PLW_A, PLW_B, PLW_C, PLW_D, PLW_E, PLW_F, &
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
 REAL, DIMENSION(SIZE(PLW_RAD))    :: ZWORK
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !--------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('LW_FLUX_COMP',0,ZHOOK_HANDLE)
 

@@ -12,14 +12,13 @@ SUBROUTINE DEFAULT_ALB_SOIL_ECO2
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -2271,14 +2270,13 @@ SUBROUTINE DEFAULT_ALB_VEG_ECO2_01
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -2441,14 +2439,13 @@ SUBROUTINE DEFAULT_ALB_VEG_ECO2_02
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -2611,14 +2608,13 @@ SUBROUTINE DEFAULT_ALB_VEG_ECO2_03
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -2781,14 +2777,13 @@ SUBROUTINE DEFAULT_ALB_VEG_ECO2_04
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -5039,14 +5034,13 @@ SUBROUTINE DEFAULT_ALB_VEG_ECO2_05
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -7297,14 +7291,13 @@ SUBROUTINE DEFAULT_ALB_VEG_ECO2_06
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -9555,14 +9548,13 @@ SUBROUTINE DEFAULT_ALB_VEG_ECO2_07
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -11813,14 +11805,13 @@ SUBROUTINE DEFAULT_ALB_VEG_ECO2_08
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -14071,14 +14062,13 @@ SUBROUTINE DEFAULT_ALB_VEG_ECO2_09
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -16329,14 +16319,13 @@ SUBROUTINE DEFAULT_ALB_VEG_ECO2_10
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -18587,14 +18576,13 @@ SUBROUTINE DEFAULT_ALB_VEG_ECO2_11
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -20845,14 +20833,13 @@ SUBROUTINE DEFAULT_ALB_VEG_ECO2_12
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -23103,14 +23090,13 @@ SUBROUTINE DEFAULT_ALB_VEG_ECO2_13
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -25361,14 +25347,13 @@ SUBROUTINE DEFAULT_ALB_VEG_ECO2_14
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -27619,14 +27604,13 @@ SUBROUTINE DEFAULT_ALB_VEG_ECO2_15
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -29877,14 +29861,13 @@ SUBROUTINE DEFAULT_ALB_VEG_ECO2_16
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -32135,14 +32118,13 @@ SUBROUTINE DEFAULT_ALB_VEG_ECO2_17
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -32305,14 +32287,13 @@ SUBROUTINE DEFAULT_ALB_VEG_ECO2_18
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !
@@ -34563,14 +34544,13 @@ SUBROUTINE DEFAULT_ALB_VEG_ECO2_19
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
 USE MODD_DATA_COVER
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 IMPLICIT NONE
 !
 !*    Declaration of local variables
 !     ------------------------------ 
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 !

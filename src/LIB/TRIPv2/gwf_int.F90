@@ -7,8 +7,7 @@
 !
 USE MODD_TRIP_PAR, ONLY : XPI
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -32,7 +31,7 @@ REAL, DIMENSION(KLON,KLAT)     :: ZT
 REAL                           :: ZDLAT
 INTEGER                        :: JLON, JLAT
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GWF_INT',0,ZHOOK_HANDLE)

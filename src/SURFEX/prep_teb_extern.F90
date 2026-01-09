@@ -37,8 +37,7 @@ USE MODD_PREP_TEB,   ONLY : XGRID_ROAD, XGRID_WALL, XGRID_ROOF, &
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
 USE MODD_SURF_PAR, ONLY: XUNDEF
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -89,7 +88,7 @@ LOGICAL                              :: GTEB      ! flag if TEB fields are prese
 INTEGER                              :: IPATCH    ! number of soil temperature patches
 INTEGER                              :: ITEB_PATCH! number of TEB patches in file
  CHARACTER(LEN=3)                     :: YPATCH    ! indentificator for TEB patch
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 !*      1.     Preparation of IO for reading in the file

@@ -42,8 +42,7 @@ USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 !
 USE MODD_IO_SURF_ASC,ONLY : NNI_FORC
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 USE MODI_ABOR1_SFX
 !
@@ -61,7 +60,7 @@ IMPLICIT NONE
 !              -------------------------------
 !
 INTEGER :: INI
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('OPEN_CLOSE_BIN_ASC_FORC',0,ZHOOK_HANDLE)

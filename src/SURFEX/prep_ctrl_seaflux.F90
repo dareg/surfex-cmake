@@ -42,8 +42,7 @@ USE MODD_DIAG_n, ONLY : DIAG_OPTIONS_t
 !
 USE MODI_PREP_CTRL
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -60,7 +59,7 @@ INTEGER,  INTENT(IN)    :: KLUOUT             ! unit number
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PREP_CTRL_SEAFLUX',0,ZHOOK_HANDLE)

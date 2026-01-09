@@ -43,8 +43,7 @@ USE MODI_GET_GRID_DIM
 USE MODI_ZSFILTER
 !
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
 IMPLICIT NONE
 !
@@ -72,7 +71,7 @@ INTEGER :: JX       ! loop counter
 INTEGER :: JY       ! loop counter
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZZS ! orography in a 2D array
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZSEA! sea fraction in a 2D array
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*    1.     Gets the geometry of the grid
