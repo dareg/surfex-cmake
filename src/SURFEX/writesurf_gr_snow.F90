@@ -278,8 +278,11 @@ ELSE
               KI,PWSN_WR(:,JL,:))
       ELSE
         ! A hack to avoid bounds violation. Or the null field should not be written out. REK.
+        !CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,KPATCH,KMASK_P,TPSNOW%WSNOW(:,JL),&
+        !      KI,PWSN_WR(:,:,1))
+        PRINT*,"WARNING: Hack deactivated, causes Harmonie-Arome to crash (segfault). To be fixed properly"
         CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,KPATCH,KMASK_P,TPSNOW%WSNOW(:,JL),&
-              KI,PWSN_WR(:,:,1))
+              KI,PWSN_WR(:,JL,:))
       ENDIF
       !
       !*       7.    Snow density
@@ -295,8 +298,11 @@ ELSE
               KI,PRHO_WR(:,JL,:))
       ELSE
         ! A hack to avoid bounds violation. Or the null field should not be written out. REK.
+        !CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,KPATCH,KMASK_P,TPSNOW%RHO(:,JL),&
+        !      KI,PRHO_WR(:,:,1))
+        PRINT*,"WARNING: Hack deactivated, causes Harmonie-Arome to crash (segfault). To be fixed properly"
         CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,KPATCH,KMASK_P,TPSNOW%RHO(:,JL),&
-              KI,PRHO_WR(:,:,1))
+              KI,PRHO_WR(:,JL,:))
       ENDIF
       !
     END IF
