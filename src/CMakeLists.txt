@@ -27,6 +27,9 @@ ecbuild_add_option( FEATURE SINGLE_PRECISION
 ecbuild_add_option( FEATURE SFX_MPI
   DEFAULT OFF
   DESCRIPTION "Activate the SFX_MPI preprocessor macro" )
+ecbuild_add_option( FEATURE OMP
+  DESCRIPTION "Support for OpenMP shared memory parallelism"
+  REQUIRED_PACKAGES "OpenMP COMPONENTS Fortran" )
 
 if(${HAVE_DOUBLE_PRECISION})
   list(APPEND PRECISIONS "dp")
@@ -64,6 +67,10 @@ foreach(PRECISION ${PRECISIONS})
         $<INSTALL_INTERFACE:include/${LIBNAME}>
         $<INSTALL_INTERFACE:module/${LIBNAME}>
   )
+
+  if( HAVE_OMP )
+    target_link_libraries(${LIBNAME} PRIVATE OpenMP::OpenMP_Fortran )
+  endif()
 
   if(HAVE_SINGLE_PRECISION AND HAVE_DOUBLE_PRECISION)
     ecbuild_info("both precisions are activated code will be erased between the two compilations")
@@ -140,6 +147,11 @@ foreach(FILEPATH ${SRC_PROGRAMS})
   if(${HAVE_SFX_MPI})
     target_compile_definitions(${EXENAME} PRIVATE SFX_MPI)
   endif()
+
+  if( HAVE_OMP )
+    target_link_libraries(${EXENAME} PRIVATE OpenMP::OpenMP_Fortran )
+  endif()
+
 
   endforeach()
 endforeach()
