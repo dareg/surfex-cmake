@@ -797,7 +797,6 @@ IMPLICIT NONE
      IF (SIZE(THIS%XSSS) > 0) THEN
         THIS%TGLT%oce_all(:,1)%tml=ZSST(:)
         IF (THIS%LINTERPOL_SIC) THIS%TGLT%sit_d(1,:,1)%fsi=ZSIC(:)
-        !WRITE (0, *) __FILE__, ':', __LINE__ ,'ANTMPTEST ',THIS%TGLT%sit_d(1,:,1)%fsi,THIS%GLTPARAM%CCSVDMP
         IF (THIS%LINTERPOL_SIT) THIS%TGLT%sit_d(1,:,1)%hsi=PFSIT(:)
         ! Gelato will compute heat flux from ocean by itself, thanks to
         ! imposed namelist parameter nextqoc=0
@@ -1048,7 +1047,6 @@ USE MODI_ABOR1_SFX
 !S%GLTPARAM%CCSVDMP=THIS%CONSTRAIN_CSV
 !THIS%GLTPARAM%CCSVDMP=HCONSTRAIN_CSV !ANTMPTEST
 !THIS%GLTPARAM%CCSVDMP='NONE' !ANTMPTEST
-!WRITE (0, *) __FILE__, ':', __LINE__ ,'ANTMPTEST ', THIS%GLTPARAM%CCSVDMP
 
   !
   !* Physical dimensions are set for Gelato , as a 1D field (second dimension is degenerated)
