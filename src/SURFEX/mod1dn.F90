@@ -110,7 +110,7 @@ REAL, DIMENSION(SIZE(PSFTH)) :: ZSEASALI     !surface salinity
 LOGICAL         :: GCALLMIXT, GTIMEOK
 INTEGER         :: ILUOUT              ! output listing logical unit
 REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
-REAL :: ZCOEF
+REAL :: ZCOEFF
 !
 !-------------------------------------------------------------------------------
 !
@@ -124,7 +124,11 @@ NOCEAN_STEP=INT(O%XOCEAN_TSTEP)
 GTIMEOK=(MOD(ITIME,NOCEAN_STEP)==0)
 GCALLMIXT=((MOD(ITIME,NOCEAN_STEP)==0).AND.(O%NOCTCOUNT>0))
 !
-ZCOEF=O%XCMO_COEF
+IF (O%LCMO_COEFF) THEN
+  ZCOEFF=1.1
+ELSE
+  ZCOEFF=1.0
+ENDIF
 !
 !Call 1D model if ptime proportional to the oceanic model time step
 !
@@ -135,11 +139,11 @@ IF (GCALLMIXT) THEN
 !Computation of solar, non solar and fresh water fluxes
   DO JPT=1,SIZE(PSFTH)
  !SW Flux up
-    ZSWU(JPT,:)= ZCOEF * ( PDIR_SW(JPT,:) * PDIR_ALB(JPT,:) + PSCA_SW(JPT,:)*PSCA_ALB(JPT,:) )
+    ZSWU(JPT,:)= ZCOEFF * ( PDIR_SW(JPT,:) * PDIR_ALB(JPT,:) + PSCA_SW(JPT,:)*PSCA_ALB(JPT,:) )
  !Net solar flux  
     ZFSOL(JPT)=(SUM(PDIR_SW(JPT,:))+SUM(PSCA_SW(JPT,:))-SUM(ZSWU(JPT,:)))/(XRHOSW*XCPSW)
  !Calcul flux LW UP
-    ZLWU(JPT)= ZCOEF * PEMIS(JPT)*XSTEFAN*S%XSST(JPT)**4 + (1-PEMIS(JPT))*PLW(JPT)
+    ZLWU(JPT)= ZCOEFF * PEMIS(JPT)*XSTEFAN*S%XSST(JPT)**4 + (1-PEMIS(JPT))*PLW(JPT)
    
     IF (S%XSST(JPT)<=(XTT-2)) THEN
       ZFNSOL(JPT)=(PLW(JPT)-ZLWU(JPT)-PSFTH(JPT)-(XLSTT*PSFTQ(JPT)))/(XRHOSW*XCPSW)

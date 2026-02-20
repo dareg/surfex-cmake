@@ -47,8 +47,9 @@ LOGICAL:: LCURRENT    !set to .true. to make initialize ocean state with current
 LOGICAL:: LPROGSST    !set to .true. to make SST evolve with tendance
 INTEGER:: NTIME_COUPLING! coupling time frequency 
 INTEGER:: NOCTCOUNT   !oceanic model counter
+LOGICAL :: LREAD_CURRENT
+LOGICAL :: LCMO_COEFF
 REAL :: XOCEAN_TSTEP       ! time step of the oceanic 1D model
-REAL :: XCMO_COEF       
 !
 ! General surface: 
 !
@@ -105,7 +106,8 @@ YOCEAN%LPROGSST=.FALSE.
 YOCEAN%NTIME_COUPLING=0
 YOCEAN%NOCTCOUNT=0
 YOCEAN%XOCEAN_TSTEP=5*60.
-YOCEAN%XCMO_COEF=1.
+YOCEAN%LREAD_CURRENT=.TRUE.
+YOCEAN%LCMO_COEFF=.FALSE.
 IF (LHOOK) CALL DR_HOOK("MODD_OCEAN_N:OCEAN_INIT",1,ZHOOK_HANDLE)
 END SUBROUTINE OCEAN_INIT
 
