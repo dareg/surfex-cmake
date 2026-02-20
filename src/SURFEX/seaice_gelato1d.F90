@@ -753,8 +753,11 @@ IMPLICIT NONE
   ! Ocean part
   !----------------------------------------------------------------------------------
   ! Surface salinity
-  THIS%TGLT%oce_all(:,1)%sml=THIS%XSSS(:)
-
+  !!! SECURITY SALINITY SEA 
+  !!! (for ice solver in single precision, the sea ice MUST be salty,
+  !!!   so the sea must be salty if new ice is created)
+  THIS%TGLT%oce_all(:,1)%sml=max(5.,THIS%XSSS(:))
+  !
   ! Ensure that SSS-dependant freezing point temperature is used on
   ! locations where SIC (or SST) forcing value calls for it
 
@@ -1156,7 +1159,15 @@ USE MODI_ABOR1_SFX
      ENDWHERE
      !
   END DO
-
+  !
+  !!! SECURITY SALINITY SEA ICE 
+  !!! (for ice solver in single precision, the sea ice MUST be salty)
+  DO JX=1, THIS%GLTPARAM%nx
+    DO JL=1, THIS%GLTPARAM%nt
+      THIS%TGLT%sit(JL,JX,1)%ssi=max(5.,THIS%TGLT%sit(JL,JX,1)%ssi)
+    ENDDO
+  ENDDO
+  !
   !    5. Initalize Gelato domain parameters
   !
   !    All points of Surfex 1D grid in seaflux are sea points
