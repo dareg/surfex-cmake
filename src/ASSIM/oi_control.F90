@@ -936,7 +936,7 @@ IF (LDGELATO .AND. LAESIC)THEN
   PSIC_O(:)=PSIC_O(:)/100._JPRB !convert from percentage to fraction of unit
   DO JJ= 1,ISIZE
     IF (YSC%U%XSEA(JJ)>0.0_JPRB) THEN
-      IF (PSIC(JJ)<=1.1 .AND. PSIC(JJ)>=0.) THEN
+      IF (PSIC(JJ)<=1.1 .AND. PSIC(JJ)>=0. .AND. PSIC_O(JJ)<=1._JPRB .AND. PSIC_O(JJ)>=0.) THEN
         !1. first update ice fraction PSIC
         PSIC(JJ)=PCLISST*PSIC_O(JJ)+(1.0_JPRB-PCLISST)*PSIC(JJ)
         !1.2 if sic to high, replace by 1
