@@ -53,8 +53,15 @@ USE MODI_HOR_INTERPOL
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NCOMM, NPROC, LSFX_MPI
 USE MODI_ABOR1_SFX
+
 IMPLICIT NONE
+
+#ifdef SFX_MPI
+INCLUDE 'mpif.h'
+#endif
+
 !
 !*      0.1    declarations of arguments
 !
@@ -85,6 +92,7 @@ REAL, ALLOCATABLE, DIMENSION(:,:,:)::ZFIELDOUT!field interpolated horizontally
 !
 INTEGER                       :: JLEV, JLEV2    ! loop on oceanic vertical level
 INTEGER                       :: IK1
+INTEGER                       :: INL, INP, INFOMPI
 REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !*      1.     Does the field exist?
@@ -110,12 +118,28 @@ END IF
 !
 !*      3.     Horizontal interpolation
 !
-ALLOCATE(ZFIELDOUT  (KLAT,SIZE(ZFIELDIN,2),SIZE(ZFIELDIN,3)) )
+IF (.NOT.ASSOCIATED(ZFIELDIN)) THEN
+  ALLOCATE(ZFIELDIN(0,0,0))
+ENDIF
 ALLOCATE(ZFIELD(SIZE(ZFIELDIN,1),SIZE(ZFIELDIN,3)))
+
+INL = SIZE(ZFIELDIN,2)
+INP = SIZE(ZFIELDIN,3)
+
+IF (NPROC>1) THEN
+#ifdef SFX_MPI
+  IF (LSFX_MPI) THEN
+    CALL MPI_BCAST(INL,KIND(INL)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
+    CALL MPI_BCAST(INP,KIND(INP)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
+  ENDIF
+#endif
+ENDIF
+ALLOCATE(ZFIELDOUT(KLAT,INL,INP))
+
 !
-DO JLEV=1,SIZE(ZFIELDIN,2)
+DO JLEV=1,INL
   WHERE (PSEABATHY(:)-XZHOC(JLEV)>0.) LINTERP(:) = .FALSE.
-  ZFIELD(:,:)=ZFIELDIN(:,JLEV,:)
+  IF (SIZE(ZFIELDIN) > 0) ZFIELD(:,:)=ZFIELDIN(:,JLEV,:)
   CALL HOR_INTERPOL(DTCO, U, GCP, KLUOUT,ZFIELD,ZFIELDOUT(:,JLEV,:))
   LINTERP(:) = .TRUE.
 ENDDO

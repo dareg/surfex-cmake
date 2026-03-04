@@ -63,7 +63,7 @@ REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZFIELDIN
 INTEGER, DIMENSION(:,:,:), ALLOCATABLE :: ILSMIN  
 INTEGER, DIMENSION(:,:), ALLOCATABLE :: IMASKIN  ! input mask
 INTEGER, DIMENSION(:), ALLOCATABLE :: IMASKOUT ! output mask
-INTEGER, DIMENSION(:), POINTER :: IMASK=>NULL()
+INTEGER, DIMENSION(:), ALLOCATABLE :: IMASK
 INTEGER, DIMENSION(SIZE(NP,1),SIZE(NP,2)) :: IP
 INTEGER                            :: INO, INL     ! output number of points
 INTEGER                            :: JL, JI       ! loop counter
@@ -101,6 +101,7 @@ DO JL=1,SIZE(NP,2)
     IP(JI,JL) = IMASK(NP(JI,JL))
   ENDDO
 ENDDO
+DEALLOCATE(IMASK)
 !
 !*      3. Interpolation with horibl
 !
@@ -117,7 +118,6 @@ ENDDO
 !
 !*      6.    Deallocations
 !
-IMASK => NULL()
 DEALLOCATE(IMASKIN )
 DEALLOCATE(IMASKOUT)
 DEALLOCATE(ZFIELDIN)

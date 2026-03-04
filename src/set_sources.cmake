@@ -1013,6 +1013,7 @@ set (SRC
 	"SURFEX/mode_write_surf_asc.F90"
 	"SURFEX/mode_write_surf_cov.F90"
 	"SURFEX/mode_write_surf_fa.F90"
+	"SURFEX/mode_prep_ctl.F90"
 	"SURFEX/modify_tree_height.F90"
 	"SURFEX/modn_agri.F90"
 	"SURFEX/modn_chs_orilam.F90"

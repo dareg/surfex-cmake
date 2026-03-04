@@ -30,12 +30,11 @@
 !
 USE EGGANGLES,ONLY : LOLA, ANGLE_DOMAIN
 !
-USE MODD_GET_MESH_INDEX_GAUSS, ONLY : XXCEN, XYCEN, XYINF, XYSUP, XXINF, XXSUP,       &
+USE MODD_GET_MESH_INDEX_GAUSS, ONLY : XYINF, XYSUP, XXINF, XXSUP,       &
                                       NNLATI, NNLOPA, XLAPO, XLOPO, XCODIL, XSINTS,   &
                                       XLON, XLAT, XCOST, XSINTC, XCOSN, XSINN, XLONP, &
                                       XLATP, XCOSP, XSINP, XPI, X1, X2, XDR,          &
-                                      NFRACDX, NFRACGX, NFRACDY, NFACTY, XXDIF, XYDIF,&
-                                      LROTSTRETCH
+                                      NFRACDX, XYCEN, LROTSTRETCH
 !
 USE MODE_GRIDTYPE_GAUSS
 !
@@ -53,8 +52,8 @@ REAL,    DIMENSION(:),         INTENT(IN)   :: PGRID_PAR ! grid parameters
 REAL,    DIMENSION(:),         INTENT(IN)   :: PLAT      ! latitude of the point  (degrees)
 REAL,    DIMENSION(:),         INTENT(IN)   :: PLON      ! longitude of the point (degrees)
 INTEGER, DIMENSION(:,:),       INTENT(OUT)  :: KINDEX    ! index of the grid mesh where the point is
-INTEGER, DIMENSION(:,:),      INTENT(OUT)   :: KISSOX    ! X index of the subgrid mesh
-INTEGER, DIMENSION(:,:),      INTENT(OUT)   :: KISSOY    ! Y index of the subgrid mesh
+INTEGER, DIMENSION(:,:),       INTENT(OUT)  :: KISSOX    ! X index of the subgrid mesh
+INTEGER, DIMENSION(:,:),       INTENT(OUT)  :: KISSOY    ! Y index of the subgrid mesh
 INTEGER, DIMENSION(:,:),       INTENT(OUT)  :: KFISSOX   ! X index of the fractional subgrid mesh
 INTEGER, DIMENSION(:,:),       INTENT(OUT)  :: KFISSOY   ! Y index of the fractional subgrid mesh
 !
@@ -69,16 +68,23 @@ REAL, DIMENSION(SIZE(PLAT))       :: ZX, ZY       ! pseudo longitude of input po
 REAL, DIMENSION(SIZE(PLAT))       :: ZVALUE
 REAL :: ZPC2
 REAL :: ZNODATA
+REAL :: ZSSOX, ZSSOY, ZSSO, ZFSSO
+REAL :: ZRVRS90, RVRS360, ZNLATI
+REAL(KIND=8) :: RVRSDP360
+REAL(KIND=8), DIMENSION(:), ALLOCATABLE :: RDPNLOPA
 !
-INTEGER, DIMENSION(SIZE(PLAT))    :: ICJ
 INTEGER :: ILGRID, ISIZE_LON, ISIZE_DLAT, INBLINES  ! number of grid points
-INTEGER :: IFACTX, ISIZEX, ISIZEY
-INTEGER :: JI, JJ, JL       ! loop counter in x
-INTEGER :: JGRID, IGRID0    ! loop counter on grid  points
+INTEGER :: JI, JL       ! loop counter in x
+INTEGER :: IOFF, IINDEX, ILAT, ILON, IGUESS
+
+LOGICAL :: LLREPRO_SINGLE_PGD_GAUSS ! .TRUE. to reproduce the results of the former algorithm in single precision.
 !
-REAL(KIND=JPHOOK) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE, ZHOOK_HANDLE2, ZHOOK_HANDLE4
 !----------------------------------------------------------------------------
 !
+LLREPRO_SINGLE_PGD_GAUSS=(KIND(RVRSDP360)/=KIND(RVRS360))
+!LLREPRO_SINGLE_PGD_GAUSS=.FALSE.
+
 IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_1',0,ZHOOK_HANDLE)
 !
 IF (PRESENT(PVALUE) .AND. PRESENT(PNODATA)) THEN
@@ -89,14 +95,13 @@ ELSE
   ZNODATA = 0
 ENDIF
 !
-KINDEX(:,:) = 0
-KISSOX(:,:) = 0
-KISSOY(:,:) = 0
-KFISSOX(:,:) = 0
-KFISSOY(:,:) = 0
-!
+IF (KSSO /=0) ZSSO =FLOAT(KSSO)
+IF (KFSSO/=0) ZFSSO=FLOAT(KFSSO)
+
 IF (.NOT. ALLOCATED(NNLOPA)) THEN
   !
+  IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_2',0,ZHOOK_HANDLE2)
+
   !*    1.     Gets parameters of the projection
   !            ---------------------------------
   !
@@ -105,13 +110,15 @@ IF (.NOT. ALLOCATED(NNLOPA)) THEN
   !
   CALL GET_GRIDTYPE_GAUSS(PGRID_PAR,NNLATI,KL=ILGRID)
   !
-  ALLOCATE(NNLOPA(0:NNLATI))
-  ALLOCATE(XXCEN(ILGRID))
-  ALLOCATE(XYCEN(ILGRID))
-  CALL GET_GRIDTYPE_GAUSS(PGRID_PAR,NNLATI,XLAPO,XLOPO,XCODIL,NNLOPA(1:NNLATI), &
-                          ILGRID,PLAT_XY=XYCEN,PLON_XY=XXCEN             )
-  NNLOPA(0) = 0
+  ALLOCATE(NNLOPA(NNLATI))
+  CALL GET_GRIDTYPE_GAUSS(PGRID_PAR,NNLATI,XLAPO,XLOPO,XCODIL,NNLOPA,ILGRID)
   !
+  ALLOCATE(NFRACDX(NNLATI)) ! recycling : offset for each gaussian latitude
+  NFRACDX(1)=0
+  DO JI=2,NNLATI
+    NFRACDX(JI)= NFRACDX(JI-1)+NNLOPA(JI-1)
+  ENDDO
+
   ZPC2  = XCODIL*XCODIL
   X1 = 1.0-ZPC2
   X2 = 1.0+ZPC2
@@ -129,47 +136,14 @@ IF (.NOT. ALLOCATED(NNLOPA)) THEN
   ALLOCATE(XYINF(ILGRID))
   ALLOCATE(XXSUP(ILGRID))
   ALLOCATE(XYSUP(ILGRID))
-  ALLOCATE(XXDIF(ILGRID))
-  ALLOCATE(XYDIF(ILGRID))  
   !
-  CALL GAUSS_GRID_LIMITS(NNLATI,NNLOPA(1:NNLATI),XXINF,XXSUP,XYINF,XYSUP)
-  DO JJ=1,ILGRID
-    XXDIF(JJ) = 1. / (XXSUP(JJ) - XXINF(JJ))
-    XYDIF(JJ) = 1. / (XYSUP(JJ) - XYINF(JJ))
+  CALL GAUSS_GRID_LIMITS(NNLATI,NNLOPA,XXINF,XXSUP,XYINF,XYSUP)
+
+  ALLOCATE(XYCEN(NNLATI)) ! recycling : lower latitude bound for each latitude
+  DO JI=1,NNLATI
+    XYCEN(JI) = XYINF(NFRACDX(JI)+1)
   ENDDO
-  !
-  IFACTX = FLOOR(SQRT(FLOAT(NNLATI))) + 1
-  ISIZEX = FLOOR(FLOAT(NNLATI) / IFACTX)
-  !
-  ALLOCATE(NFRACDX(0:IFACTX))
-  ALLOCATE(NFRACGX(0:IFACTX))
-  !
-  NFRACDX(0) = 0
-  NFRACGX(0) = 1
-  NFRACDX(1) = 1
-  NFRACGX(1) = 1
-  NFRACDX(IFACTX) = NNLATI
-  NFRACGX(IFACTX) = SUM(NNLOPA(:))
-  DO JJ=2,IFACTX-1
-    NFRACDX(JJ) = 1 + (JJ-1) * ISIZEX
-    NFRACGX(JJ) = NFRACGX(JJ-1) + SUM(NNLOPA(NFRACDX(JJ-1):(JJ-1)*ISIZEX))
-  ENDDO
-  !
-  !
-  ALLOCATE(NFACTY(NNLATI))
-  NFACTY(:) = FLOOR(SQRT(FLOAT(NNLOPA(1:NNLATI))))+1
-  !
-  ALLOCATE(NFRACDY(NNLATI,0:MAXVAL(NFACTY)))
-  !
-  DO JJ=1,NNLATI
-    ISIZEY = FLOOR(FLOAT(NNLOPA(JJ)) / NFACTY(JJ))
-    NFRACDY(JJ,0) = 0
-    NFRACDY(JJ,1) = 1
-    NFRACDY(JJ,NFACTY(JJ)) = NNLOPA(JJ)
-    DO JI=2,NFACTY(JJ)-1
-      NFRACDY(JJ,JI) = 1 + (JI-1) * ISIZEY
-    ENDDO
-  ENDDO
+
   !
   !*    3.     Find if rotated pole and/or stretching to improve CPU time
   !            ----------------------------------------------------------
@@ -177,6 +151,8 @@ IF (.NOT. ALLOCATED(NNLOPA)) THEN
   LROTSTRETCH = .TRUE.
   IF (XCODIL==1.0.AND.XLAPO==90.0.AND.XLOPO==0.0) LROTSTRETCH = .FALSE.
   !
+  IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_2',1,ZHOOK_HANDLE2)
+
 ENDIF
 !
 ! case where the grid is not regular: all points are considered independently
@@ -224,18 +200,15 @@ IF (.NOT.ALLOCATED(XLON)) THEN
   !
 ENDIF
 !
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_1',1,ZHOOK_HANDLE)
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_2',0,ZHOOK_HANDLE)
-
 !
 !*    3.     Projection of input points into pseudo coordinates
 !            --------------------------------------------------
 !
-DO JJ=1,INBLINES
-  XLAT  (JJ) = PLAT(JJ*ISIZE_DLAT) * XDR
-  XSINTC(JJ) = SIN(XLAT(JJ)) * XCOSP
-  XSINTS(JJ) = SIN(XLAT(JJ)) * XSINP
-  XCOST (JJ) = COS(XLAT(JJ))
+DO JI=1,INBLINES
+  XLAT  (JI) = PLAT(JI*ISIZE_DLAT) * XDR
+  XSINTC(JI) = SIN(XLAT(JI)) * XCOSP
+  XSINTS(JI) = SIN(XLAT(JI)) * XSINP
+  XCOST (JI) = COS(XLAT(JI))
 ENDDO
 !
 IF (LROTSTRETCH) THEN
@@ -245,133 +218,93 @@ ELSE
   ZY(:) = PLAT(:) 
 ENDIF
 !
+IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_1',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 !*    5.     Localisation of the data points on (x,y) grid
 !            ---------------------------------------------
 !
-ICJ(:) = 0
 !
-IFACTX = SIZE(NFRACDX)
-!
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_2',1,ZHOOK_HANDLE)
-!
-!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_3',0,ZHOOK_HANDLE_OMP)
-!$OMP DO PRIVATE(JJ,JI,JGRID)
-DO JL=1,SIZE(PLAT)
-  !
- IF (ZVALUE(JL)==ZNODATA) CYCLE
-  !
-  fracx: &  
-  DO JJ=1,IFACTX
-    !
-    IF (ZY(JL)>=XYINF(NFRACGX(JJ))) THEN
-      !
-      JGRID = NFRACGX(JJ-1)  
-      !
-      DO JI=NFRACDX(JJ-1)+1,NFRACDX(JJ)-1
-        !
-        JGRID = JGRID + NNLOPA(JI-1)
-        !
-        IF (ZY(JL)>=XYINF(JGRID)) THEN
-          !
-          ICJ(JL) = JI
-          EXIT fracx
-          !
-        ENDIF
-        !
-      ENDDO
-      !
-      ICJ(JL) = NFRACDX(JJ)
-      !
-      exit fracx
-      !
-    ENDIF
-    !
-  ENDDO fracx
-  !
-ENDDO
-!$OMP END DO
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_3',1,ZHOOK_HANDLE_OMP)
-!$OMP END PARALLEL
-!
-!
-!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_4',0,ZHOOK_HANDLE_OMP)
-!$OMP DO PRIVATE(IGRID0,JGRID,JI,JJ)
-DO JL=1,SIZE(PLAT)
-  !
-  IF (ZVALUE(JL)==ZNODATA) CYCLE
-  !
-  IGRID0 = 0
-  IF (ICJ(JL)/=1) IGRID0 = SUM(NNLOPA(1:ICJ(JL)-1))
-  !
-  !* loop on grid points: longitude
-  fracy: &
-  DO JJ = 1,NFACTY(ICJ(JL))
-    !
-    IF (ZX(JL)<XXSUP(IGRID0+NFRACDY(ICJ(JL),JJ))) THEN
-      !
-      JGRID = IGRID0 + NFRACDY(ICJ(JL),JJ-1)
-      !
-      DO JI=NFRACDY(ICJ(JL),JJ-1)+1,NFRACDY(ICJ(JL),JJ)
-        !
-        JGRID = JGRID + 1
-        IF (ZX(JL)<=XXCEN(JGRID)-180. .AND. ZX(JL)<XXSUP(JGRID)-360.) ZX(JL) = ZX(JL) + 360.
-    !* imput point is in this grid mesh
-        IF (ZX(JL)>=XXINF(JGRID) .AND. ZX(JL)<XXSUP(JGRID)) THEN
-          !
-          KINDEX(1,JL) = JGRID
-          !
-          EXIT fracy
-          !
-        ENDIF
-        !
-      ENDDO 
-      !
-    END IF
-    !
-  END DO fracy
-  !
-END DO
-!£$OMP END DO
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_4',1,ZHOOK_HANDLE_OMP)
-!$OMP END PARALLEL
-!
-!
-!*    6.     Localisation of the data points on in the subgrid of this mesh
-!            --------------------------------------------------------------
-!
-IF (KSSO/=0) THEN
-!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_5',0,ZHOOK_HANDLE_OMP)
-!$OMP DO 
-  DO JL=1,SIZE(PLAT)
-    IF (KINDEX(1,JL)/=0) THEN
-      KISSOX(1,JL) = 1 + INT( FLOAT(KSSO) * (ZX(JL)-XXINF(KINDEX(1,JL)))/(XXSUP(KINDEX(1,JL))-XXINF(KINDEX(1,JL))) )
-      KISSOY(1,JL) = 1 + INT( FLOAT(KSSO) * (ZY(JL)-XYINF(KINDEX(1,JL)))/(XYSUP(KINDEX(1,JL))-XYINF(KINDEX(1,JL))) ) 
-    ENDIF 
+IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_4',0,ZHOOK_HANDLE4)
+
+ZRVRS90=1./90.
+ZNLATI=REAL(NNLATI)
+
+IF (LLREPRO_SINGLE_PGD_GAUSS) THEN
+  RVRSDP360=1._8/360._8
+  ALLOCATE(RDPNLOPA(NNLATI))
+  DO JI=1,NNLATI
+    RDPNLOPA(JI)=REAL(NNLOPA(JI),KIND=8)
   ENDDO
-!$OMP END DO
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_5',1,ZHOOK_HANDLE_OMP)
-!$OMP END PARALLEL
+ELSE
+  RVRS360=1./360.
 ENDIF
 
-IF (KFSSO/=0) THEN
-!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_5',0,ZHOOK_HANDLE_OMP)
-!$OMP DO 
-  DO JL=1,SIZE(PLAT)
-    IF (KINDEX(1,JL)/=0) THEN
-      KFISSOX(1,JL) = 1 + INT( FLOAT(KFSSO) * (ZX(JL)-XXINF(KINDEX(1,JL)))/(XXSUP(KINDEX(1,JL))-XXINF(KINDEX(1,JL))) )
-      KFISSOY(1,JL) = 1 + INT( FLOAT(KFSSO) * (ZY(JL)-XYINF(KINDEX(1,JL)))/(XYSUP(KINDEX(1,JL))-XYINF(KINDEX(1,JL))) ) 
-    ENDIF 
-  ENDDO
-!$OMP END DO
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_5',1,ZHOOK_HANDLE_OMP)
-!$OMP END PARALLEL
-ENDIF
+!$OMP PARALLEL DO PRIVATE(JL,IGUESS,JI,ILAT,IOFF,ILON,IINDEX,ZSSOX,ZSSOY)
+DO JL=1,SIZE(PLAT)
+  !
+  IF (ZVALUE(JL)/=ZNODATA) THEN
+  !
+    ZY(JL)=MIN(MAX(ZY(JL),-90.),90.)
+
+    IGUESS=MAX(1,NINT((ZNLATI*(1.-(ZY(JL)*ZRVRS90))*0.5))) ! rather smaller
+    DO JI=IGUESS,NNLATI
+      IF (ZY(JL)>=XYCEN(JI)) THEN
+        ILAT = JI
+        IOFF = NFRACDX(JI)
+        EXIT
+      ENDIF
+    ENDDO
+    !
+    IF (ZX(JL) < 0.) ZX(JL)=ZX(JL)+360.
+
+    IF (LLREPRO_SINGLE_PGD_GAUSS) THEN
+      ILON=MOD(NINT((REAL(ZX(JL),KIND=8)*RDPNLOPA(ILAT))*RVRSDP360),NNLOPA(ILAT))+1
+      IF (ZX(JL)==XXSUP(IOFF+ILON)) THEN
+        ILON=ILON+1
+        IF (ILON==NNLOPA(ILAT)) ILON=1
+      ENDIF
+    ELSE
+      ILON=MOD(NINT((ZX(JL)*REAL(NNLOPA(ILAT)))*RVRS360),NNLOPA(ILAT))+1
+    ENDIF
+     
+    IINDEX =  IOFF + ILON
+
+  !*    6.     Localisation of the data points on in the subgrid of this mesh
+  !            --------------------------------------------------------------
+    IF (IINDEX/=0 .AND. (KSSO/=0 .OR. KFSSO/=0)) THEN
+      IF (ZX(JL) > XXSUP(IINDEX)) THEN
+        ZSSOX = (ZX(JL)-360.-XXINF(IINDEX))/(XXSUP(IINDEX)-XXINF(IINDEX))
+      ELSE
+        ZSSOX = (ZX(JL)-XXINF(IINDEX))/(XXSUP(IINDEX)-XXINF(IINDEX))
+      ENDIF
+      IF (ZY(JL) >= XYSUP(IINDEX)) THEN
+        ! shift slightly to the south =>
+        ZSSOY = (XYSUP(IINDEX)-1000.*EPSILON(XYSUP(IINDEX))-XYINF(IINDEX))/(XYSUP(IINDEX)-XYINF(IINDEX))
+      ELSE
+        ZSSOY = (ZY(JL)-XYINF(IINDEX))/(XYSUP(IINDEX)-XYINF(IINDEX))
+      ENDIF
+      IF (KSSO/=0) THEN
+        KISSOX(1,JL) = 1 + INT( ZSSO * ZSSOX )
+        KISSOY(1,JL) = 1 + INT( ZSSO * ZSSOY ) 
+      ENDIF
+      IF (KFSSO/=0) THEN
+        KFISSOX(1,JL) = 1 + INT( ZFSSO * ZSSOX )
+        KFISSOY(1,JL) = 1 + INT( ZFSSO * ZSSOY ) 
+      ENDIF
+    ENDIF
+
+  ELSE
+
+    IINDEX=0
+
+  ENDIF
+  !
+  KINDEX(1,JL)=IINDEX
+ENDDO
+!$OMP END PARALLEL DO
+
+IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_4',1,ZHOOK_HANDLE4)
 !
 !-------------------------------------------------------------------------------
 !

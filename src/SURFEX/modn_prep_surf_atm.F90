@@ -44,9 +44,11 @@ INTEGER           :: NMONTH       ! MONTH for surface
 INTEGER           :: NDAY         ! DAY for surface
 REAL              :: XTIME        ! TIME for surface
 LOGICAL           :: LWRITE_EXTERN
+LOGICAL           :: LNO_VERT_INTERP ! skip vertical interpolation if intput and
+                                     ! output grids are the same
 !
 NAMELIST/NAM_PREP_SURF_ATM/CFILE, CFILETYPE, CFILEPGD, CFILEPGDTYPE, NHALO_PREP, &
-         NYEAR, NMONTH, NDAY, XTIME, LWRITE_EXTERN
+         NYEAR, NMONTH, NDAY, XTIME, LWRITE_EXTERN, LNO_VERT_INTERP
 !
 !-------------------------------------------------------------------------------
 !

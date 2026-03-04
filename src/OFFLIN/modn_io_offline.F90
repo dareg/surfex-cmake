@@ -37,6 +37,7 @@
 !!                          forcing and surface file orographies if LSET_FORC_ZS=.F
 !!      M. Dumont 12/2016 spectral calculation for Crocus CSPECSNOW
 !!      Y. Seity  09/2018 add LFAGMAP
+!!      R. El Khatib  08/2025 add LQDNORMS: Quick&Dirty norms for testing/debugging ;-)
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -152,6 +153,7 @@ CHARACTER(LEN=4) :: YALG_MPI = "LIN "     ! type of distribution algorithm for M
 !
 
 LOGICAL         :: LFAGMAP = .FALSE.
+LOGICAL         :: LQDNORMS = .FALSE.
 
 ! * autorize spectral caculation for snow 
 LOGICAL     :: CSPECSNOW=.FALSE.
@@ -174,7 +176,7 @@ NAMELIST/NAM_IO_OFFLINE/CSURF_FILETYPE, CTIMESERIES_FILETYPE, CFORCING_FILETYPE,
                         LPRINT, LRESTART, LINQUIRE, NSCAL, NHALO,                &
                         XTSTEP_SURF, XTSTEP_OUTPUT, LDIAG_FA_NOCOMPACT,          &
                         LSET_FORC_ZS, LWRITE_COORD, LWRITE_TOPO,                 &
-                        LOUT_TIMENAME, LLIMIT_QAIR,                              &
+                        LOUT_TIMENAME, LLIMIT_QAIR, LQDNORMS,                    &
                         LSHADOWS_SLOPE,LSHADOWS_OTHER, LWR_VEGTYPE,              &
                         NB_READ_FORC, LLAND_USE, NPROMA, NI, NJ, XIO_FRAC,       &
                         YALG_MPI, XDELTA_OROG, LADAPT_SW, LINTERP_SW, LFAGMAP,   &
