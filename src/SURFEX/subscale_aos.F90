@@ -537,6 +537,7 @@ DEALLOCATE(ISSOT)
 !
 !*    5.     Next grid point
 !            ---------------
+DEALLOCATE(XSSQO) ! otherwise XSSQO is never deallocated
 !
 
 IF (LHOOK) CALL DR_HOOK('SUBSCALE_AOS',1,ZHOOK_HANDLE)

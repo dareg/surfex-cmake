@@ -153,6 +153,8 @@ INTEGER                            :: IINLA     ! Number of parallel
 INTEGER                            :: JLAT0, IOS_SAVE
 INTEGER                            :: JOPOS     ! Output position
 INTEGER                            :: JL, JL2   ! Dummy counter
+
+INTEGER                            :: IMAXLOC, IMINLOC
 !
 REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------
@@ -264,7 +266,12 @@ END IF
 POLA(:) = 0.
 POLO(:) = 0.
 !
-IOS_SAVE = 1
+!IOS_SAVE = 1
+IF (PRESENT(PILATARRAY)) THEN
+  IMAXLOC=MAXLOC(PILATARRAY(:),1)
+  IMINLOC=MINLOC(PILATARRAY(:),1)
+ENDIF
+!$OMP PARALLEL DO PRIVATE(JLAT0,JL2)
 DO JL = 1, KOLEN
   !
   IF (.NOT. OINTERP(JL)) CYCLE
@@ -278,10 +285,10 @@ DO JL = 1, KOLEN
   ! 3.1.1. find positions of latitudes
   IF (PRESENT(PILATARRAY)) THEN
     !
-    IF (POLA(JL)>MAXVAL(PILATARRAY(:))) THEN
-      KO(JL,3) = MAXLOC(PILATARRAY,1)
-    ELSEIF (POLA(JL)<MINVAL(PILATARRAY(:))) THEN
-      KO(JL,3) = MINLOC(PILATARRAY,1)
+    IF (POLA(JL)>PILATARRAY(IMAXLOC)) THEN
+      KO(JL,3) = IMAXLOC
+    ELSEIF (POLA(JL)<PILATARRAY(IMINLOC)) THEN
+      KO(JL,3) = IMINLOC
     ELSE 
       DO JLAT0 = 1,KINLA
         !JL2 = MOD(JLAT0+IOS_SAVE-1,KINLA) !ANTMPTEST
@@ -296,10 +303,10 @@ DO JL = 1, KOLEN
             EXIT
           ENDIF                 
         ELSE
-          IF (POLA(JL)>=PILATARRAY(JL2)-ZIDLAT(JL2)/2..AND.POLA(JL)<PILATARRAY(JL2)+ZIDLAT(JL2+1)/2.) THEN
+          IF (POLA(JL)>=PILATARRAY(JL2)-ZIDLAT(JL2)*0.5.AND.POLA(JL)<PILATARRAY(JL2)+ZIDLAT(JL2+1)*0.5) THEN
             KO(JL,3) = JL2
             EXIT
-          ELSEIF (POLA(JL)<=PILATARRAY(JL2)-ZIDLAT(JL2)/2..AND.POLA(JL)>PILATARRAY(JL2)+ZIDLAT(JL2+1)/2.) THEN
+          ELSEIF (POLA(JL)<=PILATARRAY(JL2)-ZIDLAT(JL2)*0.5.AND.POLA(JL)>PILATARRAY(JL2)+ZIDLAT(JL2+1)*0.5) THEN
             KO(JL,3) = JL2
             EXIT
           ENDIF                  
@@ -307,7 +314,7 @@ DO JL = 1, KOLEN
               
       ENDDO
     ENDIF
-    IOS_SAVE = KO(JL,3)
+    !IOS_SAVE = KO(JL,3)
     !
     PLA(JL,3) = PILATARRAY(KO(JL,3))
     !
@@ -383,6 +390,7 @@ DO JL = 1, KOLEN
   END IF
   !
 END DO
+!$OMP END PARALLEL DO
 !
 IF (LHOOK) CALL DR_HOOK('HORIBL_SURF_INIT',1,ZHOOK_HANDLE)
 !

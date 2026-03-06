@@ -49,7 +49,7 @@ USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SSO_n, ONLY : SSO_t
 !
-USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM, LSFX_MPI
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PGD_GRID,       ONLY : CGRID, NL, XGRID_PAR
 USE MODD_PGDWORK,        ONLY : XALL, NSIZE_ALL, NSIZE, XSUMVAL, XPREC
@@ -127,6 +127,9 @@ REAL, DIMENSION(:), ALLOCATABLE :: ZSEA   !to check compatibility between
 REAL, DIMENSION(:), ALLOCATABLE :: ZWATER !prescribed fractions and ECOCLIMAP
 REAL, DIMENSION(:), ALLOCATABLE :: ZNATURE
 REAL, DIMENSION(:), ALLOCATABLE :: ZTOWN
+!!! BEGIN SB TEST OPTIM MEMOIRE
+REAL, DIMENSION(:), ALLOCATABLE :: ZROWS
+!!! END SB TEST OPTIM MEMOIRE
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZCOVER_NATURE, ZCOVER_TOWN, ZCOVER_SEA, ZCOVER_WATER, &
                                      ZCOVER, ZCOVER2
 !
@@ -145,6 +148,9 @@ INTEGER               :: ILUOUT    ! output listing logical unit
 INTEGER               :: IRESP     ! Error code after redding
 INTEGER               :: JCOV    ! loop counter on covers
 INTEGER               :: JL, JI    ! loop counter on horizontal points
+!! BEGIN SB TEST OPTIM MEMOIRE
+INTEGER               :: II, JJ    ! for loop on U%XCOVER
+!! END SB TEST OPTIM MEMOIRE
 INTEGER               :: ICOVER, ICOVERSUM, ICOVER_OLD, ICPT  ! 0 if cover is not present, >1 if present somewhere
 INTEGER               :: IPERMSNOW, IECO2 
 INTEGER               :: IC_NAT, IC_TWN, IC_WAT, IC_SEA
@@ -227,7 +233,17 @@ IF (LUNIF_COVER) THEN
         U%XCOVER(:,ICPT) = XUNIF_COVER(JCOV)
       ENDIF
     END DO
-    U%XCOVER(:,:) = U%XCOVER(:,:) / SPREAD(SUM(U%XCOVER(:,:),2),2,ICOVER)
+    !U%XCOVER(:,:) = U%XCOVER(:,:) / SPREAD(SUM(U%XCOVER(:,:),2),2,ICOVER)
+    ALLOCATE(ZROWS(SIZE(U%XCOVER,1)))
+    ZROWS=SUM(U%XCOVER, DIM=2)
+    DO II=1,SIZE(U%XCOVER, 1)
+    IF (ZROWS(II) > 0. ) THEN
+      DO JJ=1,SIZE(U%XCOVER, 2)
+        U%XCOVER(II,JJ) = U%XCOVER(II,JJ)/ZROWS(II)
+      END DO
+    END IF
+    END DO
+    DEALLOCATE(ZROWS)
   END IF
 !
 !*    3.3     No data
@@ -301,7 +317,19 @@ ELSE
 !
   ICOVER = SIZE(U%XCOVER,2)
 !
-  U%XCOVER(:,:) = U%XCOVER(:,:) / SPREAD(SUM(U%XCOVER(:,:),2),2,ICOVER)
+!!!! BEGIN SB TEST OPTIM MEMOIRE (AVOID SPREAD)
+!  U%XCOVER(:,:) = U%XCOVER(:,:) / SPREAD(SUM(U%XCOVER(:,:),2),2,ICOVER)
+ALLOCATE(ZROWS(SIZE(U%XCOVER,1)))
+ZROWS=SUM(U%XCOVER, DIM=2)
+DO II=1,SIZE(U%XCOVER, 1)
+  IF (ZROWS(II) > 0. ) THEN
+    DO JJ=1,SIZE(U%XCOVER, 2)
+      U%XCOVER(II,JJ) = U%XCOVER(II,JJ)/ZROWS(II)
+    END DO
+  END IF
+END DO
+DEALLOCATE(ZROWS)
+!!!! END SB TEST OPTIM MEMOIRE
 !
   DEALLOCATE(NSIZE    )
 !
@@ -541,7 +569,17 @@ ELSE
 !*    7.      Coherence check
 !             ---------------
 !
-  U%XCOVER(:,:)=U%XCOVER(:,:)/SPREAD(SUM(U%XCOVER(:,:),2),2,ICOVER)
+!  U%XCOVER(:,:)=U%XCOVER(:,:)/SPREAD(SUM(U%XCOVER(:,:),2),2,ICOVER)
+ALLOCATE(ZROWS(SIZE(U%XCOVER,1)))
+ZROWS=SUM(U%XCOVER, DIM=2)
+DO II=1,SIZE(U%XCOVER, 1)
+  IF (ZROWS(II) > 0. ) THEN
+    DO JJ=1,SIZE(U%XCOVER, 2)
+      U%XCOVER(II,JJ) = U%XCOVER(II,JJ)/ZROWS(II)
+    END DO
+  END IF
+END DO
+DEALLOCATE(ZROWS)
 !
   DEALLOCATE(IMASK_SEA)
   DEALLOCATE(IMASK_WATER)
@@ -684,9 +722,12 @@ ELSE
   '*  Coherence computation between covers and imposed nature fraction *'
   WRITE(ILUOUT,FMT=*) &
   '*********************************************************************'
-  NSIZE(:,1) = 1
-  WHERE (U%XNATURE(:).NE.0. .AND. ZNATURE(:).EQ.0.) NSIZE(:,1)=0
-          
+  !NSIZE(:,1) = 1
+  WHERE (U%XNATURE(:).NE.0. .AND. ZNATURE(:).EQ.0.)
+    NSIZE(:,1)=0
+  ELSEWHERE
+    NSIZE(:,1) = 1
+  ENDWHERE        
   DO JL=1,SIZE(U%XCOVER,1)
     IF (U%XNATURE(JL).EQ.0.) NSIZE(JL,1)=-1
   ENDDO
@@ -706,8 +747,12 @@ ELSE
   '*  Coherence computation between covers and imposed town   fraction *'
   WRITE(ILUOUT,FMT=*) &
   '*********************************************************************'
-  NSIZE(:,1) = 1
-  WHERE (U%XTOWN(:).NE.0. .AND. ZTOWN(:).EQ.0.) NSIZE(:,1)=0
+  !NSIZE(:,1) = 1
+  WHERE (U%XTOWN(:).NE.0. .AND. ZTOWN(:).EQ.0.)
+    NSIZE(:,1)=0
+  ELSEWHERE
+    NSIZE(:,1) = 1
+  ENDWHERE
   DO JL=1,SIZE(U%XCOVER,1)
     IF (U%XTOWN(JL).EQ.0.) NSIZE(JL,1)=-1
   ENDDO
@@ -727,8 +772,12 @@ ELSE
   '*  Coherence computation between covers and imposed water  fraction *'
   WRITE(ILUOUT,FMT=*) &
   '*********************************************************************'
-  NSIZE(:,1) = 1
-  WHERE (U%XWATER(:).NE.0. .AND. ZWATER(:).EQ.0.) NSIZE(:,1)=0
+  !NSIZE(:,1) = 1
+  WHERE (U%XWATER(:).NE.0. .AND. ZWATER(:).EQ.0.)
+    NSIZE(:,1)=0
+  ELSEWHERE 
+    NSIZE(:,1) = 1
+  ENDWHERE
 ! if water imposed to 1 in a grid cell: no extrapolation
   DO JL=1,SIZE(U%XCOVER,1)
      IF(U%XWATER(JL)==1.0)THEN
@@ -754,8 +803,12 @@ ELSE
   '*  Coherence computation between covers and imposed sea    fraction *'
   WRITE(ILUOUT,FMT=*) &
   '*********************************************************************'
-  NSIZE(:,1) = 1
-  WHERE (U%XSEA(:).NE.0. .AND. ZSEA(:).EQ.0.) NSIZE(:,1)=0
+  !NSIZE(:,1) = 1
+  WHERE (U%XSEA(:).NE.0. .AND. ZSEA(:).EQ.0.)
+    NSIZE(:,1)=0
+  ELSEWHERE
+    NSIZE(:,1) = 1
+  ENDWHERE
 ! if sea imposed to 1 in a grid cell: no extrapolation          
   DO JL=1,SIZE(U%XCOVER,1)
      IF(U%XSEA(JL)==1.0)THEN
@@ -779,7 +832,17 @@ ELSE
   U%XCOVER(:,:) = U%XCOVER(:,:) + 0.001 * ( ZCOVER_NATURE(:,:) + ZCOVER_TOWN(:,:) + &
                                             ZCOVER_WATER (:,:) + ZCOVER_SEA (:,:) )
   !
-  U%XCOVER(:,:)=U%XCOVER(:,:)/SPREAD(SUM(U%XCOVER(:,:),2),2,ICOVER)
+  !U%XCOVER(:,:)=U%XCOVER(:,:)/SPREAD(SUM(U%XCOVER(:,:),2),2,ICOVER)
+ALLOCATE(ZROWS(SIZE(U%XCOVER,1)))
+ZROWS=SUM(U%XCOVER, DIM=2)
+DO II=1,SIZE(U%XCOVER, 1)
+  IF (ZROWS(II) > 0. ) THEN
+    DO JJ=1,SIZE(U%XCOVER, 2)
+      U%XCOVER(II,JJ) = U%XCOVER(II,JJ)/ZROWS(II)
+    END DO
+  END IF
+END DO
+DEALLOCATE(ZROWS)
   !
   DEALLOCATE(ZCOVER_NATURE)
   DEALLOCATE(ZCOVER_TOWN  )
@@ -910,49 +973,34 @@ IF (LHOOK) CALL DR_HOOK('PGD_COVER:MAKE_MASK_COVER',1,ZHOOK_HANDLE)
 END SUBROUTINE MAKE_MASK_COVER
 !
 !------------------------------------------------------
-!
 SUBROUTINE GET_RMCOV_OMP(KCOVER,PCOVER)
 !
 USE MODD_SURFEX_OMP, ONLY : NBLOCKTOT
 !
-USE MODI_GATHER_AND_WRITE_MPI
-USE MODI_READ_AND_SEND_MPI
-!
 INTEGER, INTENT(IN) :: KCOVER
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PCOVER
 !
-REAL, DIMENSION(U%NDIM_FULL,SIZE(PCOVER,2)) :: ZCOVER_ALL
-INTEGER, DIMENSION(U%NDIM_FULL) :: IMAXCOVER_ALL
-INTEGER, DIMENSION(U%NSIZE_FULL) :: IMAXCOVER
-INTEGER :: JK, JCOV, ISIZE_OMP
-REAL(KIND=JPHOOK) :: ZHOOK_HANDLE_OMP
+INTEGER :: JK, IMAXCOVER, JCOV, ISIZE_OMP
+REAL :: ZHOOK_HANDLE_OMP
 !
 ISIZE_OMP = MAX(1,SIZE(PCOVER,1)/NBLOCKTOT)
 !
- CALL GATHER_AND_WRITE_MPI(PCOVER,ZCOVER_ALL)
-IF (NRANK==NPIO) THEN
-  DO JL = 1,U%NDIM_FULL
-    IMAXCOVER_ALL(JL) = MAXLOC(ZCOVER_ALL(JL,:),1)
-  ENDDO
-ENDIF
-!
- CALL READ_AND_SEND_MPI(IMAXCOVER_ALL,IMAXCOVER)
-!
 ! * removes cover with very small coverage
 !$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
-IF (LHOOK) CALL DR_HOOK('PGD_COVER:GET_RMCOV_OMP',0,ZHOOK_HANDLE_OMP)
-!$OMP DO SCHEDULE(STATIC,ISIZE_OMP) PRIVATE(JL,JCOV)
+!$OMP DO SCHEDULE(STATIC,ISIZE_OMP) PRIVATE(JL,IMAXCOVER,JCOV)
 DO JL=1,SIZE(PCOVER,1)
+  IMAXCOVER = MAXLOC(PCOVER(JL,:),1)
   DO JCOV=1,KCOVER
-    IF (JCOV /= IMAXCOVER(JL)) THEN
-      IF (ANINT(PCOVER(JL,JCOV)*XPREC)/XPREC<=XRM_COVER ) PCOVER(JL,JCOV) = 0.
+    IF (JCOV /= IMAXCOVER) THEN
+      IF (PCOVER(JL,JCOV)<=XRM_COVER ) PCOVER(JL,JCOV) = 0.
     ENDIF
   END DO
 END DO
 !$OMP END DO
-IF (LHOOK) CALL DR_HOOK('PGD_COVER:GET_RMCOV_OMP',1,ZHOOK_HANDLE_OMP)
 !$OMP END PARALLEL
 !
 END SUBROUTINE GET_RMCOV_OMP
+!
+!------------------------------------------------------
 !
 END SUBROUTINE PGD_COVER

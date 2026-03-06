@@ -47,6 +47,7 @@ SUBROUTINE INTERPOL_NPTS(UG,U,HPROGRAM,KLUOUT,KNPTS,KCODE,PX,PY,PFIELD,KNEAR_NBR
 !!    Modification
 !!    B. Decharme  2014  scan all point case if gaussien grid or NHALO = 0
 !!    A.Napoly & H.Petithomme 2023 optimisations
+!!    R. El Khatib Bugfix openmp
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -57,7 +58,7 @@ USE MODD_SURF_ATM_GRID_N,ONLY: SURF_ATM_GRID_t
 USE MODD_SURF_ATM_N,ONLY: SURF_ATM_t
 !
 USE MODD_SURFEX_OMP,ONLY: NBLOCK
-USE MODD_SURFEX_MPI,ONLY: NRANK,NPIO,NCOMM,NPROC,IDX_I,NINDEX,NNUM,LSFX_MPI
+USE MODD_SURFEX_MPI,ONLY: NRANK,NPIO,NCOMM,NPROC,IDX_I,NINDEX,NNUM
 USE MODD_SURF_PAR,ONLY: XUNDEF
 !
 USE MODI_GATHER_AND_WRITE_MPI
@@ -66,7 +67,6 @@ USE MODI_GET_NEAR_MESHES
 USE MODI_SUM_ON_ALL_PROCS
 !
 USE YOMHOOK,ONLY: LHOOK,DR_HOOK, JPHOOK
-USE PARKIND1,ONLY: JPRB
 !
 #ifdef SFX_MNH
   USE MODD_IO_ll,ONLY: ISP,ISNPROC
@@ -93,6 +93,7 @@ REAL,DIMENSION(:,:),INTENT(INOUT) :: PFIELD
 !
 INTEGER,PARAMETER :: IINT4=KIND(0)/4,IREAL4=KIND(0.)/4
 INTEGER :: IP,ICPT,IL1,JL,JP,JK,INP,IL2,INPTS,INFOMPI,IDIM_FULL,INEAR,IOLD,INPX,IDIM
+INTEGER :: IL
 INTEGER,DIMENSION(:,:,:),ALLOCATABLE :: ININD0,ININD_ALL
 INTEGER,DIMENSION(:,:),ALLOCATABLE :: ININD
 INTEGER,DIMENSION(:),ALLOCATABLE :: IINDEX,ISIZE,ISIZE_TOT,IND,INDO,INUM_TOT,IINDEX_TOT
@@ -155,9 +156,7 @@ IOLD = 1
   !
   IF (NPROC > 1) THEN
 #if defined(SFX_MPI) || defined(SFX_MNH)
-    IF (LSFX_MPI) THEN
-      CALL MPI_BCAST(ISIZE_TOT,IDIM_FULL*KIND(ISIZE_TOT)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
-    ENDIF
+    CALL MPI_BCAST(ISIZE_TOT,IDIM_FULL*KIND(ISIZE_TOT)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
 #endif
   ENDIF
   !
@@ -233,46 +232,54 @@ IOLD = 1
         ICPT = ICPT+1
         IND(ICPT) = JL
       END DO
-      ALLOCATE(ZDIST(INP),ZZX(INP),ZZY(INP))
+      INPTS = MIN(KNPTS,INP)
+      ALLOCATE(ZZX(INP),ZZY(INP))
+!$OMP PARALLEL PRIVATE(JK,JL,IL)
       ! optim: preset zzx/zzy
       IF (IOLD == 1) THEN
-        ZZX(:) = PX(IINDEX(1:INP))
-        ZZY(:) = PY(IINDEX(1:INP))
+!$OMP DO
+        DO JK=1,INP
+          ZZX(JK) = PX(IINDEX(JK))
+          ZZY(JK) = PY(IINDEX(JK))
+        ENDDO
+!$OMP END DO
       ELSE
-        ZZX(:) = ZX(IINDEX(1:INP))
-        ZZY(:) = ZY(IINDEX(1:INP))
-      END IF
-      INPTS = MIN(KNPTS,INP)
-      !$omp parallel do private(zdist)
+!$OMP DO
+        DO JK=1,INP
+          ZZX(JK) = ZX(IINDEX(JK))
+          ZZY(JK) = ZY(IINDEX(JK))
+        ENDDO
+!$OMP END DO
+      ENDIF
+!$OMP DO
       DO JL=1,ICPT
+        IL=IND(JL)
         IF (IOLD == 1) THEN
-          ZDIST(1:INP) = (ZZX(1:INP)-ZX(IND(JL)))**2+(ZZY(1:INP)-ZY(IND(JL)))**2
+          CALL ORDERI(INP,ZZX,ZZY,ZX(IL),ZY(IL),IINDEX,INPTS,ININD(:,JL),ZNDIST(:,JL))
         ELSE
-          ZDIST(1:INP) = (ZZX(1:INP)-PX(IND(JL)))**2+(ZZY(1:INP)-PY(IND(JL)))**2
-        END IF
-        !
-        CALL ORDERI(INP,ZDIST,INPTS,ININD(:,JL),ZNDIST(:,JL))
-        ZNDIST(1:INPTS,JL) = SQRT(ZNDIST(1:INPTS,JL))
-        ININD(1:INPTS,JL) = IINDEX(ININD(1:INPTS,JL))
-      END DO
-      !$omp end parallel do
-      DEALLOCATE(ZZX,ZZY,IND,ZDIST)
+          CALL ORDERI(INP,ZZX,ZZY,PX(IL),PY(IL),IINDEX,INPTS,ININD(:,JL),ZNDIST(:,JL))
+        ENDIF
+      ENDDO
+!$OMP END DO
+!$OMP END PARALLEL
+      DEALLOCATE(ZZX,ZZY)
+      DEALLOCATE(IND)
   ELSE
-    ALLOCATE(ZDIST(INEAR),IND(INEAR))
     IF (.NOT.ASSOCIATED(UG%NNEAR)) THEN
       ALLOCATE(UG%NNEAR(IL1,INEAR))
       CALL GET_NEAR_MESHES(UG%G%CGRID,UG%NGRID_FULL_PAR,IDIM_FULL,UG%XGRID_FULL_PAR,&
         INEAR,UG%NNEAR)
     END IF
+    ALLOCATE(IND(INEAR))
     ! note: 1st guess for icpt (eventually depends on kcode)
     ICPT = 0
     DO JL=1,IL1
       IF (KCODE(JL) /= 0) CYCLE
-
       ICPT = ICPT+1
       IND(ICPT) = JL
     END DO
-    !$omp parallel do private(jk,inp,iindex,zdist)
+    ALLOCATE(ZZX(INEAR),ZZY(INEAR))
+!$OMP PARALLEL DO PRIVATE(JL,INP,JK,IINDEX,IL)
     DO JL=1,ICPT
       INP = 0
       DO JK=1,INEAR
@@ -288,19 +295,25 @@ IOLD = 1
         CYCLE
       END IF
       !
+      IL=IND(JL)
+      ! optim: preset zzx/zzy
       IF (IOLD == 1) THEN
-        ZDIST(1:INP) = (PX(IINDEX(1:INP))-ZX(IND(JL)))**2+&
-          (PY(IINDEX(1:INP))-ZY(IND(JL)))**2
+        DO JK=1,INP
+          ZZX(JK) = PX(IINDEX(JK))
+          ZZY(JK) = PY(IINDEX(JK))
+        ENDDO
+        CALL ORDERI(INP,ZZX,ZZY,ZX(IL),ZY(IL),IINDEX,INPTS,ININD(:,JL),ZNDIST(:,JL))
       ELSE
-        ZDIST(1:INP) = (ZX(IINDEX(1:INP))-PX(IND(JL)))**2+&
-          (ZY(IINDEX(1:INP))-PY(IND(JL)))**2
-      END IF
-      !
-      CALL ORDERI(INP,ZDIST,INPTS,ININD(:,JL),ZNDIST(:,JL))
-      ZNDIST(1:INPTS,JL) = SQRT(ZNDIST(1:INPTS,JL))
-      ININD(1:INPTS,JL) = IINDEX(ININD(1:INPTS,JL))
+        DO JK=1,INP
+          ZZX(JK) = ZX(IINDEX(JK))
+          ZZY(JK) = ZY(IINDEX(JK))
+        ENDDO
+        CALL ORDERI(INP,ZZX,ZZY,PX(IL),PY(IL),IINDEX,INPTS,ININD(:,JL),ZNDIST(:,JL))
+      ENDIF
     END DO
-    !$omp end parallel do
+!$OMP END PARALLEL DO
+    DEALLOCATE(ZZX,ZZY)
+
     ! note: account for possibly changed kcode, final icpt
     JK = 0
     DO JL=1,ICPT
@@ -318,7 +331,7 @@ IOLD = 1
     END DO
     !
     ICPT = ICPT-JK
-    DEALLOCATE(ZDIST,IND)
+    DEALLOCATE(IND)
     INPTS = KNPTS
   END IF
 
@@ -332,9 +345,7 @@ IOLD = 1
     ISIZE(:) = ICPT
   ELSE
 #if defined(SFX_MPI) || defined(SFX_MNH)
-    IF (LSFX_MPI) THEN
-      CALL MPI_ALLGATHER(ICPT,IINT4,MPI_INTEGER,ISIZE,IINT4,MPI_INTEGER,NCOMM,INFOMPI)
-    ENDIF
+    CALL MPI_ALLGATHER(ICPT,IINT4,MPI_INTEGER,ISIZE,IINT4,MPI_INTEGER,NCOMM,INFOMPI)
 #endif
   END IF
 
@@ -360,13 +371,11 @@ IOLD = 1
   ELSE
     ALLOCATE(ININD_ALL(KNPTS,INPX,0:NPROC-1))
 #if defined(SFX_MPI) || defined(SFX_MNH)
-    IF (LSFX_MPI) THEN
-      IDIM = INPX*KNPTS
-      DO JP=0,NPROC-1
-        CALL MPI_GATHER(ININD0(:,:,JP),IDIM*IINT4,MPI_INTEGER,ININD_ALL,IDIM*IINT4,&
-          MPI_INTEGER,JP,NCOMM,INFOMPI)
-      END DO
-    ENDIF
+    IDIM = INPX*KNPTS
+    DO JP=0,NPROC-1
+      CALL MPI_GATHER(ININD0(:,:,JP),IDIM*IINT4,MPI_INTEGER,ININD_ALL,IDIM*IINT4,&
+        MPI_INTEGER,JP,NCOMM,INFOMPI)
+    END DO
 #endif
     DEALLOCATE(ININD0)
   END IF
@@ -393,23 +402,21 @@ IOLD = 1
     ZFIELD3 => ZFIELD(:,:,:,0)
   ELSE
 #if defined(SFX_MPI) || defined(SFX_MNH)
-    IF (LSFX_MPI) THEN
-      ALLOCATE(ZFIELD3(IL2,KNPTS,ICPT))
-      ALLOCATE(ZFIELD2(IL2,KNPTS,ICPT,0:NPROC-1))
-      !
-      DO JP=0,NPROC-1
-        INP = ISIZE(JP)
-        IDIM = INP*INPTS*IL2
-        CALL MPI_GATHER(ZFIELD(:,:,1:INP,JP),IDIM*IREAL4,MPI_REAL,ZFIELD2,IDIM*IREAL4,&
-          MPI_REAL,JP,NCOMM,INFOMPI)
-      END DO
-      !
-      DO JP=0,NPROC-1
-        WHERE (ZFIELD2(:,:,:,JP) /= XUNDEF) ZFIELD3(:,:,:) = ZFIELD2(:,:,:,JP)
-      END DO
-      !
-      DEALLOCATE(ZFIELD2)
-    ENDIF
+    ALLOCATE(ZFIELD3(IL2,KNPTS,ICPT))
+    ALLOCATE(ZFIELD2(IL2,KNPTS,ICPT,0:NPROC-1))
+    !
+    DO JP=0,NPROC-1
+      INP = ISIZE(JP)
+      IDIM = INP*INPTS*IL2
+      CALL MPI_GATHER(ZFIELD(:,:,1:INP,JP),IDIM*IREAL4,MPI_REAL,ZFIELD2,IDIM*IREAL4,&
+        MPI_REAL,JP,NCOMM,INFOMPI)
+    END DO
+    !
+    DO JP=0,NPROC-1
+      WHERE (ZFIELD2(:,:,:,JP) /= XUNDEF) ZFIELD3(:,:,:) = ZFIELD2(:,:,:,JP)
+    END DO
+    !
+    DEALLOCATE(ZFIELD2)
 #endif
   END IF
   !
@@ -491,35 +498,48 @@ contains
   END SUBROUTINE GATHERFIELDX1
 #endif
   !
-  SUBROUTINE ORDERI(N,X,NOUT,IND,XOUT)
+  SUBROUTINE ORDERI(N,PZX,PZY,PX,PY,KINDEX,NOUT,IND,XOUT)
     INTEGER,INTENT(IN) :: N,NOUT
     INTEGER,INTENT(OUT) :: IND(NOUT)
-    REAL,INTENT(IN) :: X(N)
+    REAL,INTENT(IN) :: PZX(N), PZY(N)
+    REAL,INTENT(IN) :: PX, PY
+    INTEGER,INTENT(IN) :: KINDEX(N)
     REAL,INTENT(OUT) :: XOUT(NOUT)
     INTEGER :: I,J,K,NSET
+    REAL :: X
     !
     XOUT(:) = XUNDEF
-    XOUT(1) = X(1)
-    IND(1) = 1
-    NSET = 1
     ! search and record min value/index in non-standard way:
     ! last index is returned, instead of first (j loop is hardly ever broken)
-    DO J=2,N
-      IF (X(J) > XOUT(NOUT)) CYCLE
-      DO I=NSET+1,2,-1
-        IF (ZDIST(J) > XOUT(I-1)) EXIT
-      END DO
-      ! prepare for insertion
-      IF (I <= NSET) THEN
-        DO K=NSET+1,I+1,-1
-          XOUT(K) = XOUT(K-1)
-          IND(K) = IND(K-1)
+    DO J=1,N
+      X=(PZX(J)-PX)**2+(PZY(J)-PY)**2
+      IF (J==1) THEN
+        I=1
+        NSET = 1
+      ELSE
+        IF (X > XOUT(NOUT)) CYCLE
+        DO I=NSET+1,2,-1
+          IF (X > XOUT(I-1)) EXIT
         END DO
-      END IF
-      ! insert value and index (keep nset < nout!!!)
-      XOUT(I) = X(J)
+        ! prepare for insertion
+        IF (I <= NSET) THEN
+          DO K=NSET+1,I+1,-1
+            XOUT(K) = XOUT(K-1)
+            IND(K) = IND(K-1)
+          END DO
+        END IF
+        ! insert value and index (keep nset < nout!!!)
+        IF (NSET < NOUT-1) NSET = NSET+1
+      ENDIF
+      XOUT(I) = X
       IND(I) = J
-      IF (NSET < NOUT-1) NSET = NSET+1
-   END DO
+    ENDDO
+    DO J=1,NOUT
+      XOUT(J) = SQRT(XOUT(J))
+    ENDDO
+    DO J=1,NOUT
+      IND(J) = IINDEX(IND(J))
+    ENDDO
   END SUBROUTINE ORDERI
+
 END SUBROUTINE INTERPOL_NPTS

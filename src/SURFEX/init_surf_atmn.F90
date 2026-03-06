@@ -185,7 +185,7 @@ TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence paramet
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-CHARACTER(LEN=3)  :: YREAD
+CHARACTER(LEN=40)  :: YREAD
 !
 INTEGER           :: ISWB     ! number of shortwave bands
 INTEGER           :: JTILE    ! loop counter on tiles
