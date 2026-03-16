@@ -323,7 +323,10 @@ IF(GMEB)THEN
     WRITE(ILUOUT,*) GMEB_PATCH(1:IO%NPATCH).AND.GMEB_PATCH_REC(1:IO%NPATCH)
     WRITE(ILUOUT,*) '*****************************************'
   ENDIF
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  GMEB_PATCH(:)=GMEB_PATCH(:).AND.GMEB_PATCH_REC(:)
+
+  !  By commenting this line the user is allowed to activate MEB for any patch,
+  !  i.e. also for non-forested patches:
+  !  GMEB_PATCH(:)=GMEB_PATCH(:).AND.GMEB_PATCH_REC(:)
 
   IO%LMEB_PATCH(1:IO%NPATCH) = GMEB_PATCH(1:IO%NPATCH)
 
