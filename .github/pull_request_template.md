@@ -4,6 +4,12 @@ _Description of code changes, motivations, scientific references, etc_
 
 ...
 
+_If a namelist key is added, please fill the following table_
+
+|Namelist block|Fortran name|Fortran type|Values|Default value|Comment|
+|--------------|------------|------------|------|-------------|-------|
+|              |            |            |      |             |       |
+
 ACCORD Rolling Work Plan
 ------------------------
 _Associated task(s) in the ACCORD RWP_
@@ -14,7 +20,7 @@ _Associated task(s) in the ACCORD RWP_
 Associated IAL PR
 -----------------
 
-
+_Does this PR only need a IAL PR to compile ?_
 
 Validation
 ----------
