@@ -20,7 +20,7 @@ _Associated task(s) in the ACCORD RWP_
 Associated IAL PR
 -----------------
 
-_Does this PR need an IAL PR to compile ? (eg : interface modification called from MSE ..) _
+_Does this PR need an IAL PR to compile ? (eg : interface modification called from MSE ..)_
 
 Validation
 ----------
