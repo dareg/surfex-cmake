@@ -30,6 +30,10 @@ ecbuild_add_option( FEATURE SFX_MPI
 ecbuild_add_option( FEATURE OMP
   DESCRIPTION "Support for OpenMP shared memory parallelism"
   REQUIRED_PACKAGES "OpenMP COMPONENTS Fortran" )
+ecbuild_add_option(FEATURE IFS_FLAGS
+                   DESCRIPTION "Compile with IFS flags"
+                   DEFAULT OFF)
+
 
 if(${HAVE_DOUBLE_PRECISION})
   list(APPEND PRECISIONS "dp")
@@ -70,6 +74,10 @@ foreach(PRECISION ${PRECISIONS})
 
   if( HAVE_OMP )
     target_link_libraries(${LIBNAME} PRIVATE OpenMP::OpenMP_Fortran )
+    if(HAVE_IFS_FLAGS)
+      target_compile_options(${LIBNAME} PUBLIC
+      ${ECBUILD_IFS_Fortran_FLAGS})
+    endif()
   endif()
 
   if(HAVE_SINGLE_PRECISION AND HAVE_DOUBLE_PRECISION)
@@ -89,7 +97,7 @@ foreach(PRECISION ${PRECISIONS})
   endif()
 
   if(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
-     ecbuild_add_fortran_flags( -assume byterecl )
+     ecbuild_add_fortran_flags( "-assume byterecl"  NO_FAIL)
   endif()
   target_compile_definitions(${LIBNAME} PRIVATE in_surfex)
   target_compile_definitions(${LIBNAME} PRIVATE SFX_ARO)
@@ -115,7 +123,7 @@ endif()
 
 if(${HAVE_SINGLE_PRECISION})
   target_compile_options(surfex_sp PUBLIC $<$<COMPILE_LANGUAGE:Fortran>:${ECBUILD_Fortran_COMPILE_OPTIONS_REAL4}>)
-  target_compile_definitions(surfex_sp PUBLIC PARKIND1_SINGLE)
+  target_compile_definitions(surfex_sp PUBLIC PARKIND1_SINGLE HIRLAM_SP_HACKS)
 endif()
 
 foreach(FILEPATH ${SRC_PROGRAMS})
