@@ -152,6 +152,29 @@ def get_proc_signature(line):
     return proc_type, proc_name, proc_args
 
 
+def break_long_lines(lines):
+    newlines = []
+    for line in lines:
+        while len(line) > 80:
+            break_idx_space = line[0:80].rfind(" ")
+            break_idx_comma = line[0:80].rfind(",")
+
+            # Find which one let us have the longest line of less than 80 chars
+            if break_idx_comma > break_idx_space:
+                break_idx = break_idx_comma
+            else:
+                break_idx = break_idx_space
+
+            # If no space or comma was found, force break the line at 80 chars
+            if break_idx == -1:
+                break_idx = 80
+
+            newlines.append(line[:break_idx] + "&\n")
+            line = line[break_idx:]
+        newlines.append(line)
+    return newlines
+
+
 def gen_modi(f90):
     modi_path = Path(modi_dir / Path("modi_" + str(f90.name)))
     src = open(f90, "r")
@@ -195,6 +218,7 @@ def gen_modi(f90):
 
     remove_dangling_ifdef(modi_lines)
     remove_unsed_modules(modi_lines)
+    modi_lines = break_long_lines(modi_lines)
     modi = open(modi_path, "w")
     modi.write("".join(modi_lines))
 
